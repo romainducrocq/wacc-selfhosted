@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+sudo -v
+
 cd wheelcc/
 find . -name "*.o" -type f -delete; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -d "src/" ]; then rm -r src/; fi; if [ ${?} -ne 0 ]; then exit 1; fi
@@ -18,4 +20,7 @@ if [ ${?} -ne 0 ]; then exit 1; fi
 
 cd bin/
 ./make.sh
+if [ ${?} -ne 0 ]; then exit 1; fi
+
+yes | ./install.sh
 if [ ${?} -ne 0 ]; then exit 1; fi

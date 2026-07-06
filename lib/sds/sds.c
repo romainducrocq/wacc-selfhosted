@@ -473,14 +473,14 @@ static int sdsull2str(char* s, unsigned long v) {
  *
  * sdscatprintf(sdsempty(),"%lld\n", value);
  */
-sds sdsfromlonglong(long value) {
+sds sdsfromlong(long value) {
     char buf[SDS_LLSTR_SIZE];
     int len = sdsll2str(buf, value);
 
     return sdsnewlen(buf, len);
 }
 
-sds sdsfromunsignedlonglong(unsigned long value) {
+sds sdsfromunsignedlong(unsigned long value) {
     char buf[SDS_LLSTR_SIZE];
     int len = sdsull2str(buf, value);
 

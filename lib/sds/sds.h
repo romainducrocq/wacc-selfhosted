@@ -52,8 +52,8 @@ sds sdscat(sds s, char* t);
 
 void sdsrange(sds s, long start, long end);
 void sdsclear(sds s);
-sds sdsfromlonglong(long value);
-sds sdsfromunsignedlonglong(unsigned long value);
+sds sdsfromlong(long value);
+sds sdsfromunsignedlong(unsigned long value);
 
 /* Low level functions exposed to the user API */
 sds sdsMakeRoomFor(sds s, unsigned long addlen);

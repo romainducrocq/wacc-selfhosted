@@ -141,7 +141,7 @@ static char _error_msg[ERROR_MSG_SIZE];
 
 // String
 
-typedef sds string_t;
+#define string_t sds
 #define str_new(X) X ? sdsnew(X) : NULL
 #define str_delete(X)      \
     if (X) {               \
@@ -229,16 +229,15 @@ typedef sds string_t;
 // Hashmap
 
 #define pair_t(TK, TV) Pair##TK##TV
-#define PairKeyValue(TK, TV)        \
-    typedef struct pair_t(TK, TV) { \
-        TK key;                     \
-        TV value;                   \
-    }                               \
-    pair_t(TK, TV)
+#define PairKeyValue(TK, TV)      \
+    typedef struct Pair##TK##TV { \
+        TK key;                   \
+        TV value;                 \
+    } Pair##TK##TV
 #define pair_first(X) (X).key
 #define pair_second(X) (X).value
 
-#define hashmap_t(TK, TV) pair_t(TK, TV)*
+#define hashmap_t(TK, TV) Pair##TK##TV*
 #define map_new() NULL
 #define map_delete(X)  \
     if (X) {           \
@@ -271,15 +270,14 @@ typedef sds string_t;
 // Hashset
 
 #define element_t(TK) Element##TK
-#define ElementKey(TK)             \
-    typedef struct element_t(TK) { \
-        TK key;                    \
-        int8_t value;              \
-    }                              \
-    element_t(TK)
+#define ElementKey(TK)           \
+    typedef struct Element##TK { \
+        TK key;                  \
+        int8_t value;            \
+    } Element##TK
 #define element_get(X) (X).key
 
-#define hashset_t(TK) element_t(TK)*
+#define hashset_t(TK) Element##TK*
 #define set_new() map_new()
 #define set_delete(X) map_delete(X)
 #define set_size(X) map_size(X)

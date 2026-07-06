@@ -33,7 +33,7 @@
 #ifndef __SDS_H
 #define __SDS_H
 
-// TODO
+// TODO keep ?
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wdiscarded-qualifiers"
 #elif defined(__GNUC__)

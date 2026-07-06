@@ -131,26 +131,6 @@
 #define stbds_hmget(t, k) (stbds_hmgetp(t, k)->value)
 #define stbds_hmlenu(t) ((t) ? stbds_header((t)-1)->length - 1 : 0)
 
-// TODO
-#ifdef STB_DS_IMPLEMENTATION
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-extern void* realloc(void* ptr, unsigned long size);
-extern void free(void* ptr);
-extern void* memset(void* s, int c, unsigned long n);
-extern int memcmp(void* s1, void* s2, unsigned long n);
-extern int strcmp(char* s1, char* s2);
-extern void* memcpy(void* s1, void* s2, unsigned long n);
-extern void* memmove(void* s1, void* s2, unsigned long n);
-extern unsigned long strlen(char* s);
-#pragma GCC diagnostic pop
-#else
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#endif
-//
-
 struct stbds_array_header {
     unsigned long length;
     unsigned long capacity;
@@ -169,6 +149,20 @@ extern void* stbds_hmdel_key(
 #endif // INCLUDE_STB_DS_H
 
 #ifdef STB_DS_IMPLEMENTATION
+
+// TODO add clang
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
+extern void* realloc(void* ptr, unsigned long size);
+extern void free(void* ptr);
+extern void* memset(void* s, int c, unsigned long n);
+extern int memcmp(void* s1, void* s2, unsigned long n);
+extern int strcmp(char* s1, char* s2);
+extern void* memcpy(void* s1, void* s2, unsigned long n);
+extern void* memmove(void* s1, void* s2, unsigned long n);
+extern unsigned long strlen(char* s);
+#pragma GCC diagnostic pop
+//
 
 void* stbds_arrgrowf(void* a, unsigned long elemsize, unsigned long addlen, unsigned long min_cap) {
     struct stbds_array_header temp = {0};

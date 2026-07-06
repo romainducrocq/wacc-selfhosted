@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "util/c_std.h"
@@ -228,8 +229,7 @@ static void fold_truncate_instr(Ctx ctx, TacTruncate* node, size_t instr_idx) {
     }
 }
 
-static shared_ptr_t(CConst)
-    fold_zero_extend_uchar_const(Ctx ctx, TacVariable* node, CConstUChar* constant) {
+static shared_ptr_t(CConst) fold_zero_extend_uchar_const(Ctx ctx, TacVariable* node, CConstUChar* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Int_t: {
             TInt value = (TInt)constant->value;
@@ -599,8 +599,7 @@ static void fold_unary_instr(Ctx ctx, TacUnary* node, size_t instr_idx) {
     }
 }
 
-static shared_ptr_t(CConst)
-    fold_binary_int_const(TacBinaryOp* node, CConstInt* constant_1, CConstInt* constant_2) {
+static shared_ptr_t(CConst) fold_binary_int_const(TacBinaryOp* node, CConstInt* constant_1, CConstInt* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TInt value = constant_1->value + constant_2->value;
@@ -672,8 +671,7 @@ static shared_ptr_t(CConst)
     }
 }
 
-static shared_ptr_t(CConst)
-    fold_binary_long_const(TacBinaryOp* node, CConstLong* constant_1, CConstLong* constant_2) {
+static shared_ptr_t(CConst) fold_binary_long_const(TacBinaryOp* node, CConstLong* constant_1, CConstLong* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TLong value = constant_1->value + constant_2->value;
@@ -793,8 +791,7 @@ static shared_ptr_t(CConst)
     }
 }
 
-static shared_ptr_t(CConst)
-    fold_binary_uint_const(TacBinaryOp* node, CConstUInt* constant_1, CConstUInt* constant_2) {
+static shared_ptr_t(CConst) fold_binary_uint_const(TacBinaryOp* node, CConstUInt* constant_1, CConstUInt* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TUInt value = constant_1->value + constant_2->value;
@@ -939,8 +936,7 @@ static shared_ptr_t(CConst)
     }
 }
 
-static shared_ptr_t(TacValue)
-    fold_binary_const(TacBinaryOp* node, CConst* constant_1, CConst* constant_2) {
+static shared_ptr_t(TacValue) fold_binary_const(TacBinaryOp* node, CConst* constant_1, CConst* constant_2) {
     THROW_ABORT_IF(constant_1->type != constant_2->type);
     shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant_1->type) {

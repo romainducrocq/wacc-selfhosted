@@ -1,3 +1,5 @@
+#include <sys/types.h>
+
 #include "util/c_std.h"
 #include "util/fileio.h"
 #include "util/throw.h"

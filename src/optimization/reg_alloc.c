@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "util/c_std.h"
@@ -891,8 +892,7 @@ static void alloc_unprune_infer_graph(Ctx ctx, InferenceRegister* infer, TIdenti
         }
     }
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer =
-            &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         if (linked_infer->color != REG_Sp) {
             register_mask_set(&color_reg_mask, linked_infer->color, false);
         }
@@ -1379,8 +1379,7 @@ static bool coal_briggs_test(Ctx ctx, InferenceRegister* src_infer, InferenceReg
 
 static bool coal_george_test(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegister* infer) {
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer =
-            &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         if (!register_mask_get(linked_infer->linked_hard_mask, reg_kind)
             && linked_infer->degree >= ctx->p_infer_graph->k) {
             return false;
@@ -1811,8 +1810,7 @@ static void alloc_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void allocate_registers(
-    AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code) {
+void allocate_registers(AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code) {
     RegAllocContext ctx;
     {
         ctx.backend = backend;

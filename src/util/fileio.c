@@ -105,9 +105,7 @@ bool read_line(Ctx ctx, char** line, size_t* line_size) {
     }
 }
 
-static void write_chunk(Ctx ctx, char* buf, size_t buf_size) {
-    fwrite(buf, sizeof(char), buf_size, ctx->fd_write);
-}
+static void write_chunk(Ctx ctx, char* buf, size_t buf_size) { fwrite(buf, sizeof(char), buf_size, ctx->fd_write); }
 
 void write_buffer(Ctx ctx, char* buf) {
     str_append(ctx->write_buf, buf);

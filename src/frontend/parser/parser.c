@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "util/c_std.h"
 #include "util/str2t.h"
 #include "util/throw.h"
@@ -1940,8 +1942,7 @@ static error_t proc_ptr_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_arr_decltor(
-    Ctx ctx, CArrayDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+static error_t proc_arr_decltor(Ctx ctx, CArrayDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
     shared_ptr_t(Type) derived_type = sptr_new();
     CATCH_ENTER;
     TLong size = node->size;
@@ -1969,8 +1970,7 @@ static error_t proc_param_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_fun_decltor(
-    Ctx ctx, CFunDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+static error_t proc_fun_decltor(Ctx ctx, CFunDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
     shared_ptr_t(Type) derived_type = sptr_new();
     vector_t(TIdentifier) params = vec_new();
     vector_t(shared_ptr_t(Type)) param_types = vec_new();

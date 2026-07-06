@@ -1,6 +1,8 @@
 #ifndef _UTIL_THROW_H
 #define _UTIL_THROW_H
 
+#include <stddef.h>
+
 #ifndef __cplusplus
 #include <stdnoreturn.h>
 #endif

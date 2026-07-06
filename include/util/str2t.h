@@ -1,6 +1,8 @@
 #ifndef _UTIL_STR2T_H
 #define _UTIL_STR2T_H
 
+#include <inttypes.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 

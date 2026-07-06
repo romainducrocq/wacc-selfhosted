@@ -1,4 +1,6 @@
+#include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 
 #include "util/c_std.h"
 #include "util/str2t.h"
@@ -728,8 +730,7 @@ static void deref_ptr_addrof_res_instr(TacDereferencedPointer* res, unique_ptr_t
     *exp_res = make_TacPlainOperand(&val);
 }
 
-static void sub_obj_addrof_res_instr(
-    Ctx ctx, TacSubObject* res, CAddrOf* node, unique_ptr_t(TacExpResult) * exp_res) {
+static void sub_obj_addrof_res_instr(Ctx ctx, TacSubObject* res, CAddrOf* node, unique_ptr_t(TacExpResult) * exp_res) {
     shared_ptr_t(TacValue) dst = ptr_inner_value(ctx, node->_base);
     {
         TIdentifier name = res->base_name;
@@ -814,8 +815,7 @@ static unique_ptr_t(TacExpResult) sizeoft_res_instr(Ctx ctx, CSizeOfT* node) {
     return make_TacPlainOperand(&val);
 }
 
-static void plain_op_dot_res_instr(
-    TacPlainOperand* res, TLong member_offset, unique_ptr_t(TacExpResult) * exp_res) {
+static void plain_op_dot_res_instr(TacPlainOperand* res, TLong member_offset, unique_ptr_t(TacExpResult) * exp_res) {
     THROW_ABORT_IF(res->val->type != AST_TacVariable_t);
     TIdentifier base_name = res->val->get._TacVariable.name;
     TLong offset = member_offset;
@@ -1221,11 +1221,9 @@ static void statement_instr(Ctx ctx, CStatement* node) {
     }
 }
 
-static void compound_init_instr(
-    Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size);
+static void compound_init_instr(Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size);
 
-static void string_single_init_instr(
-    Ctx ctx, CString* node, Array* arr_type, TIdentifier symbol, TLong size) {
+static void string_single_init_instr(Ctx ctx, CString* node, Array* arr_type, TIdentifier symbol, TLong size) {
     size_t byte_at = 0;
 
     size_t bytes_size = (size_t)arr_type->size;
@@ -1305,8 +1303,7 @@ static void single_init_instr(Ctx ctx, CSingleInit* node, Type* init_type, TIden
     }
 }
 
-static void scalar_compound_init_instr(
-    Ctx ctx, CSingleInit* node, Type* init_type, TIdentifier symbol, TLong size) {
+static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, Type* init_type, TIdentifier symbol, TLong size) {
     if (node->exp->type == AST_CString_t && init_type->type == AST_Array_t) {
         string_single_init_instr(ctx, &node->exp->get._CString, &init_type->get._Array, symbol, size);
     }
@@ -1318,8 +1315,7 @@ static void scalar_compound_init_instr(
     }
 }
 
-static void arr_compound_init_instr(
-    Ctx ctx, CCompoundInit* node, Array* arr_type, TIdentifier symbol, TLong* size) {
+static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, Array* arr_type, TIdentifier symbol, TLong* size) {
     for (size_t i = 0; i < vec_size(node->initializers); ++i) {
         compound_init_instr(ctx, node->initializers[i], arr_type->elem_type, symbol, size);
         if (node->initializers[i]->type == AST_CSingleInit_t) {
@@ -1338,8 +1334,7 @@ static void struct_compound_init_instr(
     *size += get_struct_scale(ctx, struct_type);
 }
 
-static void aggr_compound_init_instr(
-    Ctx ctx, CCompoundInit* node, Type* init_type, TIdentifier symbol, TLong* size) {
+static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, Type* init_type, TIdentifier symbol, TLong* size) {
     switch (init_type->type) {
         case AST_Array_t:
             arr_compound_init_instr(ctx, node, &init_type->get._Array, symbol, size);
@@ -1352,8 +1347,7 @@ static void aggr_compound_init_instr(
     }
 }
 
-static void compound_init_instr(
-    Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size) {
+static void compound_init_instr(Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size) {
     switch (node->type) {
         case AST_CSingleInit_t:
             scalar_compound_init_instr(ctx, &node->get._CSingleInit, init_type, symbol, *size);

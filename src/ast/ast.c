@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 

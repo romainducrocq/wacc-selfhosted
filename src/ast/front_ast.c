@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 
@@ -209,8 +211,8 @@ unique_ptr_t(CExp) make_CUnary(CUnaryOp* unop, unique_ptr_t(CExp) * exp, size_t 
     return self;
 }
 
-unique_ptr_t(CExp) make_CBinary(
-    CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
+unique_ptr_t(CExp)
+    make_CBinary(CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CBinary_t;
     self->get._CBinary.binop = *binop;
@@ -222,8 +224,8 @@ unique_ptr_t(CExp) make_CBinary(
     return self;
 }
 
-unique_ptr_t(CExp) make_CAssignment(
-    CUnaryOp* unop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
+unique_ptr_t(CExp)
+    make_CAssignment(CUnaryOp* unop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CAssignment_t;
     self->get._CAssignment.unop = *unop;

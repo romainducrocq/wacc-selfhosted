@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 
@@ -208,8 +210,8 @@ unique_ptr_t(TacInstruction)
     return self;
 }
 
-unique_ptr_t(TacInstruction) make_TacBinary(TacBinaryOp* binop, shared_ptr_t(TacValue) * src1,
-    shared_ptr_t(TacValue) * src2, shared_ptr_t(TacValue) * dst) {
+unique_ptr_t(TacInstruction) make_TacBinary(
+    TacBinaryOp* binop, shared_ptr_t(TacValue) * src1, shared_ptr_t(TacValue) * src2, shared_ptr_t(TacValue) * dst) {
     unique_ptr_t(TacInstruction) self = make_TacInstruction();
     self->type = AST_TacBinary_t;
     self->get._TacBinary.binop = *binop;

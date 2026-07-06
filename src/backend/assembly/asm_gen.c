@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <sys/types.h>
+
 #include "util/c_std.h"
 #include "util/str2t.h"
 #include "util/throw.h"
@@ -1415,8 +1418,7 @@ static void ret_call_instr(Ctx ctx, TacValue* node, REGISTER_KIND arg_reg) {
     push_instr(ctx, make_AsmMov(&asm_type_dst, &src, &dst));
 }
 
-static void ret_8b_call_instr(
-    Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
+static void ret_8b_call_instr(Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
     TIdentifier dst_name = name;
     shared_ptr_t(AsmOperand) src = gen_register(arg_reg);
     shared_ptr_t(AssemblyType) asm_type_dst =

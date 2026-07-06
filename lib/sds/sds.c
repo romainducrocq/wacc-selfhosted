@@ -32,7 +32,7 @@
 
 #include "sds.h"
 
-// TODO
+// TODO add clang
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
 extern void* malloc(unsigned long size);

@@ -1,3 +1,6 @@
+#include <stdlib.h>
+#include <sys/types.h>
+
 #include "util/c_std.h"
 #include "util/str2t.h"
 #include "util/throw.h"
@@ -1778,8 +1781,7 @@ static void check_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, shared
     sptr_copy(Type, *init_type, node->_base->init_type);
 }
 
-static void check_struct_init(
-    Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
+static void check_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
     StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     for (size_t i = vec_size(node->initializers); i < map_size(struct_typedef->members); ++i) {
         StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
@@ -3316,8 +3318,7 @@ static error_t reslv_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, sha
     CATCH_EXIT;
 }
 
-static error_t reslv_struct_init(
-    Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
+static error_t reslv_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
     CATCH_ENTER;
     TRY(check_bound_struct_init(ctx, node, struct_type));
 

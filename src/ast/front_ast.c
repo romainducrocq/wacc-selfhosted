@@ -199,7 +199,7 @@ unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(Type) * tar
     return self;
 }
 
-unique_ptr_t(CExp) make_CUnary(const CUnaryOp* unop, unique_ptr_t(CExp) * exp, size_t info_at) {
+unique_ptr_t(CExp) make_CUnary(CUnaryOp* unop, unique_ptr_t(CExp) * exp, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CUnary_t;
     self->get._CUnary.unop = *unop;
@@ -210,7 +210,7 @@ unique_ptr_t(CExp) make_CUnary(const CUnaryOp* unop, unique_ptr_t(CExp) * exp, s
 }
 
 unique_ptr_t(CExp) make_CBinary(
-    const CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
+    CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CBinary_t;
     self->get._CBinary.binop = *binop;
@@ -223,7 +223,7 @@ unique_ptr_t(CExp) make_CBinary(
 }
 
 unique_ptr_t(CExp) make_CAssignment(
-    const CUnaryOp* unop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
+    CUnaryOp* unop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CAssignment_t;
     self->get._CAssignment.unop = *unop;
@@ -829,7 +829,7 @@ void free_CStructDeclaration(unique_ptr_t(CStructDeclaration) * self) {
 }
 
 unique_ptr_t(CFunctionDeclaration) make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params,
-    unique_ptr_t(CBlock) * body, shared_ptr_t(Type) * fun_type, const CStorageClass* storage_class, size_t info_at) {
+    unique_ptr_t(CBlock) * body, shared_ptr_t(Type) * fun_type, CStorageClass* storage_class, size_t info_at) {
     unique_ptr_t(CFunctionDeclaration) self = uptr_new();
     uptr_alloc(CFunctionDeclaration, self);
     self->type = AST_CFunctionDeclaration_t;
@@ -860,7 +860,7 @@ void free_CFunctionDeclaration(unique_ptr_t(CFunctionDeclaration) * self) {
 }
 
 unique_ptr_t(CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(CInitializer) * init,
-    shared_ptr_t(Type) * var_type, const CStorageClass* storage_class, size_t info_at) {
+    shared_ptr_t(Type) * var_type, CStorageClass* storage_class, size_t info_at) {
     unique_ptr_t(CVariableDeclaration) self = uptr_new();
     uptr_alloc(CVariableDeclaration, self);
     self->type = AST_CVariableDeclaration_t;

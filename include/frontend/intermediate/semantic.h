@@ -22,7 +22,7 @@ typedef struct IdentifierContext IdentifierContext;
 extern "C" {
 #endif
 error_t analyze_semantic(
-    const CProgram* node, ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
+    CProgram* node, ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
 #ifdef __cplusplus
 }
 #endif

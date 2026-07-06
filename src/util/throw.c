@@ -26,7 +26,7 @@ typedef ErrorsContext* Ctx;
 #else
 _Noreturn
 #endif
-void panic_sigabrt(const char* msg, const char* func, int line, const char* file) {
+void panic_sigabrt(char* msg, char* func, int line, char* file) {
     fflush(stdout);
     fprintf(stderr,
         "\033[1m%s:%i:\033[0m\n"
@@ -45,7 +45,7 @@ void raise_init_error(Ctx ctx) {
 
 void raise_base_error(Ctx ctx) {
     free_fileio(ctx->fileio);
-    const char* filename = get_filename(ctx->fileio);
+    char* filename = get_filename(ctx->fileio);
     if (ctx->is_stdout) {
         printf("\n");
         fflush(stdout);
@@ -69,11 +69,11 @@ static size_t get_token_linenum(Ctx ctx, size_t total_linenum) {
 
 void raise_error_at_token(Ctx ctx, size_t info_at) {
     THROW_ABORT_IF(info_at >= vec_size(ctx->errors->token_infos));
-    const TokenInfo* token_info = &ctx->errors->token_infos[info_at];
+    TokenInfo* token_info = &ctx->errors->token_infos[info_at];
     size_t tok_linenum = get_token_linenum(ctx, token_info->total_linenum);
 
     free_fileio(ctx->fileio);
-    const char* filename = get_filename(ctx->fileio);
+    char* filename = get_filename(ctx->fileio);
     string_t line = str_new(NULL);
     {
         size_t len = 0;

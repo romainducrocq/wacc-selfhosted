@@ -62,20 +62,20 @@ typedef enum MESSAGE_UTIL {
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
-const char* get_tok_fmt(IdentifierContext* ctx, const Token* token);
-const char* get_const_fmt(const CConst* node);
-const char* get_storage_class_fmt(const CStorageClass* node);
-const char* get_unop_fmt(const CUnaryOp* node);
-const char* get_binop_fmt(const CBinaryOp* node);
-const char* get_assign_fmt(const CBinaryOp* node, const CUnaryOp* unop);
-const char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt);
-const char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt);
-const char* get_fun_fmt(IdentifierContext* ctx, const FunType* fun_type, string_t* fun_fmt);
-const char* get_ptr_fmt(IdentifierContext* ctx, const Pointer* ptr_type, string_t* ptr_fmt);
-const char* get_arr_fmt(IdentifierContext* ctx, const Array* arr_type, string_t* arr_fmt);
-const char* get_struct_fmt(IdentifierContext* ctx, const Structure* struct_type, string_t* struct_fmt);
-const char* get_type_fmt(IdentifierContext* ctx, const Type* type, string_t* type_fmt);
+char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
+char* get_tok_fmt(IdentifierContext* ctx, Token* token);
+char* get_const_fmt(CConst* node);
+char* get_storage_class_fmt(CStorageClass* node);
+char* get_unop_fmt(CUnaryOp* node);
+char* get_binop_fmt(CBinaryOp* node);
+char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop);
+char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt);
+char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt);
+char* get_fun_fmt(IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt);
+char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt);
+char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt);
+char* get_struct_fmt(IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt);
+char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt);
 #ifdef __cplusplus
 }
 #endif
@@ -92,12 +92,12 @@ const char* get_type_fmt(IdentifierContext* ctx, const Type* type, string_t* typ
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char* get_fatal_msg(MESSAGE_FATAL msg);
-const char* get_arg_msg(MESSAGE_ARG msg);
-const char* get_util_msg(MESSAGE_UTIL msg);
-const char* get_lexer_msg(MESSAGE_LEXER msg);
-const char* get_parser_msg(MESSAGE_PARSER msg);
-const char* get_semantic_msg(MESSAGE_SEMANTIC msg);
+char* get_fatal_msg(MESSAGE_FATAL msg);
+char* get_arg_msg(MESSAGE_ARG msg);
+char* get_util_msg(MESSAGE_UTIL msg);
+char* get_lexer_msg(MESSAGE_LEXER msg);
+char* get_parser_msg(MESSAGE_PARSER msg);
+char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 #ifdef __cplusplus
 }
 #endif

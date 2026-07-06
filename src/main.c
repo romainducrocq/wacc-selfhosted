@@ -44,8 +44,8 @@ typedef struct MainContext {
     uint8_t optim_1_mask;
     uint8_t optim_2_code;
     string_t filename;
-    vector_t(const char*) includedirs;
-    vector_t(const char*) stdlibdirs;
+    vector_t(char*) includedirs;
+    vector_t(char*) stdlibdirs;
 } MainContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,32 +54,32 @@ typedef struct MainContext {
 
 typedef MainContext* Ctx;
 
-static void verbose(Ctx ctx, const char* msg) {
+static void verbose(Ctx ctx, char* msg) {
     if (ctx->is_verbose) {
         printf("%s", msg);
     }
 }
 
 #ifndef __NDEBUG__
-static void debug_toks(Ctx ctx, const vector_t(Token) tokens) {
+static void debug_toks(Ctx ctx, vector_t(Token) tokens) {
     if (ctx->is_verbose) {
         pprint_toks(ctx->identifiers, tokens);
     }
 }
 
-static void debug_c_ast(Ctx ctx, const CProgram* node) {
+static void debug_c_ast(Ctx ctx, CProgram* node) {
     if (ctx->is_verbose) {
         pprint_c_ast(ctx->identifiers, node);
     }
 }
 
-static void debug_tac_ast(Ctx ctx, const TacProgram* node) {
+static void debug_tac_ast(Ctx ctx, TacProgram* node) {
     if (ctx->is_verbose) {
         pprint_tac_ast(ctx->identifiers, node);
     }
 }
 
-static void debug_asm_ast(Ctx ctx, const AsmProgram* node) {
+static void debug_asm_ast(Ctx ctx, AsmProgram* node) {
     if (ctx->is_verbose) {
         pprint_asm_ast(ctx->identifiers, node);
     }
@@ -116,7 +116,7 @@ static void debug_backend_symbol_table(Ctx ctx) {
 }
 #endif
 
-static void set_filename_ext(Ctx ctx, const char* ext) {
+static void set_filename_ext(Ctx ctx, char* ext) {
     for (size_t i = str_size(ctx->filename); i-- > 0;) {
         if (ctx->filename[i] == '.') {
             str_substr(ctx->filename, 0, i);
@@ -304,7 +304,7 @@ static error_t compile(Ctx ctx, ErrorsContext* errors, FileIoContext* fileio) {
     CATCH_EXIT;
 }
 
-static bool arg_parse_uint8(const char* arg, uint8_t* value) {
+static bool arg_parse_uint8(char* arg, uint8_t* value) {
     char* end_ptr = NULL;
     *value = (uint8_t)strtol(arg, &end_ptr, 10);
     return end_ptr == arg;
@@ -347,13 +347,13 @@ static error_t arg_parse(Ctx ctx, int argc, char** argv) {
     if (!argv[++i]) {
         THROW_INIT(GET_ARG_MSG_0(MSG_no_stdlib_dir_arg));
     }
-    vec_push_back(ctx->stdlibdirs, (const char*)argv[i]);
+    vec_push_back(ctx->stdlibdirs, (char*)argv[i]);
 
     if (!argv[++i]) {
         THROW_INIT(GET_ARG_MSG_0(MSG_no_include_dir_arg));
     }
     do {
-        vec_push_back(ctx->includedirs, (const char*)argv[i]);
+        vec_push_back(ctx->includedirs, (char*)argv[i]);
     }
     while (argv[++i]);
     FINALLY;

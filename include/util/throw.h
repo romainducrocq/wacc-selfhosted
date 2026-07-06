@@ -46,7 +46,7 @@ extern "C" {
 #else
 _Noreturn
 #endif
-void panic_sigabrt(const char* msg, const char* func, int line, const char* file);
+void panic_sigabrt(char* msg, char* func, int line, char* file);
 #ifdef __cplusplus
 }
 #endif

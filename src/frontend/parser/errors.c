@@ -12,7 +12,7 @@
 
 // Errors
 
-const char* get_tok_kind_fmt(TOKEN_KIND tok_kind) {
+char* get_tok_kind_fmt(TOKEN_KIND tok_kind) {
     switch (tok_kind) {
         case TOK_assign_shiftleft:
             return "<<=";
@@ -157,23 +157,23 @@ const char* get_tok_kind_fmt(TOKEN_KIND tok_kind) {
         case TOK_string_literal:
             return "string literal";
         case TOK_char_const:
-            return "const char";
+            return "char";
         case TOK_int_const:
-            return "const int";
+            return "int";
         case TOK_long_const:
-            return "const long";
+            return "long";
         case TOK_uint_const:
-            return "const unsigned int";
+            return "unsigned int";
         case TOK_ulong_const:
-            return "const unsigned long";
+            return "unsigned long";
         case TOK_dbl_const:
-            return "const double";
+            return "double";
         default:
             THROW_ABORT;
     }
 }
 
-const char* get_tok_fmt(IdentifierContext* ctx, const Token* token) {
+char* get_tok_fmt(IdentifierContext* ctx, Token* token) {
     switch (token->tok_kind) {
         case TOK_identifier:
         case TOK_string_literal:
@@ -189,7 +189,7 @@ const char* get_tok_fmt(IdentifierContext* ctx, const Token* token) {
     }
 }
 
-const char* get_const_fmt(const CConst* node) {
+char* get_const_fmt(CConst* node) {
     switch (node->type) {
         case AST_CConstInt_t:
             return "int";
@@ -210,7 +210,7 @@ const char* get_const_fmt(const CConst* node) {
     }
 }
 
-const char* get_storage_class_fmt(const CStorageClass* node) {
+char* get_storage_class_fmt(CStorageClass* node) {
     switch (node->type) {
         case AST_CStatic_t:
             return "static";
@@ -221,7 +221,7 @@ const char* get_storage_class_fmt(const CStorageClass* node) {
     }
 }
 
-const char* get_unop_fmt(const CUnaryOp* node) {
+char* get_unop_fmt(CUnaryOp* node) {
     switch (node->type) {
         case AST_CComplement_t:
             return "~";
@@ -234,7 +234,7 @@ const char* get_unop_fmt(const CUnaryOp* node) {
     }
 }
 
-const char* get_binop_fmt(const CBinaryOp* node) {
+char* get_binop_fmt(CBinaryOp* node) {
     switch (node->type) {
         case AST_CAdd_t:
             return "+";
@@ -279,7 +279,7 @@ const char* get_binop_fmt(const CBinaryOp* node) {
     }
 }
 
-const char* get_assign_fmt(const CBinaryOp* node, const CUnaryOp* unop) {
+char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop) {
     if (!node) {
         return "=";
     }
@@ -337,8 +337,8 @@ const char* get_assign_fmt(const CBinaryOp* node, const CUnaryOp* unop) {
     }
 }
 
-const char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt) {
-    const string_t value = map_get(ctx->hash_table, name);
+char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt) {
+    string_t value = map_get(ctx->hash_table, name);
     str_copy(value, *name_fmt);
     for (size_t i = str_size(*name_fmt); i-- > 0;) {
         if ((*name_fmt)[i] == UID_SEPARATOR[0]) {
@@ -349,7 +349,7 @@ const char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* nam
     return *name_fmt;
 }
 
-const char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt) {
+char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt) {
     *struct_fmt = is_union ? str_new("union ") : str_new("struct ");
     {
         string_t name_fmt = str_new(NULL);
@@ -359,7 +359,7 @@ const char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool i
     return *struct_fmt;
 }
 
-const char* get_fun_fmt(IdentifierContext* ctx, const FunType* fun_type, string_t* fun_fmt) {
+char* get_fun_fmt(IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt) {
     *fun_fmt = str_new("(");
     {
         string_t type_fmt = str_new(NULL);
@@ -383,7 +383,7 @@ const char* get_fun_fmt(IdentifierContext* ctx, const FunType* fun_type, string_
     return *fun_fmt;
 }
 
-const char* get_ptr_fmt(IdentifierContext* ctx, const Pointer* ptr_type, string_t* ptr_fmt) {
+char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt) {
     *ptr_fmt = str_new("");
     string_t decltor_fmt = str_new("*");
     while (ptr_type->ref_type->type == AST_Pointer_t) {
@@ -400,7 +400,7 @@ const char* get_ptr_fmt(IdentifierContext* ctx, const Pointer* ptr_type, string_
     return *ptr_fmt;
 }
 
-const char* get_arr_fmt(IdentifierContext* ctx, const Array* arr_type, string_t* arr_fmt) {
+char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt) {
     *arr_fmt = str_new("");
     string_t decltor_fmt = str_new("[");
     {
@@ -429,11 +429,11 @@ const char* get_arr_fmt(IdentifierContext* ctx, const Array* arr_type, string_t*
     return *arr_fmt;
 }
 
-const char* get_struct_fmt(IdentifierContext* ctx, const Structure* struct_type, string_t* struct_fmt) {
+char* get_struct_fmt(IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt) {
     return get_struct_name_fmt(ctx, struct_type->tag, struct_type->is_union, struct_fmt);
 }
 
-const char* get_type_fmt(IdentifierContext* ctx, const Type* type, string_t* type_fmt) {
+char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt) {
     switch (type->type) {
         case AST_Char_t:
             return "char";
@@ -472,7 +472,7 @@ const char* get_type_fmt(IdentifierContext* ctx, const Type* type, string_t* typ
 #define EM_VARG "\033[1m‘%s’\033[0m"
 #define RET_ERRNO return "(no. %i) "
 
-const char* get_fatal_msg(MESSAGE_FATAL msg) {
+char* get_fatal_msg(MESSAGE_FATAL msg) {
     switch (msg) {
         case MSG_unsupported_os:
             RET_ERRNO EM_VARG " operating system is not supported, requires " EM_CSTR("GNU/Linux") " (x86_64) or " //
@@ -500,7 +500,7 @@ const char* get_fatal_msg(MESSAGE_FATAL msg) {
     }
 }
 
-const char* get_arg_msg(MESSAGE_ARG msg) {
+char* get_arg_msg(MESSAGE_ARG msg) {
     switch (msg) {
         case MSG_print_help:
             RET_ERRNO "Usage: %s [--help] Debug OptimL1 OptimL2 FILE StdlibDir SourceDir [IncludeDir...]\n"
@@ -540,7 +540,7 @@ const char* get_arg_msg(MESSAGE_ARG msg) {
     }
 }
 
-const char* get_util_msg(MESSAGE_UTIL msg) {
+char* get_util_msg(MESSAGE_UTIL msg) {
     switch (msg) {
         case MSG_failed_fread:
             RET_ERRNO "cannot read input file " EM_VARG;
@@ -557,7 +557,7 @@ const char* get_util_msg(MESSAGE_UTIL msg) {
     }
 }
 
-const char* get_lexer_msg(MESSAGE_LEXER msg) {
+char* get_lexer_msg(MESSAGE_LEXER msg) {
     switch (msg) {
         case MSG_invalid_tok:
             RET_ERRNO "found invalid token " EM_VARG;
@@ -568,7 +568,7 @@ const char* get_lexer_msg(MESSAGE_LEXER msg) {
     }
 }
 
-const char* get_parser_msg(MESSAGE_PARSER msg) {
+char* get_parser_msg(MESSAGE_PARSER msg) {
     switch (msg) {
         case MSG_unexpected_next_tok:
             RET_ERRNO "found token " EM_VARG ", but expected " EM_VARG " next";
@@ -642,7 +642,7 @@ const char* get_parser_msg(MESSAGE_PARSER msg) {
     }
 }
 
-const char* get_semantic_msg(MESSAGE_SEMANTIC msg) {
+char* get_semantic_msg(MESSAGE_SEMANTIC msg) {
     switch (msg) {
         case MSG_incomplete_arr:
             RET_ERRNO "array type " EM_VARG " of incomplete type " EM_VARG ", requires a complete type";

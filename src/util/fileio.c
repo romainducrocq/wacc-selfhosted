@@ -23,7 +23,7 @@ typedef FileIoContext* Ctx;
 
 #define WRITE_BUF_SIZE 4096
 
-bool find_file(const char* filename) {
+bool find_file(char* filename) {
     tinydir_file file = {
 #ifndef __cplusplus
         0
@@ -32,7 +32,7 @@ bool find_file(const char* filename) {
     return tinydir_file_open(&file, filename) != -1 && !file.is_dir;
 }
 
-const char* get_filename(Ctx ctx) {
+char* get_filename(Ctx ctx) {
     if (!vec_empty(ctx->file_reads)) {
         return vec_back(ctx->file_reads).filename;
     }
@@ -41,9 +41,9 @@ const char* get_filename(Ctx ctx) {
     }
 }
 
-void set_filename(Ctx ctx, const string_t filename) { str_copy(filename, ctx->filename); }
+void set_filename(Ctx ctx, string_t filename) { str_copy(filename, ctx->filename); }
 
-error_t open_fread(Ctx ctx, const string_t filename) {
+error_t open_fread(Ctx ctx, string_t filename) {
     CATCH_ENTER;
     for (size_t i = 0; i < vec_size(ctx->file_reads); ++i) {
         if (ctx->file_reads[i].fd) {
@@ -71,7 +71,7 @@ error_t open_fread(Ctx ctx, const string_t filename) {
     CATCH_EXIT;
 }
 
-error_t open_fwrite(Ctx ctx, const string_t filename) {
+error_t open_fwrite(Ctx ctx, string_t filename) {
     CATCH_ENTER;
     THROW_ABORT_IF(!vec_empty(ctx->file_reads));
 
@@ -105,11 +105,11 @@ bool read_line(Ctx ctx, char** line, size_t* line_size) {
     }
 }
 
-static void write_chunk(Ctx ctx, const char* buf, size_t buf_size) {
+static void write_chunk(Ctx ctx, char* buf, size_t buf_size) {
     fwrite(buf, sizeof(char), buf_size, ctx->fd_write);
 }
 
-void write_buffer(Ctx ctx, const char* buf) {
+void write_buffer(Ctx ctx, char* buf) {
     str_append(ctx->write_buf, buf);
     while (str_size(ctx->write_buf) >= WRITE_BUF_SIZE) {
         write_chunk(ctx, ctx->write_buf, WRITE_BUF_SIZE);

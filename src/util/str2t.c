@@ -19,7 +19,7 @@ uint32_t uintmax_to_uint32(uintmax_t uintmax) { return (uint32_t)uintmax; }
 
 uint64_t uintmax_to_uint64(uintmax_t uintmax) { return (uint64_t)uintmax; }
 
-void string_to_literal(const string_t str_string, vector_t(int8_t) * string_literal) {
+void string_to_literal(string_t str_string, vector_t(int8_t) * string_literal) {
     THROW_ABORT_IF(str_size(str_string) < 2);
     for (size_t byte = 1; byte < str_size(str_string) - 1; ++byte) {
         char str_char = (char)str_string[byte];
@@ -69,7 +69,7 @@ void string_to_literal(const string_t str_string, vector_t(int8_t) * string_lite
     }
 }
 
-int32_t string_to_char_ascii(const string_t str_char) {
+int32_t string_to_char_ascii(string_t str_char) {
     THROW_ABORT_IF(str_size(str_char) < 2 || str_size(str_char) > 4);
     char c_char = (char)str_char[1];
     if (c_char == '\\') {
@@ -106,18 +106,18 @@ int32_t string_to_char_ascii(const string_t str_char) {
     }
 }
 
-static intmax_t hex_string_to_intmax(const char* str_hex) {
+static intmax_t hex_string_to_intmax(char* str_hex) {
     char* end_ptr = NULL;
     intmax_t value = strtoimax(str_hex, &end_ptr, 16);
     THROW_ABORT_IF(end_ptr == str_hex);
     return value;
 }
 
-static int8_t hex_string_to_int8(const char* str_hex) { return (int8_t)hex_string_to_intmax(str_hex); }
+static int8_t hex_string_to_int8(char* str_hex) { return (int8_t)hex_string_to_intmax(str_hex); }
 
-static int32_t hex_string_to_int32(const char* str_hex) { return (int32_t)hex_string_to_intmax(str_hex); }
+static int32_t hex_string_to_int32(char* str_hex) { return (int32_t)hex_string_to_intmax(str_hex); }
 
-static int64_t hex_string_to_int64(const char* str_hex) { return (int64_t)hex_string_to_intmax(str_hex); }
+static int64_t hex_string_to_int64(char* str_hex) { return (int64_t)hex_string_to_intmax(str_hex); }
 
 static void string_literal_byte_to_hex(int8_t value, string_t* str_hex) {
     char byte_hex[3];
@@ -125,7 +125,7 @@ static void string_literal_byte_to_hex(int8_t value, string_t* str_hex) {
     str_append(*str_hex, byte_hex);
 }
 
-int8_t string_bytes_to_int8(const vector_t(int8_t) string_literal, size_t byte_at) {
+int8_t string_bytes_to_int8(vector_t(int8_t) string_literal, size_t byte_at) {
     string_t str_hex = str_new("");
     for (size_t byte = byte_at + 1; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
@@ -137,7 +137,7 @@ int8_t string_bytes_to_int8(const vector_t(int8_t) string_literal, size_t byte_a
     return hex_value;
 }
 
-int32_t string_bytes_to_int32(const vector_t(int8_t) string_literal, size_t byte_at) {
+int32_t string_bytes_to_int32(vector_t(int8_t) string_literal, size_t byte_at) {
     string_t str_hex = str_new("");
     for (size_t byte = byte_at + 4; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
@@ -149,7 +149,7 @@ int32_t string_bytes_to_int32(const vector_t(int8_t) string_literal, size_t byte
     return hex_value;
 }
 
-int64_t string_bytes_to_int64(const vector_t(int8_t) string_literal, size_t byte_at) {
+int64_t string_bytes_to_int64(vector_t(int8_t) string_literal, size_t byte_at) {
     string_t str_hex = str_new("");
     for (size_t byte = byte_at + 8; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
@@ -161,7 +161,7 @@ int64_t string_bytes_to_int64(const vector_t(int8_t) string_literal, size_t byte
     return hex_value;
 }
 
-string_t string_literal_to_const(const vector_t(int8_t) string_literal) {
+string_t string_literal_to_const(vector_t(int8_t) string_literal) {
     string_t string_const = str_new("");
     for (size_t i = 0; i < vec_size(string_literal); ++i) {
         int8_t byte = string_literal[i];
@@ -213,7 +213,7 @@ uint64_t dbl_to_binary(double decimal) {
     return binary;
 }
 
-error_t string_to_intmax(ErrorsContext* ctx, const char* str_int, size_t info_at, intmax_t* value) {
+error_t string_to_intmax(ErrorsContext* ctx, char* str_int, size_t info_at, intmax_t* value) {
     CATCH_ENTER;
     char* end_ptr = NULL;
     *value = strtoimax(str_int, &end_ptr, 10);
@@ -224,7 +224,7 @@ error_t string_to_intmax(ErrorsContext* ctx, const char* str_int, size_t info_at
     CATCH_EXIT;
 }
 
-error_t string_to_uintmax(ErrorsContext* ctx, const char* str_uint, size_t info_at, uintmax_t* value) {
+error_t string_to_uintmax(ErrorsContext* ctx, char* str_uint, size_t info_at, uintmax_t* value) {
     CATCH_ENTER;
     char* end_ptr = NULL;
     *value = strtoumax(str_uint, &end_ptr, 10);
@@ -235,7 +235,7 @@ error_t string_to_uintmax(ErrorsContext* ctx, const char* str_uint, size_t info_
     CATCH_EXIT;
 }
 
-error_t string_to_dbl(ErrorsContext* ctx, const char* str_dbl, size_t info_at, double* value) {
+error_t string_to_dbl(ErrorsContext* ctx, char* str_dbl, size_t info_at, double* value) {
     CATCH_ENTER;
     char* end_ptr = NULL;
     *value = strtod(str_dbl, &end_ptr);

@@ -19,8 +19,8 @@ typedef struct LexerContext {
     size_t match_at;
     size_t match_size;
     hashset_t(hash_t) includename_set;
-    vector_t(const char*) * p_includedirs;
-    vector_t(const char*) * p_stdlibdirs;
+    vector_t(char*) * p_includedirs;
+    vector_t(char*) * p_stdlibdirs;
     vector_t(Token) * p_toks;
     size_t total_linenum;
 } LexerContext;
@@ -67,7 +67,7 @@ static bool match_char(Ctx ctx, char c) {
     }
 }
 
-static bool match_chars(Ctx ctx, const char* cs, size_t n) {
+static bool match_chars(Ctx ctx, char* cs, size_t n) {
     for (size_t i = 0; i < n; ++i) {
         if (!match_char(ctx, cs[i])) {
             return false;
@@ -753,7 +753,7 @@ static error_t tokenize_file(Ctx ctx) {
     CATCH_EXIT;
 }
 
-static bool find_include(vector_t(const char*) dirnames, string_t* filename) {
+static bool find_include(vector_t(char*) dirnames, string_t* filename) {
     for (size_t i = 0; i < vec_size(dirnames); ++i) {
         string_t dirname = str_new(dirnames[i]);
         str_append(dirname, *filename);
@@ -834,7 +834,7 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-error_t lex_c_code(const string_t filename, vector_t(const char*) * includedirs, vector_t(const char*) * stdlibdirs,
+error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
     ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens) {
     LexerContext ctx;
     {

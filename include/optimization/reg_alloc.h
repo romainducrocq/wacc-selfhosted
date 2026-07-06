@@ -20,7 +20,7 @@ typedef struct FrontEndContext FrontEndContext;
 extern "C" {
 #endif
 void allocate_registers(
-    const AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code);
+    AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code);
 #ifdef __cplusplus
 }
 #endif

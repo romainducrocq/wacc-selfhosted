@@ -1,0 +1,11 @@
+.idea/
+__pycache__/
+.ipynb_checkpoints
+~/
+.vscode
+perf.data
+*.swp
+
+/wheelcc/
+/nqcc2/
+/writing-a-c-compiler-tests/

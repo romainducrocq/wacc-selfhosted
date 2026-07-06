@@ -147,6 +147,7 @@ extern unsigned long strlen(char* s);
 #else
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #endif
 //
 

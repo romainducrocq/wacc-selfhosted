@@ -30,20 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "c_lib.h"
 #include "sds.h"
-
-// TODO add clang
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-extern void* malloc(unsigned long size);
-extern void* realloc(void* ptr, unsigned long size);
-extern void free(void* ptr);
-extern void* memset(void* s, int c, unsigned long n);
-extern void* memcpy(void* s1, void* s2, unsigned long n);
-extern void* memmove(void* s1, void* s2, unsigned long n);
-extern unsigned long strlen(char* s);
-#pragma GCC diagnostic pop
-//
 
 /* Note: sdshdr5 is never used, we just access the flags byte directly.
  * However is here to document the layout of type 5 SDS strings. */

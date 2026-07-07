@@ -33,14 +33,6 @@
 #ifndef __SDS_H
 #define __SDS_H
 
-// TODO keep ?
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Wdiscarded-qualifiers"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic ignored "-Wdiscarded-qualifiers"
-#endif
-//
-
 #define sds char*
 
 unsigned long sdslen(sds s);

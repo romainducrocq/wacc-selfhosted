@@ -1,29 +1,14 @@
-#if 0
+#ifdef __LIB_TINYDIR__
 #include "tinydir/tinydir.h"
 #endif
 
+#include "c_lib.h"
 #include "util/c_std.h"
 #include "util/fileio.h"
 #include "util/throw.h"
 
 // TODO errors
 // #include "frontend/parser/errors.h"
-
-// TODO add clang
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-// struct FILE; // TODO
-#define NULL 0
-#define FOPEN_MAX 16
-#define PATH_MAX 4096
-extern int fclose(struct FILE* stream);
-extern struct FILE* fopen(char* filename, char* mode);
-extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, struct FILE* stream);
-// _POSIX_C_SOURCE 200809L
-extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);
-extern void free(void* ptr);
-#pragma GCC diagnostic pop
-//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +19,7 @@ extern void free(void* ptr);
 #define WRITE_BUF_SIZE 4096
 
 bool find_file(char* filename) {
-#if 0
+#ifdef __LIB_TINYDIR__
     tinydir_file file = {0};
     return tinydir_file_open(&file, filename) != -1 && !file.is_dir;
 #else
@@ -72,7 +57,7 @@ error_t open_fread(Ctx ctx, string_t filename) {
 
     struct FileRead file_read = {0, NULL, NULL, str_new(NULL)};
     file_read.fd = fopen(filename, "rb");
-    if (!file_read.fd || str_size(filename) >= PATH_MAX) {
+    if (!file_read.fd || str_size(filename) >= 4096) {
         goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, filename)); // TODO errors
     }
     str_copy(filename, file_read.filename);
@@ -87,7 +72,7 @@ error_t open_fwrite(Ctx ctx, string_t filename) {
 
     ctx->fd_write = NULL;
     ctx->fd_write = fopen(filename, "wb");
-    if (!ctx->fd_write || str_size(filename) >= PATH_MAX) {
+    if (!ctx->fd_write || str_size(filename) >= 4096) {
         goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fwrite, filename)); // TODO errors
     }
 

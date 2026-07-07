@@ -23,11 +23,8 @@ static char esc_red[8] = { ESC, '[', '0', ';', '3', '1', 'm', 0 };
 
 void panic_sigabrt(char* msg, char* func, int line, char* file) {
     fflush(stdout);
-    fprintf(stderr,
-        "%s%s:%i:%s\n"
-        "%sinternal error:%s %s (%s)\n",
-        esc_bold, file, line, esc_reset,
-        esc_red, esc_reset, func, msg);
+    fprintf(stderr, "%s%s:%i:%s\n", esc_bold, file, line, esc_reset);
+    fprintf(stderr, "%sinternal error:%s %s (%s)\n", esc_red, esc_reset, func, msg);
     abort();
 }
 
@@ -36,8 +33,7 @@ void raise_init_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(stdout);
     }
-    fprintf(stderr, "%serror:%s %s\n",
-        esc_red, esc_reset, ctx->msg);
+    fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
 }
 
 void raise_base_error(Ctx ctx) {
@@ -47,11 +43,8 @@ void raise_base_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(stdout);
     }
-    fprintf(stderr,
-        "%s%s:%s\n"
-        "%serror:%s %s\n",
-        esc_bold, filename, esc_reset,
-        esc_red, esc_reset, ctx->msg);
+    fprintf(stderr, "%s%s:%s\n", esc_bold, filename, esc_reset);
+    fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
 }
 
 static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {
@@ -124,15 +117,10 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
             pad_linenum = 0;
         }
 
-        fprintf(stderr,
-            "%s%s:%zu:%i:%s\n"
-            "%serror:%s %s\n"
-            "at line %s: %s%*sv%s%s\n"
-            "        %*s| %s%s%s\n",
-            esc_bold, filename, tok_linenum, tok_pos, esc_reset,
-            esc_red, esc_reset, ctx->msg,
-            strto_linenum, esc_red, pad_tok, "", tok_overline, esc_reset,
-            pad_linenum, "", esc_bold, line, esc_reset);
+        fprintf(stderr, "%s%s:%zu:%i:%s\n", esc_bold, filename, tok_linenum, tok_pos, esc_reset);
+        fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
+        fprintf(stderr, "at line %s: %s%*sv%s%s\n", strto_linenum, esc_red, pad_tok, "", tok_overline, esc_reset);
+        fprintf(stderr, "        %*s| %s%s%s\n", pad_linenum, "", esc_bold, line, esc_reset);
 
         str_delete(tok_overline);
         str_delete(strto_linenum);

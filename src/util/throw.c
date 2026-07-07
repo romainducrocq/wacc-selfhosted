@@ -16,12 +16,18 @@ extern int fprintf(struct FILE* stream, char* format, ...);
 
 #define Ctx struct ErrorsContext*
 
+#define ESC 27
+static char esc_reset[5] = { ESC, '[', '0', 'm', 0 };
+static char esc_bold[5] = { ESC, '[', '1', 'm', 0 };
+static char esc_red[8] = { ESC, '[', '0', ';', '3', '1', 'm', 0 };
+
 void panic_sigabrt(char* msg, char* func, int line, char* file) {
     fflush(stdout);
     fprintf(stderr,
-        "\033[1m%s:%i:\033[0m\n"
-        "\033[0;31minternal error:\033[0m %s (%s)\n",
-        file, line, func, msg);
+        "%s%s:%i:%s\n"
+        "%sinternal error:%s %s (%s)\n",
+        esc_bold, file, line, esc_reset,
+        esc_red, esc_reset, func, msg);
     abort();
 }
 
@@ -30,7 +36,8 @@ void raise_init_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(stdout);
     }
-    fprintf(stderr, "\033[0;31merror:\033[0m %s\n", ctx->msg);
+    fprintf(stderr, "%serror:%s %s\n",
+        esc_red, esc_reset, ctx->msg);
 }
 
 void raise_base_error(Ctx ctx) {
@@ -41,9 +48,10 @@ void raise_base_error(Ctx ctx) {
         fflush(stdout);
     }
     fprintf(stderr,
-        "\033[1m%s:\033[0m\n"
-        "\033[0;31merror:\033[0m %s\n",
-        filename, ctx->msg);
+        "%s%s:%s\n"
+        "%serror:%s %s\n",
+        esc_bold, filename, esc_reset,
+        esc_red, esc_reset, ctx->msg);
 }
 
 static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {
@@ -117,11 +125,14 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
         }
 
         fprintf(stderr,
-            "\033[1m%s:%zu:%i:\033[0m\n"
-            "\033[0;31merror:\033[0m %s\n"
-            "at line %s: \033[0;31m%*sv%s\033[0m\n"
-            "        %*s| \033[1m%s\033[0m\n",
-            filename, tok_linenum, tok_pos, ctx->msg, strto_linenum, pad_tok, "", tok_overline, pad_linenum, "", line);
+            "%s%s:%zu:%i:%s\n"
+            "%serror:%s %s\n"
+            "at line %s: %s%*sv%s%s\n"
+            "        %*s| %s%s%s\n",
+            esc_bold, filename, tok_linenum, tok_pos, esc_reset,
+            esc_red, esc_reset, ctx->msg,
+            strto_linenum, esc_red, pad_tok, "", tok_overline, esc_reset,
+            pad_linenum, "", esc_bold, line, esc_reset);
 
         str_delete(tok_overline);
         str_delete(strto_linenum);

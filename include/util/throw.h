@@ -1,61 +1,55 @@
 #ifndef _UTIL_THROW_H
 #define _UTIL_THROW_H
 
-#include <stddef.h>
-
-#ifndef __cplusplus
-#include <stdnoreturn.h>
-#endif
-
 #include "util/c_std.h"
 
-typedef struct FileIoContext FileIoContext;
+struct FileIoContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Throw
 
-typedef size_t hash_t;
-PairKeyValue(hash_t, size_t);
+// TODO keep ?
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wreturn-type"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
+//
 
-typedef struct FileOpenLine {
-    size_t linenum;
-    size_t total_linenum;
+#define _TODO_ulong_t unsigned long // TODO rename all unsigned long ?
+#define hash_t unsigned long
+PairKeyValue(hash_t, _TODO_ulong_t);
+
+struct FileOpenLine {
+    unsigned long linenum;
+    unsigned long total_linenum;
     string_t filename;
-} FileOpenLine;
+};
 
-typedef struct TokenInfo {
+struct TokenInfo {
     int tok_pos;
     int tok_len;
-    size_t total_linenum;
-} TokenInfo;
+    unsigned long total_linenum;
+};
 
-typedef struct ErrorsContext {
+struct ErrorsContext {
     struct ErrorsContext* errors;
-    FileIoContext* fileio;
+    struct FileIoContext* fileio;
     // Throw
     char msg[ERROR_MSG_SIZE];
     bool is_stdout;
-    size_t info_at_buf;
-    hashmap_t(hash_t, size_t) info_at_map;
-    vector_t(FileOpenLine) fopen_lines;
-    vector_t(TokenInfo) token_infos;
-} ErrorsContext;
+    unsigned long info_at_buf;
+    hashmap_t(hash_t, _TODO_ulong_t) info_at_map;
+    vector_t(struct FileOpenLine) fopen_lines;
+    vector_t(struct TokenInfo) token_infos;
+};
 
-#ifdef __cplusplus
-extern "C" {
-[[noreturn]]
-#else
-_Noreturn
-#endif
 void panic_sigabrt(char* msg, char* func, int line, char* file);
-#ifdef __cplusplus
-}
-#endif
 #define PANIC_FUNC(X, ...) panic_sigabrt(X, __VA_ARGS__)
 #define THROW_ABORT THROW_PANIC("abort")
 #define THROW_ALLOC(T) THROW_PANIC("alloc " #T)
-#ifdef __NDEBUG__
+#ifdef __NDEBUG__ // TODO keep __NDEBUG__?
 #define THROW_ABORT_IF(X)
 #else
 #define THROW_ABORT_IF(X) \
@@ -63,15 +57,9 @@ void panic_sigabrt(char* msg, char* func, int line, char* file);
     THROW_ABORT
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-void raise_init_error(ErrorsContext* ctx);
-void raise_base_error(ErrorsContext* ctx);
-void raise_error_at_token(ErrorsContext* ctx, size_t info_at);
-#ifdef __cplusplus
-}
-#endif
+void raise_init_error(struct ErrorsContext* ctx);
+void raise_base_error(struct ErrorsContext* ctx);
+void raise_error_at_token(struct ErrorsContext* ctx, unsigned long info_at);
 #define ERROR_MSG_BUF ctx->errors->msg
 #define THROW_INIT(...) THROW_ERROR(1, raise_init_error(ctx->errors), __VA_ARGS__)
 #define THROW_BASE(...) THROW_ERROR(1, raise_base_error(ctx->errors), __VA_ARGS__)

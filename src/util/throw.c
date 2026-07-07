@@ -19,7 +19,7 @@
 
 // Throw
 
-typedef ErrorsContext* Ctx;
+typedef struct ErrorsContext* Ctx;
 
 #ifdef __cplusplus
 [[noreturn]]
@@ -69,7 +69,7 @@ static size_t get_token_linenum(Ctx ctx, size_t total_linenum) {
 
 void raise_error_at_token(Ctx ctx, size_t info_at) {
     THROW_ABORT_IF(info_at >= vec_size(ctx->errors->token_infos));
-    TokenInfo* token_info = &ctx->errors->token_infos[info_at];
+    struct TokenInfo* token_info = &ctx->errors->token_infos[info_at];
     size_t tok_linenum = get_token_linenum(ctx, token_info->total_linenum);
 
     free_fileio(ctx->fileio);

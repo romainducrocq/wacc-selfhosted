@@ -17,7 +17,7 @@
 PairKeyValue(TIdentifier, Structure);
 
 typedef struct SemanticContext {
-    ErrorsContext* errors;
+    struct ErrorsContext* errors;
     FrontEndContext* frontend;
     IdentifierContext* identifiers;
     // Type checking
@@ -73,6 +73,7 @@ static bool is_same_type(Type* type_1, Type* type_2) {
                 return is_same_struct(&type_1->get._Structure, &type_2->get._Structure);
             case AST_FunType_t:
                 THROW_ABORT;
+                // fall through
             default:
                 return true;
         }
@@ -3585,7 +3586,7 @@ static error_t resolve_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t analyze_semantic(
-    CProgram* node, ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers) {
+    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers) {
     SemanticContext ctx;
     {
         ctx.errors = errors;

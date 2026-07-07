@@ -160,6 +160,7 @@ REGISTER_KIND register_mask_kind(AsmReg* node) {
         case AST_AsmXMM14_t:
         case AST_AsmXMM15_t:
             THROW_ABORT;
+            // fall through
         default:
             THROW_ABORT;
     }
@@ -226,6 +227,7 @@ size_t register_mask_bit(REGISTER_KIND reg_kind) {
         case REG_Xmm14:
         case REG_Xmm15:
             THROW_ABORT;
+            // fall through
         default:
             THROW_ABORT;
     }

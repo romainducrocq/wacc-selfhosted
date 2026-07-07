@@ -25,7 +25,7 @@ typedef struct Declarator {
 } Declarator;
 
 typedef struct ParserContext {
-    ErrorsContext* errors;
+    struct ErrorsContext* errors;
     IdentifierContext* identifiers;
     // Parser
     size_t pop_idx;
@@ -2425,7 +2425,7 @@ static error_t parse_program(Ctx ctx, unique_ptr_t(CProgram) * c_ast) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t parse_tokens(
-    vector_t(Token) * tokens, ErrorsContext* errors, IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast) {
+    vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast) {
     ParserContext ctx;
     {
         ctx.errors = errors;

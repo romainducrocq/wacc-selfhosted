@@ -33,7 +33,7 @@
 #include "optimization/reg_alloc.h"
 
 typedef struct MainContext {
-    ErrorsContext* errors;
+    struct ErrorsContext* errors;
 #ifndef __NDEBUG__
     BackEndContext* backend;
     FrontEndContext* frontend;
@@ -128,7 +128,7 @@ static void set_filename_ext(Ctx ctx, char* ext) {
     THROW_ABORT;
 }
 
-static error_t compile(Ctx ctx, ErrorsContext* errors, FileIoContext* fileio) {
+static error_t compile(Ctx ctx, struct ErrorsContext* errors, FileIoContext* fileio) {
     IdentifierContext identifiers;
     FrontEndContext frontend;
     BackEndContext backend;
@@ -364,7 +364,7 @@ static error_t arg_parse(Ctx ctx, int argc, char** argv) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t main(int argc, char** argv) {
-    ErrorsContext errors;
+    struct ErrorsContext errors;
     FileIoContext fileio;
     MainContext ctx;
     {

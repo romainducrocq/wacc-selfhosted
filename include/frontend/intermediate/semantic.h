@@ -4,7 +4,7 @@
 #include "util/throw.h"
 
 typedef struct CProgram CProgram;
-typedef struct ErrorsContext ErrorsContext;
+struct ErrorsContext;
 typedef struct FrontEndContext FrontEndContext;
 typedef struct IdentifierContext IdentifierContext;
 
@@ -22,7 +22,7 @@ typedef struct IdentifierContext IdentifierContext;
 extern "C" {
 #endif
 error_t analyze_semantic(
-    CProgram* node, ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
+    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
 #ifdef __cplusplus
 }
 #endif

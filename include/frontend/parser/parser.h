@@ -6,7 +6,7 @@
 
 typedef struct Token Token;
 typedef struct CProgram CProgram;
-typedef struct ErrorsContext ErrorsContext;
+struct ErrorsContext;
 typedef struct IdentifierContext IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,7 +17,7 @@ typedef struct IdentifierContext IdentifierContext;
 extern "C" {
 #endif
 error_t parse_tokens(
-    vector_t(Token) * tokens, ErrorsContext* errors, IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast);
+    vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast);
 #ifdef __cplusplus
 }
 #endif

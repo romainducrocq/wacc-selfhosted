@@ -12,7 +12,7 @@
 ElementKey(hash_t);
 
 typedef struct LexerContext {
-    ErrorsContext* errors;
+    struct ErrorsContext* errors;
     FileIoContext* fileio;
     IdentifierContext* identifiers;
     // Lexer
@@ -688,7 +688,7 @@ static string_t get_match(Ctx ctx, size_t match_at, size_t match_size) {
 static error_t tokenize_include(Ctx ctx, size_t linenum);
 
 static size_t push_token_info(Ctx ctx) {
-    TokenInfo token_info = {(int)ctx->match_at, (int)ctx->match_size, ctx->total_linenum};
+    struct TokenInfo token_info = {(int)ctx->match_at, (int)ctx->match_size, ctx->total_linenum};
     vec_push_back(ctx->errors->token_infos, token_info);
     return vec_size(ctx->errors->token_infos) - 1;
 }
@@ -812,14 +812,14 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
     str_copy(vec_back(ctx->errors->fopen_lines).filename, fopen_name);
     TRY(open_fread(ctx->fileio, filename));
     {
-        FileOpenLine fopen_line = {1, ctx->total_linenum + 1, str_new(NULL)};
+        struct FileOpenLine fopen_line = {1, ctx->total_linenum + 1, str_new(NULL)};
         str_move(filename, fopen_line.filename);
         vec_push_back(ctx->errors->fopen_lines, fopen_line);
     }
     TRY(tokenize_file(ctx));
     TRY(close_fread(ctx->fileio, linenum));
     {
-        FileOpenLine fopen_line = {linenum + 1, ctx->total_linenum + 1, str_new(NULL)};
+        struct FileOpenLine fopen_line = {linenum + 1, ctx->total_linenum + 1, str_new(NULL)};
         str_move(fopen_name, fopen_line.filename);
         vec_push_back(ctx->errors->fopen_lines, fopen_line);
     }
@@ -837,7 +837,7 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
-    ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens) {
+    struct ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens) {
     LexerContext ctx;
     {
         ctx.errors = errors;
@@ -856,7 +856,7 @@ error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(ch
     CATCH_ENTER;
     TRY(open_fread(ctx.fileio, filename));
     {
-        FileOpenLine fopen_line = {1, 1, str_new(NULL)};
+        struct FileOpenLine fopen_line = {1, 1, str_new(NULL)};
         str_copy(filename, fopen_line.filename);
         vec_push_back(ctx.errors->fopen_lines, fopen_line);
     }

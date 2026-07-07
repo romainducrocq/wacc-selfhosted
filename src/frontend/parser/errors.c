@@ -296,6 +296,7 @@ char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop) {
                     THROW_ABORT;
             }
         }
+        // fall through
         case AST_CPostfix_t: {
             switch (node->type) {
                 case AST_CAdd_t:
@@ -306,6 +307,7 @@ char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop) {
                     THROW_ABORT;
             }
         }
+        // fall through
         default:
             THROW_ABORT;
     }

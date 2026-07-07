@@ -6,7 +6,7 @@
 #include "util/c_std.h"
 #include "util/throw.h"
 
-typedef struct ErrorsContext ErrorsContext;
+struct ErrorsContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@ typedef struct FileRead {
 } FileRead;
 
 typedef struct FileIoContext {
-    ErrorsContext* errors;
+    struct ErrorsContext* errors;
     // File io
     FILE* fd_write;
     string_t write_buf;

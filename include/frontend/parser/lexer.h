@@ -8,7 +8,7 @@
 
 #include "parser/tokens.h" // frontend
 
-typedef struct ErrorsContext ErrorsContext;
+struct ErrorsContext;
 typedef struct FileIoContext FileIoContext;
 typedef struct IdentifierContext IdentifierContext;
 
@@ -26,7 +26,7 @@ typedef struct Token {
 extern "C" {
 #endif
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
-    ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens);
+    struct ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens);
 #ifdef __cplusplus
 }
 #endif

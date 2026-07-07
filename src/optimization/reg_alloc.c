@@ -524,6 +524,7 @@ static void infer_init_updated_name_edges(Ctx ctx, TIdentifier name, size_t inst
             }
             case AST_AsmIndexed_t:
                 THROW_ABORT;
+                // fall through
             default: {
                 is_mov = false;
                 break;
@@ -980,6 +981,7 @@ static REGISTER_KIND get_op_reg_kind(Ctx ctx, AsmOperand* node) {
             return REG_Sp;
         case AST_AsmIndexed_t:
             THROW_ABORT;
+            // fall through
         default:
             return REG_Sp;
     }

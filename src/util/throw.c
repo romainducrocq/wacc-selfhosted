@@ -21,10 +21,14 @@ static char esc_reset[5] = { ESC, '[', '0', 'm', 0 };
 static char esc_bold[5] = { ESC, '[', '1', 'm', 0 };
 static char esc_red[8] = { ESC, '[', '0', ';', '3', '1', 'm', 0 };
 
-void panic_sigabrt(char* msg, char* func, int line, char* file) {
+void panic_sigabrt(char* msg, int line, char* file) {
     fflush(stdout);
-    fprintf(stderr, "%s%s:%i:%s\n", esc_bold, file, line, esc_reset);
-    fprintf(stderr, "%sinternal error:%s %s (%s)\n", esc_red, esc_reset, func, msg);
+    {
+        string_t strto_line = str_to_string(line);
+        fprintf(stderr, "%s%s:%s:%s\n", esc_bold, file, strto_line, esc_reset);
+        fprintf(stderr, "%sinternal error:%s %s\n", esc_red, esc_reset, msg);
+        str_delete(strto_line);
+    }
     abort();
 }
 
@@ -116,14 +120,16 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
         if (pad_linenum < 0) {
             pad_linenum = 0;
         }
+        string_t strto_pos = str_to_string(tok_pos);
 
-        fprintf(stderr, "%s%s:%zu:%i:%s\n", esc_bold, filename, tok_linenum, tok_pos, esc_reset);
+        fprintf(stderr, "%s%s:%s:%s:%s\n", esc_bold, filename, strto_linenum, strto_pos, esc_reset);
         fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
         fprintf(stderr, "at line %s: %s%*sv%s%s\n", strto_linenum, esc_red, pad_tok, "", tok_overline, esc_reset);
         fprintf(stderr, "        %*s| %s%s%s\n", pad_linenum, "", esc_bold, line, esc_reset);
 
         str_delete(tok_overline);
         str_delete(strto_linenum);
+        str_delete(strto_pos);
     }
     str_delete(line);
 }

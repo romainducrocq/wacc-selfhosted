@@ -1,0 +1,22 @@
+diff --git a/src/util/throw.c b/src/util/throw.c
+index f76b093..5478dc1 100644
+--- a/src/util/throw.c
++++ b/src/util/throw.c
+@@ -25,8 +25,9 @@ void panic_sigabrt(char* msg, int line, char* file) {
+     fflush(stdout);
+     {
+         string_t strto_line = str_to_string(line);
+-        fprintf(stderr, "%s%s:%s:%s\n", esc_bold, file, strto_line, esc_reset);
+-        fprintf(stderr, "%sinternal error:%s %s\n", esc_red, esc_reset, msg);
++        fprintf(stderr, "%*s%s:%s:", 0, esc_bold, file, strto_line);
++        fprintf(stderr, "%*s\n%sinternal error:%s ", 0, esc_reset, esc_red, esc_reset);
++        fprintf(stderr, "%*s\n%s%s", 0, msg, "", "");
+         str_delete(strto_line);
+     }
+     abort();
+diff --git a/wheelcc b/wheelcc
+--- a/wheelcc
++++ b/wheelcc
+@@ -1 +1 @@
+-Subproject commit 11a00037fde0c42822a85296b2052add17af56d9
++Subproject commit 11a00037fde0c42822a85296b2052add17af56d9-dirty

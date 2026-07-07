@@ -13,7 +13,7 @@ ElementKey(hash_t);
 
 typedef struct LexerContext {
     struct ErrorsContext* errors;
-    FileIoContext* fileio;
+    struct FileIoContext* fileio;
     IdentifierContext* identifiers;
     // Lexer
     char* line;
@@ -837,7 +837,7 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
-    struct ErrorsContext* errors, FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens) {
+    struct ErrorsContext* errors, struct FileIoContext* fileio, IdentifierContext* identifiers, vector_t(Token) * tokens) {
     LexerContext ctx;
     {
         ctx.errors = errors;

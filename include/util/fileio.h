@@ -1,48 +1,41 @@
 #ifndef _UTIL_FILEIO_H
 #define _UTIL_FILEIO_H
 
-#include <stdio.h>
-
 #include "util/c_std.h"
 #include "util/throw.h"
 
+struct FILE; // TODO move to std_c.h
 struct ErrorsContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // File io
 
-typedef struct FileRead {
-    size_t len;
+struct FileRead {
+    unsigned long len;
     char* buf;
-    FILE* fd;
+    struct FILE* fd;
     string_t filename;
-} FileRead;
+};
 
-typedef struct FileIoContext {
+struct FileIoContext {
     struct ErrorsContext* errors;
     // File io
-    FILE* fd_write;
+    struct FILE* fd_write;
     string_t write_buf;
     string_t filename;
-    vector_t(FileRead) file_reads;
-} FileIoContext;
+    vector_t(struct FileRead) file_reads;
+};
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 bool find_file(char* filename);
-char* get_filename(FileIoContext* ctx);
-void set_filename(FileIoContext* ctx, string_t filename);
-error_t open_fread(FileIoContext* ctx, string_t filename);
-error_t open_fwrite(FileIoContext* ctx, string_t filename);
-bool read_line(FileIoContext* ctx, char** line, size_t* line_size);
-void write_buffer(FileIoContext* ctx, char* buf);
-error_t close_fread(FileIoContext* ctx, size_t linenum);
-void close_fwrite(FileIoContext* ctx);
-void free_fileio(FileIoContext* ctx);
-#ifdef __cplusplus
-}
-#endif
+char* get_filename(struct FileIoContext* ctx);
+void set_filename(struct FileIoContext* ctx, string_t filename);
+error_t open_fread(struct FileIoContext* ctx, string_t filename);
+error_t open_fwrite(struct FileIoContext* ctx, string_t filename);
+bool read_line(struct FileIoContext* ctx, char** line, unsigned long* line_size);
+void write_buffer(struct FileIoContext* ctx, char* buf);
+error_t close_fread(struct FileIoContext* ctx, unsigned long linenum);
+void close_fwrite(struct FileIoContext* ctx);
+void free_fileio(struct FileIoContext* ctx);
 
 #endif

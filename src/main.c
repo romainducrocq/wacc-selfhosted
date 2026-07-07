@@ -128,7 +128,7 @@ static void set_filename_ext(Ctx ctx, char* ext) {
     THROW_ABORT;
 }
 
-static error_t compile(Ctx ctx, struct ErrorsContext* errors, FileIoContext* fileio) {
+static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoContext* fileio) {
     IdentifierContext identifiers;
     FrontEndContext frontend;
     BackEndContext backend;
@@ -365,7 +365,7 @@ static error_t arg_parse(Ctx ctx, int argc, char** argv) {
 
 error_t main(int argc, char** argv) {
     struct ErrorsContext errors;
-    FileIoContext fileio;
+    struct FileIoContext fileio;
     MainContext ctx;
     {
         errors.errors = &errors;

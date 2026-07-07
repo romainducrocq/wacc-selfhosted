@@ -19,7 +19,7 @@
 
 // File io
 
-typedef FileIoContext* Ctx;
+typedef struct FileIoContext* Ctx;
 
 #define WRITE_BUF_SIZE 4096
 
@@ -60,7 +60,7 @@ error_t open_fread(Ctx ctx, string_t filename) {
         }
     }
 
-    FileRead file_read = {0, NULL, NULL, str_new(NULL)};
+    struct FileRead file_read = {0, NULL, NULL, str_new(NULL)};
     file_read.fd = fopen(filename, "rb");
     if (!file_read.fd || str_size(filename) >= PATH_MAX) {
         THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, filename));
@@ -149,7 +149,7 @@ void close_fwrite(Ctx ctx) {
 
 void free_fileio(Ctx ctx) {
     for (size_t i = 0; i < vec_size(ctx->file_reads); ++i) {
-        FileRead* file_read = &ctx->file_reads[i];
+        struct FileRead* file_read = &ctx->file_reads[i];
         if (file_read->buf != NULL) {
             free(file_read->buf);
             file_read->buf = NULL;

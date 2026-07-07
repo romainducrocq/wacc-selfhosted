@@ -18,6 +18,9 @@ if [ ${?} -ne 0 ]; then exit 1; fi
 cp ../pkgname.cfg bin/
 if [ ${?} -ne 0 ]; then exit 1; fi
 
+sed -i "s|IS_PREPROC=0|IS_PREPROC=1|g" bin/driver.sh
+if [ ${?} -ne 0 ]; then exit 1; fi
+
 cd bin/
 ./make.sh
 if [ ${?} -ne 0 ]; then exit 1; fi

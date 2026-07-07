@@ -39,7 +39,8 @@
     }                       \
     while (0)
 
-#define THROW_PANIC(...) PANIC_FUNC(__VA_ARGS__, __func__, __LINE__, __FILE__)
+// TODO __func__
+#define THROW_PANIC(...) PANIC_FUNC(__VA_ARGS__, "", __LINE__, __FILE__)
 #define SET_ERROR_MSG(...) snprintf(ERROR_MSG_BUF, sizeof(char) * ERROR_MSG_SIZE, __VA_ARGS__)
 #define THROW_ERROR(X, Y, ...)                                  \
     do {                                                        \

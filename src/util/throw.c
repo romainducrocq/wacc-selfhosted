@@ -1,31 +1,21 @@
-#ifndef __cplusplus
-#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 10)
-#define _POSIX_C_SOURCE 200809L
-#else
-#define _GNU_SOURCE
-#endif
-#endif
-#include <stdio.h>
-#include <stdlib.h>
-#ifndef __cplusplus
-#include <stdnoreturn.h>
-#endif
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/fileio.h"
 #include "util/throw.h"
 
+// TODO remove
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
+extern int fprintf(struct FILE* stream, char* format, ...);
+#pragma GCC diagnostic pop
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Throw
 
-typedef struct ErrorsContext* Ctx;
+#define Ctx struct ErrorsContext*
 
-#ifdef __cplusplus
-[[noreturn]]
-#else
-_Noreturn
-#endif
 void panic_sigabrt(char* msg, char* func, int line, char* file) {
     fflush(stdout);
     fprintf(stderr,
@@ -37,7 +27,7 @@ void panic_sigabrt(char* msg, char* func, int line, char* file) {
 
 void raise_init_error(Ctx ctx) {
     if (ctx->is_stdout) {
-        printf("\n");
+        printf("%s", "\n");
         fflush(stdout);
     }
     fprintf(stderr, "\033[0;31merror:\033[0m %s\n", ctx->msg);
@@ -47,7 +37,7 @@ void raise_base_error(Ctx ctx) {
     free_fileio(ctx->fileio);
     char* filename = get_filename(ctx->fileio);
     if (ctx->is_stdout) {
-        printf("\n");
+        printf("%s", "\n");
         fflush(stdout);
     }
     fprintf(stderr,
@@ -56,8 +46,8 @@ void raise_base_error(Ctx ctx) {
         filename, ctx->msg);
 }
 
-static size_t get_token_linenum(Ctx ctx, size_t total_linenum) {
-    for (size_t i = 0; i < vec_size(ctx->fopen_lines) - 1; ++i) {
+static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {
+    for (unsigned long i = 0; i < vec_size(ctx->fopen_lines) - 1; ++i) {
         if (total_linenum < ctx->fopen_lines[i + 1].total_linenum) {
             set_filename(ctx->fileio, ctx->fopen_lines[i].filename);
             return total_linenum - ctx->fopen_lines[i].total_linenum + ctx->fopen_lines[i].linenum;
@@ -67,23 +57,23 @@ static size_t get_token_linenum(Ctx ctx, size_t total_linenum) {
     return total_linenum - vec_back(ctx->fopen_lines).total_linenum + vec_back(ctx->fopen_lines).linenum;
 }
 
-void raise_error_at_token(Ctx ctx, size_t info_at) {
+void raise_error_at_token(Ctx ctx, unsigned long info_at) {
     THROW_ABORT_IF(info_at >= vec_size(ctx->errors->token_infos));
     struct TokenInfo* token_info = &ctx->errors->token_infos[info_at];
-    size_t tok_linenum = get_token_linenum(ctx, token_info->total_linenum);
+    unsigned long tok_linenum = get_token_linenum(ctx, token_info->total_linenum);
 
     free_fileio(ctx->fileio);
     char* filename = get_filename(ctx->fileio);
     string_t line = str_new(NULL);
     {
-        size_t len = 0;
+        unsigned long len = 0;
         char* buf = NULL;
-        FILE* fd = fopen(filename, "rb");
+        struct FILE* fd = fopen(filename, "rb");
         if (!fd) {
             raise_base_error(ctx);
             return;
         }
-        for (size_t i = 0; i < tok_linenum; ++i) {
+        for (unsigned long i = 0; i < tok_linenum; ++i) {
             if (getline(&buf, &len, fd) == -1) {
                 free(buf);
                 fclose(fd);
@@ -103,7 +93,7 @@ void raise_error_at_token(Ctx ctx, size_t info_at) {
         }
     }
     if (ctx->is_stdout) {
-        printf("\n");
+        printf("%s", "\n");
         fflush(stdout);
     }
     {
@@ -115,7 +105,7 @@ void raise_error_at_token(Ctx ctx, size_t info_at) {
             tok_pos += token_info->tok_pos;
             if (token_info->tok_len > 1) {
                 str_resize(tok_overline, token_info->tok_len - 1);
-                for (size_t i = 0; i < str_size(tok_overline); ++i) {
+                for (unsigned long i = 0; i < str_size(tok_overline); ++i) {
                     tok_overline[i] = '~';
                 }
             }

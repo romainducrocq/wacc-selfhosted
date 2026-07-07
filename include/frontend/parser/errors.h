@@ -1,8 +1,6 @@
 #ifndef _FRONT_PARSER_ERRORS_H
 #define _FRONT_PARSER_ERRORS_H
 
-#include <stdio.h>
-
 #include "util/c_std.h"
 
 #include "ast_t.h" // ast

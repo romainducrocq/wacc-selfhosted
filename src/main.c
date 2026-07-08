@@ -5,9 +5,6 @@
 #include "util/c_std.h"
 #include "util/fileio.h"
 #include "util/throw.h"
-#ifndef __NDEBUG__
-#include "util/pprint.h"
-#endif
 
 #include "ast/ast.h"
 #include "ast/back_ast.h"
@@ -34,11 +31,6 @@
 
 typedef struct MainContext {
     struct ErrorsContext* errors;
-#ifndef __NDEBUG__
-    BackEndContext* backend;
-    FrontEndContext* frontend;
-    IdentifierContext* identifiers;
-#endif
     // Main
     bool is_verbose;
     uint8_t debug_code;
@@ -61,62 +53,6 @@ static void verbose(Ctx ctx, char* msg) {
     }
 }
 
-#ifndef __NDEBUG__
-static void debug_toks(Ctx ctx, vector_t(Token) tokens) {
-    if (ctx->is_verbose) {
-        pprint_toks(ctx->identifiers, tokens);
-    }
-}
-
-static void debug_c_ast(Ctx ctx, CProgram* node) {
-    if (ctx->is_verbose) {
-        pprint_c_ast(ctx->identifiers, node);
-    }
-}
-
-static void debug_tac_ast(Ctx ctx, TacProgram* node) {
-    if (ctx->is_verbose) {
-        pprint_tac_ast(ctx->identifiers, node);
-    }
-}
-
-static void debug_asm_ast(Ctx ctx, AsmProgram* node) {
-    if (ctx->is_verbose) {
-        pprint_asm_ast(ctx->identifiers, node);
-    }
-}
-
-static void debug_addressed_set(Ctx ctx) {
-    if (ctx->is_verbose) {
-        pprint_addressed_set(ctx->identifiers, ctx->frontend);
-    }
-}
-
-static void debug_string_const_table(Ctx ctx) {
-    if (ctx->is_verbose) {
-        pprint_string_const_table(ctx->identifiers, ctx->frontend);
-    }
-}
-
-static void debug_struct_typedef_table(Ctx ctx) {
-    if (ctx->is_verbose) {
-        pprint_struct_typedef_table(ctx->identifiers, ctx->frontend);
-    }
-}
-
-static void debug_symbol_table(Ctx ctx) {
-    if (ctx->is_verbose) {
-        pprint_symbol_table(ctx->identifiers, ctx->frontend);
-    }
-}
-
-static void debug_backend_symbol_table(Ctx ctx) {
-    if (ctx->is_verbose) {
-        pprint_backend_symbol_table(ctx->identifiers, ctx->backend);
-    }
-}
-#endif
-
 static void set_filename_ext(Ctx ctx, char* ext) {
     for (size_t i = str_size(ctx->filename); i-- > 0;) {
         if (ctx->filename[i] == '.') {
@@ -137,17 +73,7 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     unique_ptr_t(TacProgram) tac_ast = uptr_new();
     unique_ptr_t(AsmProgram) asm_ast = uptr_new();
     {
-#ifndef __NDEBUG__
-        ctx->identifiers = &identifiers;
-        ctx->frontend = &frontend;
-        ctx->backend = &backend;
-#endif
-
-        if (ctx->debug_code > 0
-#ifdef __NDEBUG__
-            && ctx->debug_code <= 127
-#endif
-        ) {
+        if (ctx->debug_code > 0 && ctx->debug_code <= 127) {
             ctx->is_verbose = true;
             errors->is_stdout = true;
         }
@@ -201,35 +127,23 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     verbose(ctx, "-- Lexing ... ");
     TRY(lex_c_code(ctx->filename, &ctx->includedirs, &ctx->stdlibdirs, errors, fileio, &identifiers, &tokens));
     verbose(ctx, "OK\n");
-#ifndef __NDEBUG__
     if (ctx->debug_code == 255) {
-        debug_toks(ctx, tokens);
         EARLY_EXIT;
     }
-#endif
 
     verbose(ctx, "-- Parsing ... ");
     TRY(parse_tokens(&tokens, errors, &identifiers, &c_ast));
     verbose(ctx, "OK\n");
-#ifndef __NDEBUG__
     if (ctx->debug_code == 254) {
-        debug_c_ast(ctx, c_ast);
         EARLY_EXIT;
     }
-#endif
 
     verbose(ctx, "-- Semantic analysis ... ");
     TRY(analyze_semantic(c_ast, errors, &frontend, &identifiers));
     verbose(ctx, "OK\n");
-#ifndef __NDEBUG__
     if (ctx->debug_code == 253) {
-        debug_c_ast(ctx, c_ast);
-        debug_string_const_table(ctx);
-        debug_struct_typedef_table(ctx);
-        debug_symbol_table(ctx);
         EARLY_EXIT;
     }
-#endif
 
     verbose(ctx, "-- TAC representation ... ");
     tac_ast = represent_three_address_code(&c_ast, &frontend, &identifiers);
@@ -238,15 +152,9 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
         optimize_three_address_code(tac_ast, &frontend, ctx->optim_1_mask);
     }
     verbose(ctx, "OK\n");
-#ifndef __NDEBUG__
     if (ctx->debug_code == 252) {
-        debug_tac_ast(ctx, tac_ast);
-        debug_string_const_table(ctx);
-        debug_struct_typedef_table(ctx);
-        debug_symbol_table(ctx);
         EARLY_EXIT;
     }
-#endif
 
     verbose(ctx, "-- Assembly generation ... ");
     asm_ast = generate_assembly(&tac_ast, &frontend, &identifiers);
@@ -257,17 +165,9 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     }
     fix_stack(asm_ast, &backend);
     verbose(ctx, "OK\n");
-#ifndef __NDEBUG__
     if (ctx->debug_code == 251) {
-        debug_asm_ast(ctx, asm_ast);
-        debug_addressed_set(ctx);
-        debug_string_const_table(ctx);
-        debug_struct_typedef_table(ctx);
-        debug_symbol_table(ctx);
-        debug_backend_symbol_table(ctx);
         EARLY_EXIT;
     }
-#endif
 
     verbose(ctx, "-- Code emission ... ");
     set_filename_ext(ctx, "s");

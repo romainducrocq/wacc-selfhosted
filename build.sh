@@ -58,10 +58,10 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/registers.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/stack_fix.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/symt_cvt.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/emitter/gas_code.c"
+
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/fileio.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/pprint.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/str2t.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/throw.c"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/str2t.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/throw.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/lib/sds/sds.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/lib/stb_ds/stb_ds.wheelcc"
 

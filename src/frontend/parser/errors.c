@@ -507,11 +507,7 @@ char* get_arg_msg(MESSAGE_ARG msg) {
         case MSG_print_help:
             RET_ERRNO "Usage: %s [--help] Debug OptimL1 OptimL2 FILE StdlibDir SourceDir [IncludeDir...]\n"
                       "    [--help]:         print help and exit\n"
-                      "    Debug:            print debug info (0..1"
-#ifndef __NDEBUG__
-                      "|251..255"
-#endif
-                      ")\n"
+                      "    Debug:            print debug info (0..1|251..255)\n"
                       "    OptimL1:          optimization level 1 mask (0..15)\n"
                       "    OptimL2:          optimization level 2 enum (0..2)\n"
                       "    FILE:             source file to compile\n"

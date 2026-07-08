@@ -2425,8 +2425,8 @@ static error_t parse_program(Ctx ctx, unique_ptr_t(CProgram) * c_ast) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-error_t parse_tokens(
-    vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast) {
+error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers,
+    unique_ptr_t(CProgram) * c_ast) {
     ParserContext ctx;
     {
         ctx.errors = errors;

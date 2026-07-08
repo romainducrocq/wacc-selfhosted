@@ -3,6 +3,7 @@
 #endif
 
 #include "c_lib.h"
+
 #include "util/c_std.h"
 #include "util/fileio.h"
 #include "util/throw.h"
@@ -100,7 +101,9 @@ bool read_line(Ctx ctx, char** line, unsigned long* line_size) {
     }
 }
 
-static void write_chunk(Ctx ctx, char* buf, unsigned long buf_size) { fwrite(buf, sizeof(char), buf_size, ctx->fd_write); }
+static void write_chunk(Ctx ctx, char* buf, unsigned long buf_size) {
+    fwrite(buf, sizeof(char), buf_size, ctx->fd_write);
+}
 
 void write_buffer(Ctx ctx, char* buf) {
     str_append(ctx->write_buf, buf);
@@ -121,12 +124,14 @@ error_t close_fread(Ctx ctx, unsigned long linenum) {
         THROW_ABORT_IF(vec_back(ctx->file_reads).buf || vec_back(ctx->file_reads).len != 0);
         vec_back(ctx->file_reads).fd = fopen(vec_back(ctx->file_reads).filename, "rb");
         if (!vec_back(ctx->file_reads).fd) {
-            goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); // TODO errors
+            goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); // TODO
+                            // errors
         }
         for (unsigned long i = 0; i < linenum; ++i) {
             if (getline(&vec_back(ctx->file_reads).buf, &vec_back(ctx->file_reads).len, vec_back(ctx->file_reads).fd)
                 == -1) {
-                goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); // TODO errors
+                goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); //
+                                // TODO errors
             }
         }
     }

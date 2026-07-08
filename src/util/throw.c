@@ -11,9 +11,9 @@
 #define Ctx struct ErrorsContext*
 
 #define ESC 27
-static char esc_reset[5] = { ESC, '[', '0', 'm', 0 };
-static char esc_bold[5] = { ESC, '[', '1', 'm', 0 };
-static char esc_red[8] = { ESC, '[', '0', ';', '3', '1', 'm', 0 };
+static char esc_reset[5] = {ESC, '[', '0', 'm', 0};
+static char esc_bold[5] = {ESC, '[', '1', 'm', 0};
+static char esc_red[8] = {ESC, '[', '0', ';', '3', '1', 'm', 0};
 
 void panic_sigabrt(char* msg, int line, char* file) {
     fflush(stdout);
@@ -118,7 +118,8 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
 
         fprintf(stderr, "%*s%*s:%*s:%*s:%*s\n", 0, esc_bold, 0, filename, 0, strto_linenum, 0, strto_pos, 0, esc_reset);
         fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
-        fprintf(stderr, "at line %*s: %*s%*sv%*s%*s\n", 0, strto_linenum, 0, esc_red, pad_tok, "", 0, tok_overline, 0, esc_reset);
+        fprintf(stderr, "at line %*s: %*s%*sv%*s%*s\n", 0, strto_linenum, 0, esc_red, pad_tok, "", 0, tok_overline, 0,
+            esc_reset);
         fprintf(stderr, "        %*s| %*s%*s%*s\n%*s", pad_linenum, "", 0, esc_bold, 0, line, 0, esc_reset, 0, "");
 
         str_delete(tok_overline);

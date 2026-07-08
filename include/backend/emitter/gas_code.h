@@ -15,8 +15,8 @@ typedef struct IdentifierContext IdentifierContext;
 #ifdef __cplusplus
 extern "C" {
 #endif
-void emit_gas_code(
-    unique_ptr_t(AsmProgram) * asm_ast, BackEndContext* backend, struct FileIoContext* fileio, IdentifierContext* identifiers);
+void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, BackEndContext* backend, struct FileIoContext* fileio,
+    IdentifierContext* identifiers);
 #ifdef __cplusplus
 }
 #endif

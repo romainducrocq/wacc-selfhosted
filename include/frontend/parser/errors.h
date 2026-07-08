@@ -26,40 +26,34 @@ typedef struct IdentifierContext IdentifierContext;
 
 // Errors
 
-typedef enum MESSAGE_FATAL {
-    MSG_unhandled_fatal_error = 0,
-    MSG_unsupported_os,
-    MSG_unsupported_arch,
-    MSG_unsupported_compiler,
-    MSG_unsupported_cc_ver
-} MESSAGE_FATAL;
+#define MESSAGE_FATAL int
+#define MSG_unhandled_fatal_error 0
+#define MSG_unsupported_os 1
+#define MSG_unsupported_arch 2
+#define MSG_unsupported_compiler 3
+#define MSG_unsupported_cc_ver 4
 
-typedef enum MESSAGE_ARG {
-    MSG_unhandled_arg_error = 100,
-    MSG_print_help,
-    MSG_no_debug_arg,
-    MSG_invalid_debug_arg,
-    MSG_no_optim_1_arg,
-    MSG_invalid_optim_1_arg,
-    MSG_no_optim_2_arg,
-    MSG_invalid_optim_2_arg,
-    MSG_no_input_files_arg,
-    MSG_no_stdlib_dir_arg,
-    MSG_no_include_dir_arg
-} MESSAGE_ARG;
+#define MESSAGE_ARG int
+#define MSG_unhandled_arg_error 100
+#define MSG_print_help 101
+#define MSG_no_debug_arg 102
+#define MSG_invalid_debug_arg 103
+#define MSG_no_optim_1_arg 104
+#define MSG_invalid_optim_1_arg 105
+#define MSG_no_optim_2_arg 106
+#define MSG_invalid_optim_2_arg 107
+#define MSG_no_input_files_arg 108
+#define MSG_no_stdlib_dir_arg 109
+#define MSG_no_include_dir_arg 110
 
-typedef enum MESSAGE_UTIL {
-    MSG_unhandled_util_error = 200,
-    MSG_failed_fread,
-    MSG_failed_fwrite,
-    MSG_failed_strtoi,
-    MSG_failed_strtou,
-    MSG_failed_strtod
-} MESSAGE_UTIL;
+#define MESSAGE_UTIL int
+#define MSG_unhandled_util_error 200
+#define MSG_failed_fread 201
+#define MSG_failed_fwrite 202
+#define MSG_failed_strtoi 203
+#define MSG_failed_strtou 204
+#define MSG_failed_strtod 205
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
 char* get_tok_fmt(IdentifierContext* ctx, Token* token);
 char* get_const_fmt(CConst* node);
@@ -74,9 +68,6 @@ char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt);
 char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt);
 char* get_struct_fmt(IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt);
 char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt);
-#ifdef __cplusplus
-}
-#endif
 #define str_get_fmt(T, ...) get_##T##_fmt(ctx->identifiers, __VA_ARGS__)
 #define str_fmt_tok(X) str_get_fmt(tok, X)
 #define str_fmt_name(X, Y) str_get_fmt(name, X, Y)
@@ -87,18 +78,12 @@ char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt);
 #define str_fmt_struct(X, Y) str_get_fmt(struct, X, Y)
 #define str_fmt_type(X, Y) str_get_fmt(type, X, Y)
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 char* get_fatal_msg(MESSAGE_FATAL msg);
 char* get_arg_msg(MESSAGE_ARG msg);
 char* get_util_msg(MESSAGE_UTIL msg);
 char* get_lexer_msg(MESSAGE_LEXER msg);
 char* get_parser_msg(MESSAGE_PARSER msg);
 char* get_semantic_msg(MESSAGE_SEMANTIC msg);
-#ifdef __cplusplus
-}
-#endif
 #define GET_MESSAGE_0(E, X) get_##E##_msg(X), (int)X
 #define GET_ARG_MSG_0(X) GET_MESSAGE_0(arg, X)
 #define GET_PARSER_MSG_0(X) GET_MESSAGE_0(parser, X)

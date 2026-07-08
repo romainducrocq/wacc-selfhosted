@@ -9,6 +9,13 @@
 #define false 0
 #define true 1
 
+#define char_t signed char
+#define int_t int
+#define long_t long
+#define uchar_t unsigned char
+#define uint_t unsigned int
+#define ulong_t unsigned long
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // C std

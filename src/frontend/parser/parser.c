@@ -143,8 +143,8 @@ static error_t parse_string_literal(Ctx ctx, shared_ptr_t(CStringLiteral) * lite
 }
 
 // <int> ::= ? An int token ? => [0-9]+
-static shared_ptr_t(CConst) parse_int_const(intmax_t intmax) {
-    TInt value = intmax_to_int32(intmax);
+static shared_ptr_t(CConst) parse_int_const(long intmax) {
+    TInt value = (int_t)intmax;
     return make_CConstInt(value);
 }
 
@@ -155,8 +155,8 @@ static shared_ptr_t(CConst) parse_char_const(Ctx ctx) {
 }
 
 // <long> ::= ? An int or long token ? => [0-9]+[lL]
-static shared_ptr_t(CConst) parse_long_const(intmax_t intmax) {
-    TLong value = intmax_to_int64(intmax);
+static shared_ptr_t(CConst) parse_long_const(long intmax) {
+    TLong value = (long_t)intmax;
     return make_CConstLong(value);
 }
 
@@ -173,14 +173,14 @@ static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 }
 
 // <uint> ::= ? An unsigned int token ? => [0-9]+[uU]
-static shared_ptr_t(CConst) parse_uint_const(uintmax_t uintmax) {
-    TUInt value = uintmax_to_uint32(uintmax);
+static shared_ptr_t(CConst) parse_uint_const(unsigned long uintmax) {
+    TUInt value = (uint_t)uintmax;
     return make_CConstUInt(value);
 }
 
 // <ulong> ::= ? An unsigned int or unsigned long token ? => [0-9]+([lL][uU]|[uU][lL])
-static shared_ptr_t(CConst) parse_ulong_const(uintmax_t uintmax) {
-    TULong value = uintmax_to_uint64(uintmax);
+static shared_ptr_t(CConst) parse_ulong_const(unsigned long uintmax) {
+    TULong value = (ulong_t)uintmax;
     return make_CConstULong(value);
 }
 
@@ -188,7 +188,7 @@ static shared_ptr_t(CConst) parse_ulong_const(uintmax_t uintmax) {
 // (signed) const = ConstInt(int) | ConstLong(long) | ConstDouble(double) | ConstChar(int)
 static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     CATCH_ENTER;
-    intmax_t value;
+    long value;
     char* strto_value;
     TRY(pop_next(ctx));
     switch (ctx->next_tok->tok_kind) {
@@ -204,7 +204,7 @@ static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     }
 
     strto_value = map_get(ctx->identifiers->hash_table, ctx->next_tok->tok);
-    TRY(string_to_intmax(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
+    TRY(string_to_long(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
     if (value > 9223372036854775807ll) {
         THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_overflow_long_const, strto_value));
     }
@@ -222,12 +222,12 @@ static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 // (unsigned) const = ConstUInt(uint) | ConstULong(ulong) | ConstUChar(int)
 static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     CATCH_ENTER;
-    uintmax_t value;
+    unsigned long value;
     char* strto_value;
     TRY(pop_next(ctx));
 
     strto_value = map_get(ctx->identifiers->hash_table, ctx->next_tok->tok);
-    TRY(string_to_uintmax(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
+    TRY(string_to_ulong(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
     if (value > 18446744073709551615ull) {
         THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_overflow_ulong_const, strto_value));
     }

@@ -1,6 +1,8 @@
 #ifndef _AST_FRONT_AST_H
 #define _AST_FRONT_AST_H
 
+#include <stddef.h>
+
 #include "util/c_std.h"
 
 #include "ast/ast.h"
@@ -113,7 +115,7 @@ typedef struct CAbstractArray {
 } CAbstractArray;
 
 typedef struct CAbstractBase {
-    int8_t _empty;
+    char _empty;
 } CAbstractBase;
 
 typedef struct CAbstractDeclarator {
@@ -471,7 +473,7 @@ typedef struct CContinue {
 } CContinue;
 
 typedef struct CNull {
-    int8_t _empty;
+    char _empty;
 } CNull;
 
 typedef struct CStatement {

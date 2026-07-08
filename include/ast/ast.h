@@ -105,9 +105,9 @@ void free_CStringLiteral(shared_ptr_t(CStringLiteral) * self);
 PairKeyValue(TIdentifier, string_t);
 
 typedef struct IdentifierContext {
-    uint32_t label_count;
-    uint32_t var_count;
-    uint32_t struct_count;
+    unsigned int label_count;
+    unsigned int var_count;
+    unsigned int struct_count;
     hashmap_t(TIdentifier, string_t) hash_table;
 } IdentifierContext;
 

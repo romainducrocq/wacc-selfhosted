@@ -370,7 +370,7 @@ typedef struct AsmCall {
 } AsmCall;
 
 typedef struct AsmRet {
-    int8_t _empty;
+    char _empty;
 } AsmRet;
 
 typedef struct AsmInstruction {

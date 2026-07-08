@@ -24,19 +24,19 @@ typedef struct AsmOperand AsmOperand;
 //               | ByteArray(int, int)
 
 typedef struct Byte {
-    int8_t _empty;
+    char _empty;
 } Byte;
 
 typedef struct LongWord {
-    int8_t _empty;
+    char _empty;
 } LongWord;
 
 typedef struct QuadWord {
-    int8_t _empty;
+    char _empty;
 } QuadWord;
 
 typedef struct BackendDouble {
-    int8_t _empty;
+    char _empty;
 } BackendDouble;
 
 typedef struct ByteArray {

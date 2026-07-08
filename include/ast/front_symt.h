@@ -1,6 +1,8 @@
 #ifndef _AST_FRONT_SYMT_H
 #define _AST_FRONT_SYMT_H
 
+#include <stddef.h>
+
 #include "util/c_std.h"
 
 #include "ast/ast.h"
@@ -36,39 +38,39 @@ typedef struct StructTypedef StructTypedef;
 //      | Structure(identifier, bool)
 
 typedef struct Char {
-    int8_t _empty;
+    char _empty;
 } Char;
 
 typedef struct SChar {
-    int8_t _empty;
+    char _empty;
 } SChar;
 
 typedef struct UChar {
-    int8_t _empty;
+    char _empty;
 } UChar;
 
 typedef struct Int {
-    int8_t _empty;
+    char _empty;
 } Int;
 
 typedef struct Long {
-    int8_t _empty;
+    char _empty;
 } Long;
 
 typedef struct UInt {
-    int8_t _empty;
+    char _empty;
 } UInt;
 
 typedef struct ULong {
-    int8_t _empty;
+    char _empty;
 } ULong;
 
 typedef struct Double {
-    int8_t _empty;
+    char _empty;
 } Double;
 
 typedef struct Void {
-    int8_t _empty;
+    char _empty;
 } Void;
 
 typedef struct FunType {
@@ -233,7 +235,7 @@ void free_StaticInit(shared_ptr_t(StaticInit) * self);
 //               | NoInitializer
 
 typedef struct Tentative {
-    int8_t _empty;
+    char _empty;
 } Tentative;
 
 typedef struct Initial {
@@ -241,7 +243,7 @@ typedef struct Initial {
 } Initial;
 
 typedef struct NoInitializer {
-    int8_t _empty;
+    char _empty;
 } NoInitializer;
 
 typedef struct InitialValue {
@@ -288,7 +290,7 @@ typedef struct ConstantAttr {
 } ConstantAttr;
 
 typedef struct LocalAttr {
-    int8_t _empty;
+    char _empty;
 } LocalAttr;
 
 typedef struct IdentifierAttr {

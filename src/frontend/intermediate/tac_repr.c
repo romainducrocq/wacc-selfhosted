@@ -556,15 +556,15 @@ static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, CAssignment* node) {
         res = repr_res_instr(ctx, node->exp_left);
     }
     else {
-        uint32_t label_count_1 = ctx->identifiers->label_count;
-        uint32_t var_count_1 = ctx->identifiers->var_count;
-        uint32_t struct_count_1 = ctx->identifiers->struct_count;
+        unsigned int label_count_1 = ctx->identifiers->label_count;
+        unsigned int var_count_1 = ctx->identifiers->var_count;
+        unsigned int struct_count_1 = ctx->identifiers->struct_count;
 
         src = repr_exp_instr(ctx, node->exp_right);
 
-        uint32_t label_count_2 = ctx->identifiers->label_count;
-        uint32_t var_count_2 = ctx->identifiers->var_count;
-        uint32_t struct_count_2 = ctx->identifiers->struct_count;
+        unsigned int label_count_2 = ctx->identifiers->label_count;
+        unsigned int var_count_2 = ctx->identifiers->var_count;
+        unsigned int struct_count_2 = ctx->identifiers->struct_count;
 
         ctx->identifiers->label_count = label_count_1;
         ctx->identifiers->var_count = var_count_1;

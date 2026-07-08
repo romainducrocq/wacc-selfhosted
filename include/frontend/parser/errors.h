@@ -84,7 +84,7 @@ char* get_util_msg(MESSAGE_UTIL msg);
 char* get_lexer_msg(MESSAGE_LEXER msg);
 char* get_parser_msg(MESSAGE_PARSER msg);
 char* get_semantic_msg(MESSAGE_SEMANTIC msg);
-#define GET_MESSAGE_0(E, X) get_##E##_msg(X), (int)X
+#define GET_MESSAGE_0(E, X) get_##E##_msg(X), #X
 #define GET_ARG_MSG_0(X) GET_MESSAGE_0(arg, X)
 #define GET_PARSER_MSG_0(X) GET_MESSAGE_0(parser, X)
 #define GET_SEMANTIC_MSG_0(X) GET_MESSAGE_0(semantic, X)
@@ -95,7 +95,10 @@ char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 #define GET_LEXER_MSG(X, ...) GET_MESSAGE(lexer, X, __VA_ARGS__)
 #define GET_PARSER_MSG(X, ...) GET_MESSAGE(parser, X, __VA_ARGS__)
 #define GET_SEMANTIC_MSG(X, ...) GET_MESSAGE(semantic, X, __VA_ARGS__)
-#define GCC_VERSION __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__
-#define CLANG_VERSION __clang_major__, __clang_minor__, __clang_patchlevel__
+
+#define STRINGIFY(X) #X
+#define GET_VERSION(X, Y, Z) STRINGIFY(X), STRINGIFY(Y), STRINGIFY(Z)
+#define GCC_VERSION GET_VERSION(__GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__)
+#define CLANG_VERSION GET_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
 
 #endif

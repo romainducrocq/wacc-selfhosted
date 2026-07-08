@@ -472,7 +472,7 @@ char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt) {
 
 #define EM_CSTR(X) "\033[1m‘" X "’\033[0m"
 #define EM_VARG "\033[1m‘%s’\033[0m"
-#define RET_ERRNO return "(no. %i) "
+#define RET_ERRNO return "(no. %s) "
 
 char* get_fatal_msg(MESSAGE_FATAL msg) {
     switch (msg) {
@@ -493,9 +493,9 @@ char* get_fatal_msg(MESSAGE_FATAL msg) {
 #endif
         case MSG_unsupported_cc_ver:
 #if defined(__APPLE__) || defined(__FreeBSD__)
-            RET_ERRNO EM_CSTR("clang") " %i.%i.%i is not supported, requires " EM_CSTR("clang") " >= 5.0.0";
+            RET_ERRNO EM_CSTR("clang") " %s.%s.%s is not supported, requires " EM_CSTR("clang") " >= 5.0.0";
 #else
-            RET_ERRNO EM_CSTR("gcc") " %i.%i.%i is not supported, requires " EM_CSTR("gcc") " >= 8.1.0";
+            RET_ERRNO EM_CSTR("gcc") " %s.%s.%s is not supported, requires " EM_CSTR("gcc") " >= 8.1.0";
 #endif
         default:
             THROW_ABORT;

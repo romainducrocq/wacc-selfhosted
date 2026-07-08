@@ -1,13 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/str2t.h"
 #include "util/throw.h"
 
-#include "frontend/parser/errors.h"
+// TODO errors
+// #include "frontend/parser/errors.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -115,7 +113,7 @@ static long hex_string_to_long(char* str_hex) {
 
 static void string_literal_byte_to_hex(char_t value, string_t* str_hex) {
     char byte_hex[3];
-    snprintf(byte_hex, sizeof(char) * 3, "%.2x", (uchar_t)value);
+    sprintf(byte_hex, "%.2x", (uchar_t)value);
     str_append(*str_hex, byte_hex);
 }
 
@@ -201,12 +199,18 @@ string_t string_literal_to_const(vector_t(char_t) string_literal) {
     return string_const;
 }
 
+// TODO errors
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 error_t string_to_long(struct ErrorsContext* ctx, char* str_int, unsigned long info_at, long* value) {
     CATCH_ENTER;
     char* end_ptr = NULL;
     *value = strtoimax(str_int, &end_ptr, 10);
     if (end_ptr == str_int) {
-        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtoi, str_int));
+        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtoi, str_int)); // TODO errors
     }
     FINALLY;
     CATCH_EXIT;
@@ -217,7 +221,7 @@ error_t string_to_ulong(struct ErrorsContext* ctx, char* str_uint, unsigned long
     char* end_ptr = NULL;
     *value = strtoumax(str_uint, &end_ptr, 10);
     if (end_ptr == str_uint) {
-        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtou, str_uint));
+        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtou, str_uint)); // TODO errors
     }
     FINALLY;
     CATCH_EXIT;
@@ -228,8 +232,13 @@ error_t string_to_dbl(struct ErrorsContext* ctx, char* str_dbl, unsigned long in
     char* end_ptr = NULL;
     *value = strtod(str_dbl, &end_ptr);
     if (end_ptr == str_dbl) {
-        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtod, str_dbl));
+        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtod, str_dbl)); // TODO errors
     }
     FINALLY;
     CATCH_EXIT;
 }
+
+// TODO errors
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

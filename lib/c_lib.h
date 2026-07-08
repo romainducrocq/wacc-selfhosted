@@ -17,6 +17,10 @@
 #pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
 #endif
 
+/* inttypes.h */
+long strtoimax(char* nptr, char** endptr, int base);
+unsigned long strtoumax(char* nptr, char** endptr, int base);
+
 /* stdbool.h */
 #define bool int
 #define false 0
@@ -36,10 +40,12 @@ extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, 
 extern int fprintf(struct FILE* stream, char* format, int prec1, char* arg1, int prec2, char* arg2, int prec3,
     char* arg3, int prec4, char* arg4, int prec5, char* arg5);
 extern int printf(char* format, char* arg1);
+extern int sprintf(char* s, char* format, unsigned char arg1);
 /* _POSIX_C_SOURCE 200809L */
 extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);
 
 /* stdlib.h */
+extern double strtod(char* nptr, char** endptr);
 extern void free(void* ptr);
 extern void* malloc(unsigned long size);
 extern void* realloc(void* ptr, unsigned long size);

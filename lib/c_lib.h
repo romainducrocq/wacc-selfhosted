@@ -27,8 +27,8 @@ unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define true 1
 
 /* stdio.h */
-#define NULL ((void*)0)
-#define FOPEN_MAX 16
+#define NULL 0
+#define FOPEN_MAX 8
 struct FILE;
 extern struct FILE* stdout;
 extern struct FILE* stderr;

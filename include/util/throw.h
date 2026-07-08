@@ -17,9 +17,8 @@ struct FileIoContext;
 #endif
 //
 
-#define _TODO_ulong_t unsigned long // TODO rename all unsigned long ?
 #define hash_t unsigned long
-PairKeyValue(hash_t, _TODO_ulong_t);
+PairKeyValue(hash_t, ulong_t);
 
 struct FileOpenLine {
     unsigned long linenum;
@@ -40,7 +39,7 @@ struct ErrorsContext {
     char msg[ERROR_MSG_SIZE];
     bool is_stdout;
     unsigned long info_at_buf;
-    hashmap_t(hash_t, _TODO_ulong_t) info_at_map;
+    hashmap_t(hash_t, ulong_t) info_at_map;
     vector_t(struct FileOpenLine) fopen_lines;
     vector_t(struct TokenInfo) token_infos;
 };
@@ -49,7 +48,7 @@ void panic_sigabrt(char* msg, int line, char* file);
 #define PANIC_FUNC(X, ...) panic_sigabrt(X, __VA_ARGS__)
 #define THROW_ABORT THROW_PANIC("abort")
 #define THROW_ALLOC(T) THROW_PANIC("alloc " #T)
-#ifdef __NDEBUG__ // TODO keep __NDEBUG__?
+#ifdef __NDEBUG__ // TODO
 #define THROW_ABORT_IF(X)
 #else
 #define THROW_ABORT_IF(X) \

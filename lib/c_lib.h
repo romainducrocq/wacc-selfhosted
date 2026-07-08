@@ -26,13 +26,15 @@
 #define NULL ((void*)0)
 #define FOPEN_MAX 16
 struct FILE;
-extern struct FILE *stdout;
-extern struct FILE *stderr;
+extern struct FILE* stdout;
+extern struct FILE* stderr;
 extern int fclose(struct FILE* stream);
 extern int fflush(struct FILE* stream);
 extern struct FILE* fopen(char* filename, char* mode);
 extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, struct FILE* stream);
 /* printf */
+extern int fprintf(struct FILE* stream, char* format, int prec1, char* arg1, int prec2, char* arg2, int prec3,
+    char* arg3, int prec4, char* arg4, int prec5, char* arg5);
 extern int printf(char* format, char* arg1);
 /* _POSIX_C_SOURCE 200809L */
 extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);

@@ -4,12 +4,6 @@
 #include "util/fileio.h"
 #include "util/throw.h"
 
-// TODO remove
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-extern int fprintf(struct FILE* stream, char* format, ...);
-#pragma GCC diagnostic pop
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Throw
@@ -25,8 +19,8 @@ void panic_sigabrt(char* msg, int line, char* file) {
     fflush(stdout);
     {
         string_t strto_line = str_to_string(line);
-        fprintf(stderr, "%s%s:%s:%s\n", esc_bold, file, strto_line, esc_reset);
-        fprintf(stderr, "%sinternal error:%s %s\n", esc_red, esc_reset, msg);
+        fprintf(stderr, "%*s%*s:%*s:%*s\n%*s", 0, esc_bold, 0, file, 0, strto_line, 0, esc_reset, 0, "");
+        fprintf(stderr, "%*sinternal error:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, msg, 0, "", 0, "");
         str_delete(strto_line);
     }
     abort();
@@ -37,7 +31,7 @@ void raise_init_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(stdout);
     }
-    fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
+    fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
 }
 
 void raise_base_error(Ctx ctx) {
@@ -47,8 +41,8 @@ void raise_base_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(stdout);
     }
-    fprintf(stderr, "%s%s:%s\n", esc_bold, filename, esc_reset);
-    fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
+    fprintf(stderr, "%*s%*s:%*s\n%*s%*s", 0, esc_bold, 0, filename, 0, esc_reset, 0, "", 0, "");
+    fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
 }
 
 static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {
@@ -122,10 +116,10 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
         }
         string_t strto_pos = str_to_string(tok_pos);
 
-        fprintf(stderr, "%s%s:%s:%s:%s\n", esc_bold, filename, strto_linenum, strto_pos, esc_reset);
-        fprintf(stderr, "%serror:%s %s\n", esc_red, esc_reset, ctx->msg);
-        fprintf(stderr, "at line %s: %s%*sv%s%s\n", strto_linenum, esc_red, pad_tok, "", tok_overline, esc_reset);
-        fprintf(stderr, "        %*s| %s%s%s\n", pad_linenum, "", esc_bold, line, esc_reset);
+        fprintf(stderr, "%*s%*s:%*s:%*s:%*s\n", 0, esc_bold, 0, filename, 0, strto_linenum, 0, strto_pos, 0, esc_reset);
+        fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
+        fprintf(stderr, "at line %*s: %*s%*sv%*s%*s\n", 0, strto_linenum, 0, esc_red, pad_tok, "", 0, tok_overline, 0, esc_reset);
+        fprintf(stderr, "        %*s| %*s%*s%*s\n%*s", pad_linenum, "", 0, esc_bold, 0, line, 0, esc_reset, 0, "");
 
         str_delete(tok_overline);
         str_delete(strto_linenum);

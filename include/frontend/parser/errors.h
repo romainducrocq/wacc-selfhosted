@@ -86,7 +86,7 @@ char* get_parser_msg(MESSAGE_PARSER msg);
 char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 #define GET_MESSAGE_0(E, X) get_##E##_msg(X), #X
 #define GET_ARG_MSG_0(X) GET_MESSAGE_0(arg, X)
-#define GET_PARSER_MSG_0(X) GET_MESSAGE_0(parser, X)
+// #define GET_PARSER_MSG_0(X) GET_MESSAGE_0(parser, X)
 #define GET_SEMANTIC_MSG_0(X) GET_MESSAGE_0(semantic, X)
 #define GET_MESSAGE(E, X, ...) GET_MESSAGE_0(E, X), __VA_ARGS__
 #define GET_FATAL_MSG(X, ...) GET_MESSAGE(fatal, X, __VA_ARGS__)

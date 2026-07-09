@@ -57,7 +57,7 @@ static error_t expect_next(Ctx ctx, Token* next_tok, TOKEN_KIND expect_tok) {
 static error_t pop_next(Ctx ctx) {
     CATCH_ENTER;
     if (ctx->pop_idx >= vec_size(*ctx->p_toks)) {
-        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG_0(MSG_reached_eof));
+        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG(0, MSG_reached_eof));
     }
 
     ctx->next_tok = &(*ctx->p_toks)[ctx->pop_idx];
@@ -74,7 +74,7 @@ static error_t pop_next_i(Ctx ctx, size_t i) {
         EARLY_EXIT;
     }
     if (ctx->pop_idx + i >= vec_size(*ctx->p_toks)) {
-        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG_0(MSG_reached_eof));
+        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG(0, MSG_reached_eof));
     }
     {
         Token swap_token_i = (*ctx->p_toks)[ctx->pop_idx + i];
@@ -92,7 +92,7 @@ static error_t pop_next_i(Ctx ctx, size_t i) {
 static error_t peek_next(Ctx ctx) {
     CATCH_ENTER;
     if (ctx->pop_idx >= vec_size(*ctx->p_toks)) {
-        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG_0(MSG_reached_eof));
+        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG(0, MSG_reached_eof));
     }
 
     ctx->peek_tok = &(*ctx->p_toks)[ctx->pop_idx];
@@ -108,7 +108,7 @@ static error_t peek_next_i(Ctx ctx, size_t i) {
         EARLY_EXIT;
     }
     if (ctx->pop_idx + i >= vec_size(*ctx->p_toks)) {
-        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG_0(MSG_reached_eof));
+        THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG(0, MSG_reached_eof));
     }
 
     ctx->peek_tok_i = &(*ctx->p_toks)[ctx->pop_idx + i];
@@ -1898,7 +1898,7 @@ static error_t parse_compound_init(Ctx ctx, unique_ptr_t(CInitializer) * initial
         TRY(expect_next(ctx, ctx->next_tok, TOK_comma_separator));
     }
     if (vec_empty(initializers)) {
-        THROW_AT_TOKEN(ctx->peek_tok->info_at, GET_PARSER_MSG_0(MSG_empty_compound_init));
+        THROW_AT_TOKEN(ctx->peek_tok->info_at, GET_PARSER_MSG(0, MSG_empty_compound_init));
     }
     TRY(pop_next(ctx));
     *initializer = make_CCompoundInit(&initializers);
@@ -1978,7 +1978,7 @@ static error_t proc_fun_decltor(Ctx ctx, CFunDeclarator* node, shared_ptr_t(Type
     vector_t(shared_ptr_t(Type)) param_types = vec_new();
     CATCH_ENTER;
     if (node->decltor->type != AST_CIdent_t) {
-        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG_0(MSG_derived_fun_decl));
+        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(0, MSG_derived_fun_decl));
     }
 
     TIdentifier name;

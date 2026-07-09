@@ -94,34 +94,34 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     CATCH_ENTER;
 
 #ifdef _WIN32
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_os, "Windows"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_os, "Windows"));
 
 #elif defined(__APPLE__) || defined(__FreeBSD__)
 #if defined(__GNUC__) && !defined(__clang__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_compiler, "gcc"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_compiler, "gcc"));
 #elif !defined(__clang__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_compiler, "unknown"));
+    THROW_INIT(GET_FATAL_MSG(1. MSG_unsupported_compiler, "unknown"));
 #elif __clang_major__ < 5
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_cc_ver, CLANG_VERSION));
+    THROW_INIT(GET_FATAL_MSG(3, MSG_unsupported_cc_ver, CLANG_VERSION));
 #endif
 
 #elif defined(__linux__)
 #ifdef __arm__
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_arch, "arm"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_arch, "arm"));
 #elif defined(__i386__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_arch, "x86"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_arch, "x86"));
 #elif !defined(__x86_64__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_arch, "unknown"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_arch, "unknown"));
 #elif defined(__clang__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_compiler, "clang"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_compiler, "clang"));
 #elif !defined(__GNUC__)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_compiler, "unknown"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_compiler, "unknown"));
 #elif __GNUC__ < 8 || (__GNUC__ == 8 && __GNUC_MINOR__ == 0)
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_cc_ver, GCC_VERSION));
+    THROW_INIT(GET_FATAL_MSG(3, MSG_unsupported_cc_ver, GCC_VERSION));
 #endif
 
 #else
-    THROW_INIT(GET_FATAL_MSG(MSG_unsupported_os, "unknown"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_os, "unknown"));
 #endif
 
     verbose(ctx, "-- Lexing ... ");
@@ -216,42 +216,42 @@ static error_t arg_parse(Ctx ctx, int argc, char** argv) {
     size_t i = 0;
 
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
-        THROW_INIT(GET_ARG_MSG(MSG_print_help, argv[0]));
+        THROW_INIT(GET_ARG_MSG(1, MSG_print_help, argv[0]));
     }
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_debug_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_debug_arg));
     }
     else if (arg_parse_uint8(argv[i], &ctx->debug_code)) {
-        THROW_INIT(GET_ARG_MSG(MSG_invalid_debug_arg, argv[i]));
+        THROW_INIT(GET_ARG_MSG(1, MSG_invalid_debug_arg, argv[i]));
     }
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_optim_1_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_optim_1_arg));
     }
     else if (arg_parse_uint8(argv[i], &ctx->optim_1_mask) || ctx->optim_1_mask > 15) {
-        THROW_INIT(GET_ARG_MSG(MSG_invalid_optim_1_arg, argv[i]));
+        THROW_INIT(GET_ARG_MSG(1, MSG_invalid_optim_1_arg, argv[i]));
     }
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_optim_2_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_optim_2_arg));
     }
     else if (arg_parse_uint8(argv[i], &ctx->optim_2_code) || ctx->optim_2_code > 2) {
-        THROW_INIT(GET_ARG_MSG(MSG_invalid_optim_2_arg, argv[i]));
+        THROW_INIT(GET_ARG_MSG(1, MSG_invalid_optim_2_arg, argv[i]));
     }
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_input_files_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_input_files_arg));
     }
     ctx->filename = str_new(argv[i]);
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_stdlib_dir_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_stdlib_dir_arg));
     }
     vec_push_back(ctx->stdlibdirs, (char*)argv[i]);
 
     if (!argv[++i]) {
-        THROW_INIT(GET_ARG_MSG_0(MSG_no_include_dir_arg));
+        THROW_INIT(GET_ARG_MSG(0, MSG_no_include_dir_arg));
     }
     do {
         vec_push_back(ctx->includedirs, (char*)argv[i]);

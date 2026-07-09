@@ -85,35 +85,15 @@ char* get_lexer_msg(MESSAGE_LEXER msg);
 char* get_parser_msg(MESSAGE_PARSER msg);
 char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 #define GET_MESSAGE_0(E, X) get_##E##_msg(X), #X
-#define GET_ARG_MSG_0(X) GET_MESSAGE_0(arg, X)
-// #define GET_PARSER_MSG_0(X) GET_MESSAGE_0(parser, X)
-#define GET_SEMANTIC_MSG_0(X) GET_MESSAGE_0(semantic, X)
-#define GET_MESSAGE(E, X, ...) GET_MESSAGE_0(E, X), __VA_ARGS__
-#define GET_FATAL_MSG(X, ...) GET_MESSAGE(fatal, X, __VA_ARGS__)
-#define GET_ARG_MSG(X, ...) GET_MESSAGE(arg, X, __VA_ARGS__)
-#define GET_UTIL_MSG(X, ...) GET_MESSAGE(util, X, __VA_ARGS__)
-#define GET_LEXER_MSG(X, ...) GET_MESSAGE(lexer, X, __VA_ARGS__)
-// #define GET_PARSER_MSG(X, ...) GET_MESSAGE(parser, X, __VA_ARGS__)
-// #define GET_SEMANTIC_MSG(X, ...) GET_MESSAGE(semantic, X, __VA_ARGS__)
-
-// #define GET_MESSAGE_N(E, N) get_##E##_msg(N), #N
-// #define GET_MESSAGE_0(E, N) GET_MESSAGE_N(N)
 #define GET_MESSAGE_1(E, N, X) GET_MESSAGE_0(E, N), X
 #define GET_MESSAGE_2(E, N, X, Y) GET_MESSAGE_1(E, N, X), Y
 #define GET_MESSAGE_3(E, N, X, Y, Z) GET_MESSAGE_2(E, N, X, Y), Z
-
-// #define GET_ARG_MSG_0(N) GET_MESSAGE_0(arg, N)
-// #define GET_PARSER_MSG_0(N) GET_MESSAGE_0(parser, N)
-// #define GET_SEMANTIC_MSG_0(N) GET_MESSAGE_0(semantic, N)
-
-// // #define GET_MESSAGE(E, X, ...) GET_MESSAGE_0(E, X), __VA_ARGS__
-
-// #define GET_FATAL_MSG(I, ...) GET_MESSAGE##I(fatal, __VA_ARGS__)
-// #define GET_ARG_MSG(I, ...) GET_MESSAGE##I(arg, __VA_ARGS__)
-// #define GET_UTIL_MSG(I, ...) GET_MESSAGE##I(util, __VA_ARGS__)
-// #define GET_LEXER_MSG(I, ...) GET_MESSAGE##I(lexer, __VA_ARGS__)
-#define GET_PARSER_MSG(I, ...) GET_MESSAGE_##I(parser, __VA_ARGS__)
-#define GET_SEMANTIC_MSG(I, ...) GET_MESSAGE_##I(semantic, __VA_ARGS__)
+#define GET_FATAL_MSG(N, ...) GET_MESSAGE_##N(fatal, __VA_ARGS__)
+#define GET_ARG_MSG(N, ...) GET_MESSAGE_##N(arg, __VA_ARGS__)
+#define GET_UTIL_MSG(N, ...) GET_MESSAGE_##N(util, __VA_ARGS__)
+#define GET_LEXER_MSG(N, ...) GET_MESSAGE_##N(lexer, __VA_ARGS__)
+#define GET_PARSER_MSG(N, ...) GET_MESSAGE_##N(parser, __VA_ARGS__)
+#define GET_SEMANTIC_MSG(N, ...) GET_MESSAGE_##N(semantic, __VA_ARGS__)
 
 #define STRINGIFY(X) #X
 #define GET_VERSION(X, Y, Z) STRINGIFY(X), STRINGIFY(Y), STRINGIFY(Z)

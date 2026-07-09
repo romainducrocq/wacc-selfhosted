@@ -100,7 +100,7 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
 #if defined(__GNUC__) && !defined(__clang__)
     THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_compiler, "gcc"));
 #elif !defined(__clang__)
-    THROW_INIT(GET_FATAL_MSG(1. MSG_unsupported_compiler, "unknown"));
+    THROW_INIT(GET_FATAL_MSG(1, MSG_unsupported_compiler, "unknown"));
 #elif __clang_major__ < 5
     THROW_INIT(GET_FATAL_MSG(3, MSG_unsupported_cc_ver, CLANG_VERSION));
 #endif

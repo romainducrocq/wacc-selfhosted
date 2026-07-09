@@ -10,7 +10,7 @@
 
 struct ErrorsContext;
 struct FileIoContext;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +23,7 @@ typedef struct Token {
 } Token;
 
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
-    struct ErrorsContext* errors, struct FileIoContext* fileio, IdentifierContext* identifiers,
+    struct ErrorsContext* errors, struct FileIoContext* fileio, struct IdentifierContext* identifiers,
     vector_t(Token) * tokens);
 
 #endif

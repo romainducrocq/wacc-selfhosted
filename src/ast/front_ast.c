@@ -164,7 +164,7 @@ unique_ptr_t(CExp) make_CExp(size_t info_at) {
     return self;
 }
 
-unique_ptr_t(CExp) make_CConstant(shared_ptr_t(CConst) * constant, size_t info_at) {
+unique_ptr_t(CExp) make_CConstant(shared_ptr_t(struct CConst) * constant, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CConstant_t;
     self->get._CConstant.constant = sptr_new();
@@ -173,7 +173,7 @@ unique_ptr_t(CExp) make_CConstant(shared_ptr_t(CConst) * constant, size_t info_a
     return self;
 }
 
-unique_ptr_t(CExp) make_CString(shared_ptr_t(CStringLiteral) * literal, size_t info_at) {
+unique_ptr_t(CExp) make_CString(shared_ptr_t(struct CStringLiteral) * literal, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CString_t;
     self->get._CString.literal = sptr_new();

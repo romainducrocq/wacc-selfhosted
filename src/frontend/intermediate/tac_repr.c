@@ -16,7 +16,7 @@
 
 typedef struct TacReprContext {
     FrontEndContext* frontend;
-    IdentifierContext* identifiers;
+    struct IdentifierContext* identifiers;
     // Three address code representation
     vector_t(unique_ptr_t(TacInstruction)) * p_instrs;
     vector_t(unique_ptr_t(TacTopLevel)) * p_toplvls;
@@ -88,7 +88,7 @@ static TacBinaryOp repr_binop(CBinaryOp* node) {
 }
 
 static shared_ptr_t(TacValue) const_value(CConstant* node) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     sptr_copy(CConst, node->constant, constant);
     return make_TacConstant(&constant);
 }
@@ -141,7 +141,7 @@ static unique_ptr_t(TacExpResult) const_res_instr(CConstant* node) {
     return make_TacPlainOperand(&val);
 }
 
-static TIdentifier make_literal_identifier(Ctx ctx, CStringLiteral* node) {
+static TIdentifier make_literal_identifier(Ctx ctx, struct CStringLiteral* node) {
     string_t value = string_literal_to_const(node->value);
     return make_string_identifier(ctx->identifiers, &value);
 }
@@ -167,7 +167,7 @@ static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, CString* node) {
             {
                 shared_ptr_t(StaticInit) static_init = sptr_new();
                 {
-                    shared_ptr_t(CStringLiteral) literal = sptr_new();
+                    shared_ptr_t(struct CStringLiteral) literal = sptr_new();
                     sptr_copy(CStringLiteral, node->literal, literal);
                     static_init = make_StringInit(string_const, true, &literal);
                 }
@@ -380,7 +380,7 @@ static unique_ptr_t(TacExpResult) binary_subtract_ptr_res_instr(Ctx ctx, CBinary
     shared_ptr_t(TacValue) src_2 = sptr_new();
     {
         TLong value = get_type_scale(ctx, node->exp_left->exp_type->get._Pointer.ref_type);
-        shared_ptr_t(CConst) constant = make_CConstLong(value);
+        shared_ptr_t(struct CConst) constant = make_CConstLong(value);
         src_2 = make_TacConstant(&constant);
     }
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
@@ -418,7 +418,7 @@ static unique_ptr_t(TacExpResult) binary_and_res_instr(Ctx ctx, CBinary* node) {
         push_instr(ctx, make_TacJumpIfZero(target_false, &condition_right));
     }
     {
-        shared_ptr_t(CConst) constant = make_CConstInt(1);
+        shared_ptr_t(struct CConst) constant = make_CConstInt(1);
         shared_ptr_t(TacValue) src_true = make_TacConstant(&constant);
         shared_ptr_t(TacValue) dst_cp = sptr_new();
         sptr_copy(TacValue, dst, dst_cp);
@@ -427,7 +427,7 @@ static unique_ptr_t(TacExpResult) binary_and_res_instr(Ctx ctx, CBinary* node) {
     push_instr(ctx, make_TacJump(target_true));
     push_instr(ctx, make_TacLabel(target_false));
     {
-        shared_ptr_t(CConst) constant = make_CConstInt(0);
+        shared_ptr_t(struct CConst) constant = make_CConstInt(0);
         shared_ptr_t(TacValue) src_false = make_TacConstant(&constant);
         shared_ptr_t(TacValue) dst_cp = sptr_new();
         sptr_copy(TacValue, dst, dst_cp);
@@ -450,7 +450,7 @@ static unique_ptr_t(TacExpResult) binary_or_res_instr(Ctx ctx, CBinary* node) {
         push_instr(ctx, make_TacJumpIfNotZero(target_true, &condition_right));
     }
     {
-        shared_ptr_t(CConst) constant = make_CConstInt(0);
+        shared_ptr_t(struct CConst) constant = make_CConstInt(0);
         shared_ptr_t(TacValue) src_false = make_TacConstant(&constant);
         shared_ptr_t(TacValue) dst_cp = sptr_new();
         sptr_copy(TacValue, dst, dst_cp);
@@ -459,7 +459,7 @@ static unique_ptr_t(TacExpResult) binary_or_res_instr(Ctx ctx, CBinary* node) {
     push_instr(ctx, make_TacJump(target_false));
     push_instr(ctx, make_TacLabel(target_true));
     {
-        shared_ptr_t(CConst) constant = make_CConstInt(1);
+        shared_ptr_t(struct CConst) constant = make_CConstInt(1);
         shared_ptr_t(TacValue) src_true = make_TacConstant(&constant);
         shared_ptr_t(TacValue) dst_cp = sptr_new();
         sptr_copy(TacValue, dst, dst_cp);
@@ -745,7 +745,7 @@ static void sub_obj_addrof_res_instr(Ctx ctx, TacSubObject* res, CAddrOf* node, 
         shared_ptr_t(TacValue) idx = sptr_new();
         {
             TLong offset = res->offset;
-            shared_ptr_t(CConst) constant = make_CConstLong(offset);
+            shared_ptr_t(struct CConst) constant = make_CConstLong(offset);
             idx = make_TacConstant(&constant);
         }
         shared_ptr_t(TacValue) dst_cp = sptr_new();
@@ -796,7 +796,7 @@ static unique_ptr_t(TacExpResult) subscript_res_instr(Ctx ctx, CSubscript* node)
 }
 
 static unique_ptr_t(TacExpResult) sizeof_res_instr(Ctx ctx, CSizeOf* node) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     {
         TULong value = (TULong)get_type_scale(ctx, node->exp->exp_type);
         constant = make_CConstULong(value);
@@ -806,7 +806,7 @@ static unique_ptr_t(TacExpResult) sizeof_res_instr(Ctx ctx, CSizeOf* node) {
 }
 
 static unique_ptr_t(TacExpResult) sizeoft_res_instr(Ctx ctx, CSizeOfT* node) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     {
         TULong value = (TULong)get_type_scale(ctx, node->target_type);
         constant = make_CConstULong(value);
@@ -830,7 +830,7 @@ static void deref_ptr_dot_res_instr(Ctx ctx, TacDereferencedPointer* res, CDot* 
         shared_ptr_t(TacValue) idx = sptr_new();
         {
             TLong offset = member_offset;
-            shared_ptr_t(CConst) constant = make_CConstLong(offset);
+            shared_ptr_t(struct CConst) constant = make_CConstLong(offset);
             idx = make_TacConstant(&constant);
         }
         shared_ptr_t(TacValue) dst = ptr_inner_value(ctx, node->_base);
@@ -877,7 +877,7 @@ static unique_ptr_t(TacExpResult) arrow_res_instr(Ctx ctx, CArrow* node) {
         shared_ptr_t(TacValue) idx = sptr_new();
         {
             TLong offset = member_offset;
-            shared_ptr_t(CConst) constant = make_CConstLong(offset);
+            shared_ptr_t(struct CConst) constant = make_CConstLong(offset);
             idx = make_TacConstant(&constant);
         }
         shared_ptr_t(TacValue) dst = ptr_inner_value(ctx, node->_base);
@@ -1235,7 +1235,7 @@ static void string_single_init_instr(Ctx ctx, CString* node, Array* arr_type, TI
         TLong offset = size + ((TLong)byte_at);
         shared_ptr_t(TacValue) src = sptr_new();
         {
-            shared_ptr_t(CConst) constant = sptr_new();
+            shared_ptr_t(struct CConst) constant = sptr_new();
             {
                 size_t bytes_left = bytes_size - byte_at;
                 if (bytes_left < 4) {
@@ -1264,7 +1264,7 @@ static void string_single_init_instr(Ctx ctx, CString* node, Array* arr_type, TI
         TLong offset = size + ((TLong)byte_at);
         shared_ptr_t(TacValue) src = sptr_new();
         {
-            shared_ptr_t(CConst) constant = sptr_new();
+            shared_ptr_t(struct CConst) constant = sptr_new();
             {
                 size_t bytes_left = bytes_size - byte_at;
                 if (bytes_left < 4) {
@@ -1440,7 +1440,7 @@ static unique_ptr_t(TacTopLevel) repr_fun_toplvl(Ctx ctx, CFunctionDeclaration* 
         ctx->p_instrs = &body;
         repr_block(ctx, node->body);
         {
-            shared_ptr_t(CConst) constant = make_CConstInt(0);
+            shared_ptr_t(struct CConst) constant = make_CConstInt(0);
             shared_ptr_t(TacValue) val = make_TacConstant(&constant);
             push_instr(ctx, make_TacReturn(&val));
         }
@@ -1576,7 +1576,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unique_ptr_t(TacProgram) represent_three_address_code(
-    unique_ptr_t(CProgram) * c_ast, FrontEndContext* frontend, IdentifierContext* identifiers) {
+    unique_ptr_t(CProgram) * c_ast, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     TacReprContext ctx;
     {
         ctx.frontend = frontend;

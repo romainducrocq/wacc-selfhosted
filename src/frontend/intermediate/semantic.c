@@ -20,7 +20,7 @@ PairKeyValue(TIdentifier, Structure);
 typedef struct SemanticContext {
     struct ErrorsContext* errors;
     FrontEndContext* frontend;
-    IdentifierContext* identifiers;
+    struct IdentifierContext* identifiers;
     // Type checking
     hashmap_t(TIdentifier, size_t) extern_scope_map;
     hashmap_t(TIdentifier, TIdentifier) goto_map;
@@ -1665,7 +1665,7 @@ static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, Type* init_type);
 static unique_ptr_t(CInitializer) check_single_zero_init(Type* elem_type) {
     unique_ptr_t(CExp) exp = uptr_new();
     {
-        shared_ptr_t(CConst) constant = sptr_new();
+        shared_ptr_t(struct CConst) constant = sptr_new();
         switch (elem_type->type) {
             case AST_Char_t:
             case AST_SChar_t: {
@@ -2090,7 +2090,7 @@ static error_t check_literal_string_init(Ctx ctx, CString* node, Pointer* static
     CATCH_EXIT;
 }
 
-static TIdentifier make_literal_identifier(Ctx ctx, CStringLiteral* node) {
+static TIdentifier make_literal_identifier(Ctx ctx, struct CStringLiteral* node) {
     string_t value = string_literal_to_const(node->value);
     return make_string_identifier(ctx->identifiers, &value);
 }
@@ -2116,7 +2116,7 @@ static void check_static_ptr_string_init(Ctx ctx, CString* node) {
             {
                 shared_ptr_t(StaticInit) static_init = sptr_new();
                 {
-                    shared_ptr_t(CStringLiteral) literal = sptr_new();
+                    shared_ptr_t(struct CStringLiteral) literal = sptr_new();
                     sptr_copy(CStringLiteral, node->literal, literal);
                     static_init = make_StringInit(string_const, true, &literal);
                 }
@@ -2130,7 +2130,7 @@ static void check_static_ptr_string_init(Ctx ctx, CString* node) {
 }
 
 static error_t check_static_arr_string_init(Ctx ctx, CString* node, Array* static_arr_type) {
-    shared_ptr_t(CStringLiteral) literal = sptr_new();
+    shared_ptr_t(struct CStringLiteral) literal = sptr_new();
     CATCH_ENTER;
     TLong byte;
     TRY(check_bound_string_init(ctx, node, static_arr_type));
@@ -3593,7 +3593,7 @@ static error_t resolve_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t analyze_semantic(
-    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers) {
+    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     SemanticContext ctx;
     {
         ctx.errors = errors;

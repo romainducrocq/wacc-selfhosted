@@ -6,18 +6,18 @@
 #include "intermediate/labels.h" // frontend
 
 typedef struct CExp CExp;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Identifiers
 
-TIdentifier rslv_label_identifier(IdentifierContext* ctx, TIdentifier label);
-TIdentifier rslv_var_identifier(IdentifierContext* ctx, TIdentifier variable);
-TIdentifier rslv_struct_tag(IdentifierContext* ctx, TIdentifier structure);
-TIdentifier repr_label_identifier(IdentifierContext* ctx, LABEL_KIND label_kind);
-TIdentifier repr_loop_identifier(IdentifierContext* ctx, LABEL_KIND label_kind, TIdentifier target);
-TIdentifier repr_case_identifier(IdentifierContext* ctx, TIdentifier target, bool is_label, size_t i);
-TIdentifier repr_var_identifier(IdentifierContext* ctx, CExp* node);
+TIdentifier rslv_label_identifier(struct IdentifierContext* ctx, TIdentifier label);
+TIdentifier rslv_var_identifier(struct IdentifierContext* ctx, TIdentifier variable);
+TIdentifier rslv_struct_tag(struct IdentifierContext* ctx, TIdentifier structure);
+TIdentifier repr_label_identifier(struct IdentifierContext* ctx, LABEL_KIND label_kind);
+TIdentifier repr_loop_identifier(struct IdentifierContext* ctx, LABEL_KIND label_kind, TIdentifier target);
+TIdentifier repr_case_identifier(struct IdentifierContext* ctx, TIdentifier target, bool is_label, size_t i);
+TIdentifier repr_var_identifier(struct IdentifierContext* ctx, CExp* node);
 
 #endif

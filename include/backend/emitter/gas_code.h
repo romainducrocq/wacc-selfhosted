@@ -6,13 +6,13 @@
 typedef struct AsmProgram AsmProgram;
 typedef struct BackEndContext BackEndContext;
 struct FileIoContext;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Gnu assembler code emission
 
 void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, BackEndContext* backend, struct FileIoContext* fileio,
-    IdentifierContext* identifiers);
+    struct IdentifierContext* identifiers);
 
 #endif

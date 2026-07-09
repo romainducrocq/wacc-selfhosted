@@ -16,11 +16,11 @@ typedef struct Pointer Pointer;
 typedef struct Array Array;
 typedef struct Structure Structure;
 typedef struct Type Type;
-typedef struct CConst CConst;
+struct CConst;
 typedef struct CUnaryOp CUnaryOp;
 typedef struct CBinaryOp CBinaryOp;
 typedef struct CStorageClass CStorageClass;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,19 +55,19 @@ typedef struct IdentifierContext IdentifierContext;
 #define MSG_failed_strtod 205
 
 char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
-char* get_tok_fmt(IdentifierContext* ctx, Token* token);
-char* get_const_fmt(CConst* node);
+char* get_tok_fmt(struct IdentifierContext* ctx, Token* token);
+char* get_const_fmt(struct CConst* node);
 char* get_storage_class_fmt(CStorageClass* node);
 char* get_unop_fmt(CUnaryOp* node);
 char* get_binop_fmt(CBinaryOp* node);
 char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop);
-char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt);
-char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt);
-char* get_fun_fmt(IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt);
-char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt);
-char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt);
-char* get_struct_fmt(IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt);
-char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt);
+char* get_name_fmt(struct IdentifierContext* ctx, TIdentifier name, string_t* name_fmt);
+char* get_struct_name_fmt(struct IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt);
+char* get_fun_fmt(struct IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt);
+char* get_ptr_fmt(struct IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt);
+char* get_arr_fmt(struct IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt);
+char* get_struct_fmt(struct IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt);
+char* get_type_fmt(struct IdentifierContext* ctx, Type* type, string_t* type_fmt);
 #define str_get_fmt(T, ...) get_##T##_fmt(ctx->identifiers, __VA_ARGS__)
 #define str_fmt_tok(X) str_get_fmt(tok, X)
 #define str_fmt_name(X, Y) str_get_fmt(name, X, Y)

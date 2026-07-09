@@ -84,7 +84,7 @@ typedef struct TacBinaryOp {
 //     | Var(identifier)
 
 typedef struct TacConstant {
-    shared_ptr_t(CConst) constant;
+    shared_ptr_t(struct CConst) constant;
 } TacConstant;
 
 typedef struct TacVariable {
@@ -101,7 +101,7 @@ typedef struct TacValue {
 } TacValue;
 
 shared_ptr_t(TacValue) make_TacValue(void);
-shared_ptr_t(TacValue) make_TacConstant(shared_ptr_t(CConst) * constant);
+shared_ptr_t(TacValue) make_TacConstant(shared_ptr_t(struct CConst) * constant);
 shared_ptr_t(TacValue) make_TacVariable(TIdentifier name);
 void free_TacValue(shared_ptr_t(TacValue) * self);
 

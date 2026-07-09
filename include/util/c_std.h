@@ -80,7 +80,7 @@
 #define uptr_alloc(T, X)           \
     do {                           \
         free_##T(&X);              \
-        X = (T*)malloc(sizeof(T)); \
+        X = (struct T*)malloc(sizeof(struct T)); \
         if (!X) {                  \
             THROW_ALLOC(T);        \
         }                          \

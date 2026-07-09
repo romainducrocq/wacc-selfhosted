@@ -6,7 +6,7 @@
 typedef struct CProgram CProgram;
 struct ErrorsContext;
 typedef struct FrontEndContext FrontEndContext;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,6 +19,6 @@ typedef struct IdentifierContext IdentifierContext;
 // Identifier resolution
 
 error_t analyze_semantic(
-    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
+    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

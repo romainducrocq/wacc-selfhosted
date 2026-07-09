@@ -20,7 +20,7 @@ shared_ptr_t(TacValue) make_TacValue(void) {
     return self;
 }
 
-shared_ptr_t(TacValue) make_TacConstant(shared_ptr_t(CConst) * constant) {
+shared_ptr_t(TacValue) make_TacConstant(shared_ptr_t(struct CConst) * constant) {
     shared_ptr_t(TacValue) self = make_TacValue();
     self->type = AST_TacConstant_t;
     self->get._TacConstant.constant = sptr_new();

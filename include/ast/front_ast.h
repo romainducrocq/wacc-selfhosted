@@ -211,12 +211,12 @@ void free_CDeclarator(unique_ptr_t(CDeclarator) * self);
 //     | Arrow(exp, identifier, type)
 
 typedef struct CConstant {
-    shared_ptr_t(CConst) constant;
+    shared_ptr_t(struct CConst) constant;
     CExp* _base;
 } CConstant;
 
 typedef struct CString {
-    shared_ptr_t(CStringLiteral) literal;
+    shared_ptr_t(struct CStringLiteral) literal;
     CExp* _base;
 } CString;
 
@@ -328,8 +328,8 @@ typedef struct CExp {
 } CExp;
 
 unique_ptr_t(CExp) make_CExp(size_t info_at);
-unique_ptr_t(CExp) make_CConstant(shared_ptr_t(CConst) * constant, size_t info_at);
-unique_ptr_t(CExp) make_CString(shared_ptr_t(CStringLiteral) * literal, size_t info_at);
+unique_ptr_t(CExp) make_CConstant(shared_ptr_t(struct CConst) * constant, size_t info_at);
+unique_ptr_t(CExp) make_CString(shared_ptr_t(struct CStringLiteral) * literal, size_t info_at);
 unique_ptr_t(CExp) make_CVar(TIdentifier name, size_t info_at);
 unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(Type) * target_type, size_t info_at);
 unique_ptr_t(CExp) make_CUnary(CUnaryOp* unop, unique_ptr_t(CExp) * exp, size_t info_at);

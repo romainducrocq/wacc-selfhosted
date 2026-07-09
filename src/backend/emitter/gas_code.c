@@ -13,7 +13,7 @@
 typedef struct GasCodeContext {
     BackEndContext* backend;
     struct FileIoContext* fileio;
-    IdentifierContext* identifiers;
+    struct IdentifierContext* identifiers;
     // Gnu assembler code emission
 } GasCodeContext;
 
@@ -1058,7 +1058,7 @@ static void emit_program(Ctx ctx, AsmProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, BackEndContext* backend, struct FileIoContext* fileio,
-    IdentifierContext* identifiers) {
+    struct IdentifierContext* identifiers) {
     GasCodeContext ctx;
     {
         ctx.backend = backend;

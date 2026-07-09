@@ -178,7 +178,7 @@ typedef struct ZeroInit {
 typedef struct StringInit {
     TIdentifier string_const;
     bool is_null_term;
-    shared_ptr_t(CStringLiteral) literal;
+    shared_ptr_t(struct CStringLiteral) literal;
 } StringInit;
 
 typedef struct PointerInit {
@@ -212,7 +212,7 @@ shared_ptr_t(StaticInit) make_UCharInit(TUChar value);
 shared_ptr_t(StaticInit) make_DoubleInit(TIdentifier dbl_const);
 shared_ptr_t(StaticInit) make_ZeroInit(TLong byte);
 shared_ptr_t(StaticInit)
-    make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(CStringLiteral) * literal);
+    make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(struct CStringLiteral) * literal);
 shared_ptr_t(StaticInit) make_PointerInit(TIdentifier name);
 void free_StaticInit(shared_ptr_t(StaticInit) * self);
 

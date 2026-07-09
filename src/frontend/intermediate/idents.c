@@ -10,7 +10,7 @@
 
 // Identifiers
 
-typedef IdentifierContext* Ctx;
+typedef struct IdentifierContext* Ctx;
 
 TIdentifier rslv_label_identifier(Ctx ctx, TIdentifier label) {
     string_t name = str_new(NULL);

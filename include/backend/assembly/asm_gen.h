@@ -6,13 +6,13 @@
 typedef struct TacProgram TacProgram;
 typedef struct AsmProgram AsmProgram;
 typedef struct FrontEndContext FrontEndContext;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Assembly generation
 
 unique_ptr_t(AsmProgram)
-    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, FrontEndContext* frontend, IdentifierContext* identifiers);
+    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

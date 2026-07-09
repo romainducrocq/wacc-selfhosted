@@ -213,7 +213,7 @@ shared_ptr_t(StaticInit) make_ZeroInit(TLong byte) {
 }
 
 shared_ptr_t(StaticInit)
-    make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(CStringLiteral) * literal) {
+    make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(struct CStringLiteral) * literal) {
     shared_ptr_t(StaticInit) self = make_StaticInit();
     self->type = AST_StringInit_t;
     self->get._StringInit.string_const = string_const;

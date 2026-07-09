@@ -40,7 +40,7 @@ PairKeyValue(TIdentifier, Struct8Bytes);
 
 typedef struct AsmGenContext {
     FrontEndContext* frontend;
-    IdentifierContext* identifiers;
+    struct IdentifierContext* identifiers;
     // Assembly generation
     FunType* p_fun_type;
     REGISTER_KIND arg_regs[6];
@@ -57,20 +57,20 @@ typedef struct AsmGenContext {
 
 typedef AsmGenContext* Ctx;
 
-static shared_ptr_t(AsmOperand) char_imm_op(CConstChar* node) {
+static shared_ptr_t(AsmOperand) char_imm_op(struct CConstChar* node) {
     TULong value = (TULong)node->value;
     bool is_neg = node->value < 0;
     return make_AsmImm(value, true, false, is_neg);
 }
 
-static shared_ptr_t(AsmOperand) int_imm_op(CConstInt* node) {
+static shared_ptr_t(AsmOperand) int_imm_op(struct CConstInt* node) {
     TULong value = (TULong)node->value;
     bool is_byte = node->value <= 127 && node->value >= -128;
     bool is_neg = node->value < 0;
     return make_AsmImm(value, is_byte, false, is_neg);
 }
 
-static shared_ptr_t(AsmOperand) long_imm_op(CConstLong* node) {
+static shared_ptr_t(AsmOperand) long_imm_op(struct CConstLong* node) {
     TULong value = (TULong)node->value;
     bool is_byte = node->value <= 127l && node->value >= -128l;
     bool is_quad = node->value > 2147483647l || node->value < -2147483648l;
@@ -78,19 +78,19 @@ static shared_ptr_t(AsmOperand) long_imm_op(CConstLong* node) {
     return make_AsmImm(value, is_byte, is_quad, is_neg);
 }
 
-static shared_ptr_t(AsmOperand) uchar_imm(CConstUChar* node) {
+static shared_ptr_t(AsmOperand) uchar_imm(struct CConstUChar* node) {
     TULong value = (TULong)node->value;
     return make_AsmImm(value, true, false, false);
 }
 
-static shared_ptr_t(AsmOperand) uint_imm_op(CConstUInt* node) {
+static shared_ptr_t(AsmOperand) uint_imm_op(struct CConstUInt* node) {
     TULong value = (TULong)node->value;
     bool is_byte = node->value <= 255u;
     bool is_quad = node->value > 2147483647u;
     return make_AsmImm(value, is_byte, is_quad, false);
 }
 
-static shared_ptr_t(AsmOperand) ulong_imm_op(CConstULong* node) {
+static shared_ptr_t(AsmOperand) ulong_imm_op(struct CConstULong* node) {
     TULong value = node->value;
     bool is_byte = node->value <= 255ul;
     bool is_quad = node->value > 2147483647ul;
@@ -154,7 +154,7 @@ static shared_ptr_t(AsmOperand) dbl_static_const_op(Ctx ctx, TULong binary, TInt
     return make_AsmData(dbl_const_label, 0l);
 }
 
-static shared_ptr_t(AsmOperand) dbl_const_op(Ctx ctx, CConstDouble* node) {
+static shared_ptr_t(AsmOperand) dbl_const_op(Ctx ctx, struct CConstDouble* node) {
     TULong binary = dbl_to_binary(node->value);
     TInt byte = binary == 9223372036854775808ul ? 16 : 8;
     return dbl_static_const_op(ctx, binary, byte);
@@ -2151,7 +2151,7 @@ static void const_idx_add_ptr_instr(Ctx ctx, TacAddPtr* node) {
     {
         shared_ptr_t(AsmOperand) src = sptr_new();
         {
-            CConst* constant = node->idx->get._TacConstant.constant;
+            struct CConst* constant = node->idx->get._TacConstant.constant;
             THROW_ABORT_IF(constant->type != AST_CConstLong_t);
             src = gen_memory(REG_Ax, constant->get._CConstLong.value * node->scale);
         }
@@ -2795,7 +2795,7 @@ static unique_ptr_t(AsmProgram) gen_program(Ctx ctx, TacProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unique_ptr_t(AsmProgram)
-    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, FrontEndContext* frontend, IdentifierContext* identifiers) {
+    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     AsmGenContext ctx;
     {
         ctx.frontend = frontend;

@@ -28,7 +28,7 @@ typedef struct Declarator {
 
 typedef struct ParserContext {
     struct ErrorsContext* errors;
-    IdentifierContext* identifiers;
+    struct IdentifierContext* identifiers;
     // Parser
     size_t pop_idx;
     Token* next_tok;
@@ -127,7 +127,7 @@ static error_t parse_identifier(Ctx ctx, size_t i, TIdentifier* identifier) {
 
 // <string> ::= ? A string token ? => "([^"\\\n]|\\['"\\?abfnrtv])*"
 // string = StringLiteral(int*)
-static error_t parse_string_literal(Ctx ctx, shared_ptr_t(CStringLiteral) * literal) {
+static error_t parse_string_literal(Ctx ctx, shared_ptr_t(struct CStringLiteral) * literal) {
     vector_t(TChar) value = vec_new();
     CATCH_ENTER;
     string_to_literal(map_get(ctx->identifiers->hash_table, ctx->next_tok->tok), &value);
@@ -144,26 +144,26 @@ static error_t parse_string_literal(Ctx ctx, shared_ptr_t(CStringLiteral) * lite
 }
 
 // <int> ::= ? An int token ? => [0-9]+
-static shared_ptr_t(CConst) parse_int_const(long intmax) {
+static shared_ptr_t(struct CConst) parse_int_const(long intmax) {
     TInt value = (int_t)intmax;
     return make_CConstInt(value);
 }
 
 // <char> ::= ? A char token ? => '([^'\\\n]|\\['"?\\abfnrtv])'
-static shared_ptr_t(CConst) parse_char_const(Ctx ctx) {
+static shared_ptr_t(struct CConst) parse_char_const(Ctx ctx) {
     TInt value = string_to_char_ascii(map_get(ctx->identifiers->hash_table, ctx->next_tok->tok));
     return make_CConstInt(value);
 }
 
 // <long> ::= ? An int or long token ? => [0-9]+[lL]
-static shared_ptr_t(CConst) parse_long_const(long intmax) {
+static shared_ptr_t(struct CConst) parse_long_const(long intmax) {
     TLong value = (long_t)intmax;
     return make_CConstLong(value);
 }
 
 // <double> ::= ? A floating-point constant token ?
 //            => (([0-9]*\.[0-9]+|[0-9]+\.?)[Ee][+\-]?[0-9]+|[0-9]*\.[0-9]+|[0-9]+\.)
-static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
+static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
     CATCH_ENTER;
     TDouble value;
     TRY(string_to_dbl(
@@ -174,20 +174,20 @@ static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 }
 
 // <uint> ::= ? An unsigned int token ? => [0-9]+[uU]
-static shared_ptr_t(CConst) parse_uint_const(unsigned long uintmax) {
+static shared_ptr_t(struct CConst) parse_uint_const(unsigned long uintmax) {
     TUInt value = (uint_t)uintmax;
     return make_CConstUInt(value);
 }
 
 // <ulong> ::= ? An unsigned int or unsigned long token ? => [0-9]+([lL][uU]|[uU][lL])
-static shared_ptr_t(CConst) parse_ulong_const(unsigned long uintmax) {
+static shared_ptr_t(struct CConst) parse_ulong_const(unsigned long uintmax) {
     TULong value = (ulong_t)uintmax;
     return make_CConstULong(value);
 }
 
 // (signed) <const> ::= <int> | <long> | <double> | <char>
 // (signed) const = ConstInt(int) | ConstLong(long) | ConstDouble(double) | ConstChar(int)
-static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
+static error_t parse_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
     CATCH_ENTER;
     long value;
     char* strto_value;
@@ -221,7 +221,7 @@ static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 
 // (unsigned) <const> ::= <uint> | <ulong>
 // (unsigned) const = ConstUInt(uint) | ConstULong(ulong) | ConstUChar(int)
-static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
+static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
     CATCH_ENTER;
     unsigned long value;
     char* strto_value;
@@ -243,7 +243,7 @@ static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 }
 
 static error_t parse_arr_size(Ctx ctx, TLong* size) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -579,7 +579,7 @@ static error_t parse_arg_list(Ctx ctx, vector_t(unique_ptr_t(CExp)) * args) {
 }
 
 static error_t parse_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(parse_const(ctx, &constant));
@@ -590,7 +590,7 @@ static error_t parse_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
 }
 
 static error_t parse_unsigned_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(parse_unsigned_const(ctx, &constant));
@@ -601,7 +601,7 @@ static error_t parse_unsigned_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
 }
 
 static error_t parse_string_literal_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(CStringLiteral) literal = sptr_new();
+    shared_ptr_t(struct CStringLiteral) literal = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -697,7 +697,7 @@ static error_t parse_arrow_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
 static error_t parse_postfix_incr_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     unique_ptr_t(CExp) exp_right = uptr_new();
     unique_ptr_t(CExp) exp_right_1 = uptr_new();
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     unique_ptr_t(CExp) exp_null = uptr_new();
     size_t info_at = ctx->peek_tok->info_at;
@@ -733,7 +733,7 @@ static error_t parse_incr_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     unique_ptr_t(CExp) exp_right = uptr_new();
     unique_ptr_t(CExp) exp_left_1 = uptr_new();
     unique_ptr_t(CExp) exp_right_1 = uptr_new();
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     CUnaryOp unop = init_CPrefix();
@@ -1373,7 +1373,7 @@ static error_t parse_switch_statement(Ctx ctx, unique_ptr_t(CStatement) * statem
 static error_t parse_case_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     unique_ptr_t(CExp) value = uptr_new();
     unique_ptr_t(CStatement) jump_to = uptr_new();
-    shared_ptr_t(CConst) constant = sptr_new();
+    shared_ptr_t(struct CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at;
     TRY(pop_next(ctx));
@@ -2427,7 +2427,7 @@ static error_t parse_program(Ctx ctx, unique_ptr_t(CProgram) * c_ast) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers,
+error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
     unique_ptr_t(CProgram) * c_ast) {
     ParserContext ctx;
     {

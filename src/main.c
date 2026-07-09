@@ -65,7 +65,7 @@ static void set_filename_ext(Ctx ctx, char* ext) {
 }
 
 static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoContext* fileio) {
-    IdentifierContext identifiers;
+    struct IdentifierContext identifiers;
     FrontEndContext frontend;
     BackEndContext backend;
     vector_t(Token) tokens = vec_new();

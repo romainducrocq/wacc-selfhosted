@@ -173,7 +173,7 @@ char* get_tok_kind_fmt(TOKEN_KIND tok_kind) {
     }
 }
 
-char* get_tok_fmt(IdentifierContext* ctx, Token* token) {
+char* get_tok_fmt(struct IdentifierContext* ctx, Token* token) {
     switch (token->tok_kind) {
         case TOK_identifier:
         case TOK_string_literal:
@@ -189,7 +189,7 @@ char* get_tok_fmt(IdentifierContext* ctx, Token* token) {
     }
 }
 
-char* get_const_fmt(CConst* node) {
+char* get_const_fmt(struct CConst* node) {
     switch (node->type) {
         case AST_CConstInt_t:
             return "int";
@@ -339,7 +339,7 @@ char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop) {
     }
 }
 
-char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt) {
+char* get_name_fmt(struct IdentifierContext* ctx, TIdentifier name, string_t* name_fmt) {
     string_t value = map_get(ctx->hash_table, name);
     str_copy(value, *name_fmt);
     for (size_t i = str_size(*name_fmt); i-- > 0;) {
@@ -351,7 +351,7 @@ char* get_name_fmt(IdentifierContext* ctx, TIdentifier name, string_t* name_fmt)
     return *name_fmt;
 }
 
-char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt) {
+char* get_struct_name_fmt(struct IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt) {
     *struct_fmt = is_union ? str_new("union ") : str_new("struct ");
     {
         string_t name_fmt = str_new(NULL);
@@ -361,7 +361,7 @@ char* get_struct_name_fmt(IdentifierContext* ctx, TIdentifier name, bool is_unio
     return *struct_fmt;
 }
 
-char* get_fun_fmt(IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt) {
+char* get_fun_fmt(struct IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt) {
     *fun_fmt = str_new("(");
     {
         string_t type_fmt = str_new(NULL);
@@ -385,7 +385,7 @@ char* get_fun_fmt(IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt) 
     return *fun_fmt;
 }
 
-char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt) {
+char* get_ptr_fmt(struct IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt) {
     *ptr_fmt = str_new("");
     string_t decltor_fmt = str_new("*");
     while (ptr_type->ref_type->type == AST_Pointer_t) {
@@ -402,7 +402,7 @@ char* get_ptr_fmt(IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt) 
     return *ptr_fmt;
 }
 
-char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt) {
+char* get_arr_fmt(struct IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt) {
     *arr_fmt = str_new("");
     string_t decltor_fmt = str_new("[");
     {
@@ -431,11 +431,11 @@ char* get_arr_fmt(IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt) {
     return *arr_fmt;
 }
 
-char* get_struct_fmt(IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt) {
+char* get_struct_fmt(struct IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt) {
     return get_struct_name_fmt(ctx, struct_type->tag, struct_type->is_union, struct_fmt);
 }
 
-char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt) {
+char* get_type_fmt(struct IdentifierContext* ctx, Type* type, string_t* type_fmt) {
     switch (type->type) {
         case AST_Char_t:
             return "char";

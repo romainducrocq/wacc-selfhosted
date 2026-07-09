@@ -7,13 +7,13 @@
 typedef struct Token Token;
 typedef struct CProgram CProgram;
 struct ErrorsContext;
-typedef struct IdentifierContext IdentifierContext;
+struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Parser
 
-error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers,
+error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
     unique_ptr_t(CProgram) * c_ast);
 
 #endif

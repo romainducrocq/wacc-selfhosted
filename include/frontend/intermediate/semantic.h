@@ -18,13 +18,7 @@ typedef struct IdentifierContext IdentifierContext;
 // Loop labeling
 // Identifier resolution
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 error_t analyze_semantic(
     CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, IdentifierContext* identifiers);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

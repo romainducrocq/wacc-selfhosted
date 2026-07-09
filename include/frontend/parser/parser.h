@@ -13,13 +13,7 @@ typedef struct IdentifierContext IdentifierContext;
 
 // Parser
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, IdentifierContext* identifiers,
     unique_ptr_t(CProgram) * c_ast);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

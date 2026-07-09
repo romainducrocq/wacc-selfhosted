@@ -114,9 +114,6 @@ typedef struct Type {
     } get;
 } Type;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(Type) make_Type(void);
 shared_ptr_t(Type) make_Char(void);
 shared_ptr_t(Type) make_SChar(void);
@@ -132,9 +129,6 @@ shared_ptr_t(Type) make_Pointer(shared_ptr_t(Type) * ref_type);
 shared_ptr_t(Type) make_Array(TLong size, shared_ptr_t(Type) * elem_type);
 shared_ptr_t(Type) make_Structure(TIdentifier tag, bool is_union);
 void free_Type(shared_ptr_t(Type) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -208,9 +202,6 @@ typedef struct StaticInit {
     } get;
 } StaticInit;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(StaticInit) make_StaticInit(void);
 shared_ptr_t(StaticInit) make_IntInit(TInt value);
 shared_ptr_t(StaticInit) make_LongInit(TLong value);
@@ -224,9 +215,6 @@ shared_ptr_t(StaticInit)
     make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(CStringLiteral) * literal);
 shared_ptr_t(StaticInit) make_PointerInit(TIdentifier name);
 void free_StaticInit(shared_ptr_t(StaticInit) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -256,17 +244,11 @@ typedef struct InitialValue {
     } get;
 } InitialValue;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(InitialValue) make_InitialValue(void);
 shared_ptr_t(InitialValue) make_Tentative(void);
 shared_ptr_t(InitialValue) make_Initial(vector_t(shared_ptr_t(StaticInit)) * static_inits);
 shared_ptr_t(InitialValue) make_NoInitializer(void);
 void free_InitialValue(shared_ptr_t(InitialValue) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -304,18 +286,12 @@ typedef struct IdentifierAttr {
     } get;
 } IdentifierAttr;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(IdentifierAttr) make_IdentifierAttr(void);
 unique_ptr_t(IdentifierAttr) make_FunAttr(bool is_def, bool is_glob);
 unique_ptr_t(IdentifierAttr) make_StaticAttr(bool is_glob, shared_ptr_t(InitialValue) * init);
 unique_ptr_t(IdentifierAttr) make_ConstantAttr(shared_ptr_t(StaticInit) * static_init);
 unique_ptr_t(IdentifierAttr) make_LocalAttr(void);
 void free_IdentifierAttr(unique_ptr_t(IdentifierAttr) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -327,14 +303,8 @@ typedef struct Symbol {
     unique_ptr_t(IdentifierAttr) attrs;
 } Symbol;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(Symbol) make_Symbol(shared_ptr_t(Type) * type_t, unique_ptr_t(IdentifierAttr) * attrs);
 void free_Symbol(unique_ptr_t(Symbol) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -346,14 +316,8 @@ typedef struct StructMember {
     shared_ptr_t(Type) member_type;
 } StructMember;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(StructMember) make_StructMember(TLong offset, shared_ptr_t(Type) * member_type);
 void free_StructMember(unique_ptr_t(StructMember) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -370,15 +334,9 @@ typedef struct StructTypedef {
     hashmap_t(TIdentifier, UPtrStructMember) members;
 } StructTypedef;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(StructTypedef) make_StructTypedef(TInt alignment, TLong size, vector_t(TIdentifier) * member_names,
     hashmap_t(TIdentifier, UPtrStructMember) * members);
 void free_StructTypedef(unique_ptr_t(StructTypedef) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -397,13 +355,7 @@ typedef struct FrontEndContext {
     hashset_t(TIdentifier) addressed_set;
 } FrontEndContext;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 StructMember* get_struct_typedef_member(FrontEndContext* ctx, TIdentifier tag, TIdentifier member_name);
 StructMember* get_struct_typedef_back(FrontEndContext* ctx, TIdentifier tag);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

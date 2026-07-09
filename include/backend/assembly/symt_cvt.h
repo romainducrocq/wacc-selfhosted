@@ -15,14 +15,8 @@ typedef struct FrontEndContext FrontEndContext;
 
 // Symbol table conversion
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 TInt gen_type_alignment(FrontEndContext* ctx, Type* type);
 shared_ptr_t(AssemblyType) cvt_backend_asm_type(FrontEndContext* ctx, TIdentifier name);
 void convert_symbol_table(AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

@@ -66,9 +66,6 @@ typedef struct CConst {
     } get;
 } CConst;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(CConst) make_CConst(void);
 shared_ptr_t(CConst) make_CConstInt(TInt value);
 shared_ptr_t(CConst) make_CConstLong(TLong value);
@@ -78,9 +75,6 @@ shared_ptr_t(CConst) make_CConstDouble(TDouble value);
 shared_ptr_t(CConst) make_CConstChar(TChar value);
 shared_ptr_t(CConst) make_CConstUChar(TUChar value);
 void free_CConst(shared_ptr_t(CConst) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -91,14 +85,8 @@ typedef struct CStringLiteral {
     vector_t(TChar) value;
 } CStringLiteral;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(CStringLiteral) make_CStringLiteral(vector_t(TChar) * value);
 void free_CStringLiteral(shared_ptr_t(CStringLiteral) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -111,16 +99,10 @@ typedef struct IdentifierContext {
     hashmap_t(TIdentifier, string_t) hash_table;
 } IdentifierContext;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 TIdentifier make_string_identifier(IdentifierContext* ctx, string_t* value);
 TIdentifier make_label_identifier(IdentifierContext* ctx, string_t* name);
 TIdentifier make_var_identifier(IdentifierContext* ctx, string_t* name);
 TIdentifier make_struct_identifier(IdentifierContext* ctx, string_t* name);
-#ifdef __cplusplus
-}
-#endif
 #define UID_SEPARATOR "."
 
 #endif

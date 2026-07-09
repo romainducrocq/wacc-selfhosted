@@ -128,17 +128,11 @@ typedef struct CAbstractDeclarator {
     } get;
 } CAbstractDeclarator;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CAbstractDeclarator) make_CAbstractDeclarator(void);
 unique_ptr_t(CAbstractDeclarator) make_CAbstractPointer(unique_ptr_t(CAbstractDeclarator) * abstract_decltor);
 unique_ptr_t(CAbstractDeclarator) make_CAbstractArray(TLong size, unique_ptr_t(CAbstractDeclarator) * abstract_decltor);
 unique_ptr_t(CAbstractDeclarator) make_CAbstractBase(void);
 void free_CAbstractDeclarator(unique_ptr_t(CAbstractDeclarator) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -150,14 +144,8 @@ typedef struct CParam {
     shared_ptr_t(Type) param_type;
 } CParam;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(Type) * param_type);
 void free_CParam(unique_ptr_t(CParam) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -195,9 +183,6 @@ typedef struct CDeclarator {
     } get;
 } CDeclarator;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CDeclarator) make_CDeclarator(void);
 unique_ptr_t(CDeclarator) make_CIdent(TIdentifier name);
 unique_ptr_t(CDeclarator) make_CPointerDeclarator(unique_ptr_t(CDeclarator) * decltor);
@@ -205,9 +190,6 @@ unique_ptr_t(CDeclarator) make_CArrayDeclarator(TLong size, unique_ptr_t(CDeclar
 unique_ptr_t(CDeclarator)
     make_CFunDeclarator(vector_t(unique_ptr_t(CParam)) * param_list, unique_ptr_t(CDeclarator) * decltor);
 void free_CDeclarator(unique_ptr_t(CDeclarator) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -345,9 +327,6 @@ typedef struct CExp {
     } get;
 } CExp;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CExp) make_CExp(size_t info_at);
 unique_ptr_t(CExp) make_CConstant(shared_ptr_t(CConst) * constant, size_t info_at);
 unique_ptr_t(CExp) make_CString(shared_ptr_t(CStringLiteral) * literal, size_t info_at);
@@ -370,9 +349,6 @@ unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(Type) * target_type, size_t info_a
 unique_ptr_t(CExp) make_CDot(TIdentifier member, unique_ptr_t(CExp) * structure, size_t info_at);
 unique_ptr_t(CExp) make_CArrow(TIdentifier member, unique_ptr_t(CExp) * pointer, size_t info_at);
 void free_CExp(unique_ptr_t(CExp) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -498,9 +474,6 @@ typedef struct CStatement {
     } get;
 } CStatement;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CStatement) make_CStatement(void);
 unique_ptr_t(CStatement) make_CReturn(unique_ptr_t(CExp) * exp, size_t info_at);
 unique_ptr_t(CStatement) make_CExpression(unique_ptr_t(CExp) * exp);
@@ -520,9 +493,6 @@ unique_ptr_t(CStatement) make_CBreak(size_t info_at);
 unique_ptr_t(CStatement) make_CContinue(size_t info_at);
 unique_ptr_t(CStatement) make_CNull(void);
 void free_CStatement(unique_ptr_t(CStatement) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -546,16 +516,10 @@ typedef struct CForInit {
     } get;
 } CForInit;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CForInit) make_CForInit(void);
 unique_ptr_t(CForInit) make_CInitDecl(unique_ptr_t(CVariableDeclaration) * init);
 unique_ptr_t(CForInit) make_CInitExp(unique_ptr_t(CExp) * init);
 void free_CForInit(unique_ptr_t(CForInit) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -573,15 +537,9 @@ typedef struct CBlock {
     } get;
 } CBlock;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CBlock) make_CBlock(void);
 unique_ptr_t(CBlock) make_CB(vector_t(unique_ptr_t(CBlockItem)) * block_items);
 void free_CBlock(unique_ptr_t(CBlock) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -605,16 +563,10 @@ typedef struct CBlockItem {
     } get;
 } CBlockItem;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CBlockItem) make_CBlockItem(void);
 unique_ptr_t(CBlockItem) make_CS(unique_ptr_t(CStatement) * statement);
 unique_ptr_t(CBlockItem) make_CD(unique_ptr_t(CDeclaration) * declaration);
 void free_CBlockItem(unique_ptr_t(CBlockItem) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -654,16 +606,10 @@ typedef struct CInitializer {
     } get;
 } CInitializer;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CInitializer) make_CInitializer(void);
 unique_ptr_t(CInitializer) make_CSingleInit(unique_ptr_t(CExp) * exp);
 unique_ptr_t(CInitializer) make_CCompoundInit(vector_t(unique_ptr_t(CInitializer)) * initializers);
 void free_CInitializer(unique_ptr_t(CInitializer) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -676,15 +622,9 @@ typedef struct CMemberDeclaration {
     size_t info_at;
 } CMemberDeclaration;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CMemberDeclaration)
     make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(Type) * member_type, size_t info_at);
 void free_CMemberDeclaration(unique_ptr_t(CMemberDeclaration) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -698,15 +638,9 @@ typedef struct CStructDeclaration {
     size_t info_at;
 } CStructDeclaration;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CStructDeclaration) make_CStructDeclaration(
     TIdentifier tag, bool is_union, vector_t(unique_ptr_t(CMemberDeclaration)) * members, size_t info_at);
 void free_CStructDeclaration(unique_ptr_t(CStructDeclaration) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -722,15 +656,9 @@ typedef struct CFunctionDeclaration {
     size_t info_at;
 } CFunctionDeclaration;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CFunctionDeclaration) make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params,
     unique_ptr_t(CBlock) * body, shared_ptr_t(Type) * fun_type, CStorageClass* storage_class, size_t info_at);
 void free_CFunctionDeclaration(unique_ptr_t(CFunctionDeclaration) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -745,15 +673,9 @@ typedef struct CVariableDeclaration {
     size_t info_at;
 } CVariableDeclaration;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(CInitializer) * init,
     shared_ptr_t(Type) * var_type, CStorageClass* storage_class, size_t info_at);
 void free_CVariableDeclaration(unique_ptr_t(CVariableDeclaration) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -783,17 +705,11 @@ typedef struct CDeclaration {
     } get;
 } CDeclaration;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CDeclaration) make_CDeclaration(void);
 unique_ptr_t(CDeclaration) make_CFunDecl(unique_ptr_t(CFunctionDeclaration) * fun_decl);
 unique_ptr_t(CDeclaration) make_CVarDecl(unique_ptr_t(CVariableDeclaration) * var_decl);
 unique_ptr_t(CDeclaration) make_CStructDecl(unique_ptr_t(CStructDeclaration) * struct_decl);
 void free_CDeclaration(unique_ptr_t(CDeclaration) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -804,13 +720,7 @@ typedef struct CProgram {
     vector_t(unique_ptr_t(CDeclaration)) declarations;
 } CProgram;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(CProgram) make_CProgram(vector_t(unique_ptr_t(CDeclaration)) * declarations);
 void free_CProgram(unique_ptr_t(CProgram) * self);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

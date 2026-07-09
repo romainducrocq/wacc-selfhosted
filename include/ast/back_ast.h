@@ -186,9 +186,6 @@ typedef struct AsmOperand {
     } get;
 } AsmOperand;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(AsmOperand) make_AsmOperand(void);
 shared_ptr_t(AsmOperand) make_AsmImm(TULong value, bool is_byte, bool is_quad, bool is_neg);
 shared_ptr_t(AsmOperand) make_AsmRegister(AsmReg* reg);
@@ -198,9 +195,6 @@ shared_ptr_t(AsmOperand) make_AsmData(TIdentifier name, TLong offset);
 shared_ptr_t(AsmOperand) make_AsmPseudoMem(TIdentifier name, TLong offset);
 shared_ptr_t(AsmOperand) make_AsmIndexed(TLong scale, AsmReg* reg_base, AsmReg* reg_index);
 void free_AsmOperand(shared_ptr_t(AsmOperand) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -400,9 +394,6 @@ typedef struct AsmInstruction {
     } get;
 } AsmInstruction;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(AsmInstruction) make_AsmInstruction(void);
 unique_ptr_t(AsmInstruction)
     make_AsmMov(shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
@@ -433,9 +424,6 @@ unique_ptr_t(AsmInstruction) make_AsmPop(AsmReg* reg);
 unique_ptr_t(AsmInstruction) make_AsmCall(TIdentifier name);
 unique_ptr_t(AsmInstruction) make_AsmRet(void);
 void free_AsmInstruction(unique_ptr_t(AsmInstruction) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -473,9 +461,6 @@ typedef struct AsmTopLevel {
     } get;
 } AsmTopLevel;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(AsmTopLevel) make_AsmTopLevel(void);
 unique_ptr_t(AsmTopLevel) make_AsmFunction(
     TIdentifier name, bool is_glob, bool is_ret_memory, vector_t(unique_ptr_t(AsmInstruction)) * instructions);
@@ -484,9 +469,6 @@ unique_ptr_t(AsmTopLevel) make_AsmStaticVariable(
 unique_ptr_t(AsmTopLevel)
     make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(StaticInit) * static_init);
 void free_AsmTopLevel(unique_ptr_t(AsmTopLevel) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -498,14 +480,8 @@ typedef struct AsmProgram {
     vector_t(unique_ptr_t(AsmTopLevel)) top_levels;
 } AsmProgram;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(AsmProgram) make_AsmProgram(
     vector_t(unique_ptr_t(AsmTopLevel)) * static_const_toplvls, vector_t(unique_ptr_t(AsmTopLevel)) * top_levels);
 void free_AsmProgram(unique_ptr_t(AsmProgram) * self);
-#ifdef __cplusplus
-}
-#endif
 
 #endif

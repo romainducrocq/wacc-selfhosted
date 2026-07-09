@@ -56,9 +56,6 @@ typedef struct AssemblyType {
     } get;
 } AssemblyType;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 shared_ptr_t(AssemblyType) make_AssemblyType(void);
 shared_ptr_t(AssemblyType) make_Byte(void);
 shared_ptr_t(AssemblyType) make_LongWord(void);
@@ -66,9 +63,6 @@ shared_ptr_t(AssemblyType) make_QuadWord(void);
 shared_ptr_t(AssemblyType) make_BackendDouble(void);
 shared_ptr_t(AssemblyType) make_ByteArray(TLong size, TInt alignment);
 void free_AssemblyType(shared_ptr_t(AssemblyType) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -95,16 +89,10 @@ typedef struct BackendSymbol {
     } get;
 } BackendSymbol;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 unique_ptr_t(BackendSymbol) make_BackendSymbol(void);
 unique_ptr_t(BackendSymbol) make_BackendObj(bool is_static, bool is_const, shared_ptr_t(AssemblyType) * asm_type);
 unique_ptr_t(BackendSymbol) make_BackendFun(bool is_def);
 void free_BackendSymbol(unique_ptr_t(BackendSymbol) * self);
-#ifdef __cplusplus
-}
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

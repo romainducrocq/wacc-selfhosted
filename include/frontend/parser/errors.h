@@ -94,7 +94,7 @@ char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 #define GET_UTIL_MSG(X, ...) GET_MESSAGE(util, X, __VA_ARGS__)
 #define GET_LEXER_MSG(X, ...) GET_MESSAGE(lexer, X, __VA_ARGS__)
 // #define GET_PARSER_MSG(X, ...) GET_MESSAGE(parser, X, __VA_ARGS__)
-#define GET_SEMANTIC_MSG(X, ...) GET_MESSAGE(semantic, X, __VA_ARGS__)
+// #define GET_SEMANTIC_MSG(X, ...) GET_MESSAGE(semantic, X, __VA_ARGS__)
 
 // #define GET_MESSAGE_N(E, N) get_##E##_msg(N), #N
 // #define GET_MESSAGE_0(E, N) GET_MESSAGE_N(N)
@@ -113,7 +113,7 @@ char* get_semantic_msg(MESSAGE_SEMANTIC msg);
 // #define GET_UTIL_MSG(I, ...) GET_MESSAGE##I(util, __VA_ARGS__)
 // #define GET_LEXER_MSG(I, ...) GET_MESSAGE##I(lexer, __VA_ARGS__)
 #define GET_PARSER_MSG(I, ...) GET_MESSAGE_##I(parser, __VA_ARGS__)
-// #define GET_SEMANTIC_MSG(I, ...) GET_MESSAGE##I(semantic, __VA_ARGS__)
+#define GET_SEMANTIC_MSG(I, ...) GET_MESSAGE_##I(semantic, __VA_ARGS__)
 
 #define STRINGIFY(X) #X
 #define GET_VERSION(X, Y, Z) STRINGIFY(X), STRINGIFY(Y), STRINGIFY(Z)

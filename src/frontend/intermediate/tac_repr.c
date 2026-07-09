@@ -15,7 +15,7 @@
 #include "frontend/intermediate/tac_repr.h"
 
 typedef struct TacReprContext {
-    FrontEndContext* frontend;
+    struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Three address code representation
     vector_t(unique_ptr_t(TacInstruction)) * p_instrs;
@@ -101,15 +101,15 @@ static shared_ptr_t(TacValue) var_value(CVar* node) {
 static shared_ptr_t(TacValue) exp_inner_value(Ctx ctx, CExp* node, bool is_ptr) {
     TIdentifier inner_name = repr_var_identifier(ctx->identifiers, node);
     if (map_find(ctx->frontend->symbol_table, inner_name) == map_end()) {
-        shared_ptr_t(Type) inner_type = sptr_new();
+        shared_ptr_t(struct Type) inner_type = sptr_new();
         if (is_ptr) {
             inner_type = make_Long();
         }
         else {
             sptr_copy(Type, node->exp_type, inner_type);
         }
-        unique_ptr_t(IdentifierAttr) inner_attrs = make_LocalAttr();
-        unique_ptr_t(Symbol) symbol = make_Symbol(&inner_type, &inner_attrs);
+        unique_ptr_t(struct IdentifierAttr) inner_attrs = make_LocalAttr();
+        unique_ptr_t(struct Symbol) symbol = make_Symbol(&inner_type, &inner_attrs);
         map_move_add(ctx->frontend->symbol_table, inner_name, symbol);
     }
     return make_TacVariable(inner_name);
@@ -157,15 +157,15 @@ static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, CString* node) {
         else {
             string_const_label = repr_label_identifier(ctx->identifiers, LBL_Lstring);
             map_add(ctx->frontend->string_const_table, string_const, string_const_label);
-            shared_ptr_t(Type) constant_type = sptr_new();
+            shared_ptr_t(struct Type) constant_type = sptr_new();
             {
                 TLong size = ((TLong)vec_size(node->literal->value)) + 1l;
-                shared_ptr_t(Type) elem_type = make_Char();
+                shared_ptr_t(struct Type) elem_type = make_Char();
                 constant_type = make_Array(size, &elem_type);
             }
-            unique_ptr_t(IdentifierAttr) constant_attrs = uptr_new();
+            unique_ptr_t(struct IdentifierAttr) constant_attrs = uptr_new();
             {
-                shared_ptr_t(StaticInit) static_init = sptr_new();
+                shared_ptr_t(struct StaticInit) static_init = sptr_new();
                 {
                     shared_ptr_t(struct CStringLiteral) literal = sptr_new();
                     sptr_copy(CStringLiteral, node->literal, literal);
@@ -173,7 +173,7 @@ static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, CString* node) {
                 }
                 constant_attrs = make_ConstantAttr(&static_init);
             }
-            unique_ptr_t(Symbol) symbol = make_Symbol(&constant_type, &constant_attrs);
+            unique_ptr_t(struct Symbol) symbol = make_Symbol(&constant_type, &constant_attrs);
             map_move_add(ctx->frontend->symbol_table, string_const_label, symbol);
         }
     }
@@ -186,7 +186,7 @@ static unique_ptr_t(TacExpResult) var_res_instr(CVar* node) {
     return make_TacPlainOperand(&val);
 }
 
-static bool is_type_signed(Type* type) {
+static bool is_type_signed(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -199,7 +199,7 @@ static bool is_type_signed(Type* type) {
     }
 }
 
-static TInt get_scalar_size(Type* type) {
+static TInt get_scalar_size(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -218,9 +218,9 @@ static TInt get_scalar_size(Type* type) {
     }
 }
 
-static TLong get_type_scale(Ctx ctx, Type* type);
+static TLong get_type_scale(Ctx ctx, struct Type* type);
 
-static TLong get_arr_scale(Ctx ctx, Array* arr_type) {
+static TLong get_arr_scale(Ctx ctx, struct Array* arr_type) {
     TLong size = arr_type->size;
     while (arr_type->elem_type->type == AST_Array_t) {
         arr_type = &arr_type->elem_type->get._Array;
@@ -229,11 +229,11 @@ static TLong get_arr_scale(Ctx ctx, Array* arr_type) {
     return get_type_scale(ctx, arr_type->elem_type) * size;
 }
 
-static TLong get_struct_scale(Ctx ctx, Structure* struct_type) {
+static TLong get_struct_scale(Ctx ctx, struct Structure* struct_type) {
     return map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
 }
 
-static TLong get_type_scale(Ctx ctx, Type* type) {
+static TLong get_type_scale(Ctx ctx, struct Type* type) {
     switch (type->type) {
         case AST_Array_t:
             return get_arr_scale(ctx, &type->get._Array);
@@ -845,8 +845,8 @@ static void sub_obj_dot_res_instr(TacSubObject* res, TLong member_offset) { res-
 
 static unique_ptr_t(TacExpResult) dot_res_instr(Ctx ctx, CDot* node) {
     THROW_ABORT_IF(node->structure->exp_type->type != AST_Structure_t);
-    Structure* struct_type = &node->structure->exp_type->get._Structure;
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct Structure* struct_type = &node->structure->exp_type->get._Structure;
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     TLong member_offset = map_get(struct_typedef->members, node->member)->offset;
     unique_ptr_t(TacExpResult) res = repr_res_instr(ctx, node->structure);
     switch (res->type) {
@@ -867,10 +867,10 @@ static unique_ptr_t(TacExpResult) dot_res_instr(Ctx ctx, CDot* node) {
 
 static unique_ptr_t(TacExpResult) arrow_res_instr(Ctx ctx, CArrow* node) {
     THROW_ABORT_IF(node->pointer->exp_type->type != AST_Pointer_t);
-    Pointer* ptr_type = &node->pointer->exp_type->get._Pointer;
+    struct Pointer* ptr_type = &node->pointer->exp_type->get._Pointer;
     THROW_ABORT_IF(ptr_type->ref_type->type != AST_Structure_t);
-    Structure* struct_type = &ptr_type->ref_type->get._Structure;
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct Structure* struct_type = &ptr_type->ref_type->get._Structure;
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     TLong member_offset = map_get(struct_typedef->members, node->member)->offset;
     shared_ptr_t(TacValue) val = repr_exp_instr(ctx, node->pointer);
     if (member_offset > 0l) {
@@ -1221,9 +1221,9 @@ static void statement_instr(Ctx ctx, CStatement* node) {
     }
 }
 
-static void compound_init_instr(Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size);
+static void compound_init_instr(Ctx ctx, CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size);
 
-static void string_single_init_instr(Ctx ctx, CString* node, Array* arr_type, TIdentifier symbol, TLong size) {
+static void string_single_init_instr(Ctx ctx, CString* node, struct Array* arr_type, TIdentifier symbol, TLong size) {
     size_t byte_at = 0;
 
     size_t bytes_size = (size_t)arr_type->size;
@@ -1286,7 +1286,7 @@ static void string_single_init_instr(Ctx ctx, CString* node, Array* arr_type, TI
     }
 }
 
-static void single_init_instr(Ctx ctx, CSingleInit* node, Type* init_type, TIdentifier symbol) {
+static void single_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type, TIdentifier symbol) {
     if (node->exp->type == AST_CString_t && init_type->type == AST_Array_t) {
         string_single_init_instr(ctx, &node->exp->get._CString, &init_type->get._Array, symbol, 0l);
     }
@@ -1303,7 +1303,7 @@ static void single_init_instr(Ctx ctx, CSingleInit* node, Type* init_type, TIden
     }
 }
 
-static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, Type* init_type, TIdentifier symbol, TLong size) {
+static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type, TIdentifier symbol, TLong size) {
     if (node->exp->type == AST_CString_t && init_type->type == AST_Array_t) {
         string_single_init_instr(ctx, &node->exp->get._CString, &init_type->get._Array, symbol, size);
     }
@@ -1315,7 +1315,7 @@ static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, Type* init_ty
     }
 }
 
-static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, Array* arr_type, TIdentifier symbol, TLong* size) {
+static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Array* arr_type, TIdentifier symbol, TLong* size) {
     for (size_t i = 0; i < vec_size(node->initializers); ++i) {
         compound_init_instr(ctx, node->initializers[i], arr_type->elem_type, symbol, size);
         if (node->initializers[i]->type == AST_CSingleInit_t) {
@@ -1325,16 +1325,16 @@ static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, Array* arr_typ
 }
 
 static void struct_compound_init_instr(
-    Ctx ctx, CCompoundInit* node, Structure* struct_type, TIdentifier symbol, TLong* size) {
+    Ctx ctx, CCompoundInit* node, struct Structure* struct_type, TIdentifier symbol, TLong* size) {
     for (size_t i = vec_size(node->initializers); i-- > 0;) {
-        StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
+        struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         TLong offset = *size + member->offset;
         compound_init_instr(ctx, node->initializers[i], member->member_type, symbol, &offset);
     }
     *size += get_struct_scale(ctx, struct_type);
 }
 
-static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, Type* init_type, TIdentifier symbol, TLong* size) {
+static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
     switch (init_type->type) {
         case AST_Array_t:
             arr_compound_init_instr(ctx, node, &init_type->get._Array, symbol, size);
@@ -1347,7 +1347,7 @@ static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, Type* init_ty
     }
 }
 
-static void compound_init_instr(Ctx ctx, CInitializer* node, Type* init_type, TIdentifier symbol, TLong* size) {
+static void compound_init_instr(Ctx ctx, CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
     switch (node->type) {
         case AST_CSingleInit_t:
             scalar_compound_init_instr(ctx, &node->get._CSingleInit, init_type, symbol, *size);
@@ -1361,7 +1361,7 @@ static void compound_init_instr(Ctx ctx, CInitializer* node, Type* init_type, TI
 }
 
 static void var_decl_instr(Ctx ctx, CVariableDeclaration* node) {
-    Type* init_type = map_get(ctx->frontend->symbol_table, node->name)->type_t;
+    struct Type* init_type = map_get(ctx->frontend->symbol_table, node->name)->type_t;
     switch (node->init->type) {
         case AST_CSingleInit_t:
             single_init_instr(ctx, &node->init->get._CSingleInit, init_type, node->name);
@@ -1472,38 +1472,38 @@ static void declaration_toplvl(Ctx ctx, CDeclaration* node) {
     }
 }
 
-static vector_t(shared_ptr_t(StaticInit)) tentative_static_toplvl(Ctx ctx, Type* static_init_type) {
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+static vector_t(shared_ptr_t(struct StaticInit)) tentative_static_toplvl(Ctx ctx, struct Type* static_init_type) {
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     {
         TLong byte = get_type_scale(ctx, static_init_type);
-        shared_ptr_t(StaticInit) static_init = make_ZeroInit(byte);
+        shared_ptr_t(struct StaticInit) static_init = make_ZeroInit(byte);
         vec_move_back(static_inits, static_init);
     }
     return static_inits;
 }
 
-static vector_t(shared_ptr_t(StaticInit)) initial_static_toplvl(Initial* node) {
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+static vector_t(shared_ptr_t(struct StaticInit)) initial_static_toplvl(struct Initial* node) {
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     vec_reserve(static_inits, vec_size(node->static_inits));
     for (size_t i = 0; i < vec_size(node->static_inits); ++i) {
-        shared_ptr_t(StaticInit) static_init = sptr_new();
+        shared_ptr_t(struct StaticInit) static_init = sptr_new();
         sptr_copy(StaticInit, node->static_inits[i], static_init);
         vec_move_back(static_inits, static_init);
     }
     return static_inits;
 }
 
-static void repr_static_var_toplvl(Ctx ctx, Symbol* node, TIdentifier symbol) {
-    StaticAttr* static_attr = &node->attrs->get._StaticAttr;
+static void repr_static_var_toplvl(Ctx ctx, struct Symbol* node, TIdentifier symbol) {
+    struct StaticAttr* static_attr = &node->attrs->get._StaticAttr;
     if (static_attr->init->type == AST_NoInitializer_t) {
         return;
     }
 
     TIdentifier name = symbol;
     bool is_glob = static_attr->is_glob;
-    shared_ptr_t(Type) static_init_type = sptr_new();
+    shared_ptr_t(struct Type) static_init_type = sptr_new();
     sptr_copy(Type, node->type_t, static_init_type);
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     switch (static_attr->init->type) {
         case AST_Tentative_t:
             static_inits = tentative_static_toplvl(ctx, static_init_type);
@@ -1522,18 +1522,18 @@ static void push_static_const_toplvl(Ctx ctx, unique_ptr_t(TacTopLevel) static_c
     vec_move_back(*ctx->p_static_consts, static_const_toplvls);
 }
 
-static void repr_static_const_toplvl(Ctx ctx, Symbol* node, TIdentifier symbol) {
+static void repr_static_const_toplvl(Ctx ctx, struct Symbol* node, TIdentifier symbol) {
     TIdentifier name = symbol;
-    shared_ptr_t(Type) static_init_type = sptr_new();
+    shared_ptr_t(struct Type) static_init_type = sptr_new();
     sptr_copy(Type, node->type_t, static_init_type);
-    shared_ptr_t(StaticInit) static_init = sptr_new();
+    shared_ptr_t(struct StaticInit) static_init = sptr_new();
     sptr_copy(StaticInit, node->attrs->get._ConstantAttr.static_init, static_init);
     push_static_const_toplvl(ctx, make_TacStaticConstant(name, &static_init_type, &static_init));
 }
 
 // (static variable) top_level = StaticVariable(identifier, bool, type, static_init*)
 // (static constant) top_level = StaticConstant(identifier, type, static_init)
-static void symbol_toplvl(Ctx ctx, Symbol* node, TIdentifier symbol) {
+static void symbol_toplvl(Ctx ctx, struct Symbol* node, TIdentifier symbol) {
     switch (node->attrs->type) {
         case AST_StaticAttr_t:
             repr_static_var_toplvl(ctx, node, symbol);
@@ -1576,7 +1576,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unique_ptr_t(TacProgram) represent_three_address_code(
-    unique_ptr_t(CProgram) * c_ast, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
+    unique_ptr_t(CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     TacReprContext ctx;
     {
         ctx.frontend = frontend;

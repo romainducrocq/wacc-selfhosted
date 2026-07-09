@@ -419,7 +419,7 @@ unique_ptr_t(AsmTopLevel) make_AsmFunction(
 }
 
 unique_ptr_t(AsmTopLevel) make_AsmStaticVariable(
-    TIdentifier name, TInt alignment, bool is_glob, vector_t(shared_ptr_t(StaticInit)) * static_inits) {
+    TIdentifier name, TInt alignment, bool is_glob, vector_t(shared_ptr_t(struct StaticInit)) * static_inits) {
     unique_ptr_t(AsmTopLevel) self = make_AsmTopLevel();
     self->type = AST_AsmStaticVariable_t;
     self->get._AsmStaticVariable.name = name;
@@ -431,7 +431,7 @@ unique_ptr_t(AsmTopLevel) make_AsmStaticVariable(
 }
 
 unique_ptr_t(AsmTopLevel)
-    make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(StaticInit) * static_init) {
+    make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(struct StaticInit) * static_init) {
     unique_ptr_t(AsmTopLevel) self = make_AsmTopLevel();
     self->type = AST_AsmStaticConstant_t;
     self->get._AsmStaticConstant.name = name;

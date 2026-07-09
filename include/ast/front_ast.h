@@ -141,10 +141,10 @@ void free_CAbstractDeclarator(unique_ptr_t(CAbstractDeclarator) * self);
 typedef struct CParam {
     unique_ptr_impl(AST_T);
     unique_ptr_t(CDeclarator) decltor;
-    shared_ptr_t(Type) param_type;
+    shared_ptr_t(struct Type) param_type;
 } CParam;
 
-unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(Type) * param_type);
+unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(struct Type) * param_type);
 void free_CParam(unique_ptr_t(CParam) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -227,7 +227,7 @@ typedef struct CVar {
 
 typedef struct CCast {
     unique_ptr_t(CExp) exp;
-    shared_ptr_t(Type) target_type;
+    shared_ptr_t(struct Type) target_type;
     CExp* _base;
 } CCast;
 
@@ -286,7 +286,7 @@ typedef struct CSizeOf {
 } CSizeOf;
 
 typedef struct CSizeOfT {
-    shared_ptr_t(Type) target_type;
+    shared_ptr_t(struct Type) target_type;
     CExp* _base;
 } CSizeOfT;
 
@@ -304,7 +304,7 @@ typedef struct CArrow {
 
 typedef struct CExp {
     unique_ptr_impl(AST_T);
-    shared_ptr_t(Type) exp_type;
+    shared_ptr_t(struct Type) exp_type;
     size_t info_at;
 
     union {
@@ -331,7 +331,7 @@ unique_ptr_t(CExp) make_CExp(size_t info_at);
 unique_ptr_t(CExp) make_CConstant(shared_ptr_t(struct CConst) * constant, size_t info_at);
 unique_ptr_t(CExp) make_CString(shared_ptr_t(struct CStringLiteral) * literal, size_t info_at);
 unique_ptr_t(CExp) make_CVar(TIdentifier name, size_t info_at);
-unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(Type) * target_type, size_t info_at);
+unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(struct Type) * target_type, size_t info_at);
 unique_ptr_t(CExp) make_CUnary(CUnaryOp* unop, unique_ptr_t(CExp) * exp, size_t info_at);
 unique_ptr_t(CExp)
     make_CBinary(CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, size_t info_at);
@@ -345,7 +345,7 @@ unique_ptr_t(CExp) make_CAddrOf(unique_ptr_t(CExp) * exp, size_t info_at);
 unique_ptr_t(CExp)
     make_CSubscript(unique_ptr_t(CExp) * primary_exp, unique_ptr_t(CExp) * subscript_exp, size_t info_at);
 unique_ptr_t(CExp) make_CSizeOf(unique_ptr_t(CExp) * exp, size_t info_at);
-unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(Type) * target_type, size_t info_at);
+unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(struct Type) * target_type, size_t info_at);
 unique_ptr_t(CExp) make_CDot(TIdentifier member, unique_ptr_t(CExp) * structure, size_t info_at);
 unique_ptr_t(CExp) make_CArrow(TIdentifier member, unique_ptr_t(CExp) * pointer, size_t info_at);
 void free_CExp(unique_ptr_t(CExp) * self);
@@ -598,7 +598,7 @@ typedef struct CCompoundInit {
 
 typedef struct CInitializer {
     unique_ptr_impl(AST_T);
-    shared_ptr_t(Type) init_type;
+    shared_ptr_t(struct Type) init_type;
 
     union {
         CSingleInit _CSingleInit;
@@ -618,12 +618,12 @@ void free_CInitializer(unique_ptr_t(CInitializer) * self);
 typedef struct CMemberDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier member_name;
-    shared_ptr_t(Type) member_type;
+    shared_ptr_t(struct Type) member_type;
     size_t info_at;
 } CMemberDeclaration;
 
 unique_ptr_t(CMemberDeclaration)
-    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(Type) * member_type, size_t info_at);
+    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(struct Type) * member_type, size_t info_at);
 void free_CMemberDeclaration(unique_ptr_t(CMemberDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -651,13 +651,13 @@ typedef struct CFunctionDeclaration {
     TIdentifier name;
     vector_t(TIdentifier) params;
     unique_ptr_t(CBlock) body;
-    shared_ptr_t(Type) fun_type;
+    shared_ptr_t(struct Type) fun_type;
     CStorageClass storage_class;
     size_t info_at;
 } CFunctionDeclaration;
 
 unique_ptr_t(CFunctionDeclaration) make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params,
-    unique_ptr_t(CBlock) * body, shared_ptr_t(Type) * fun_type, CStorageClass* storage_class, size_t info_at);
+    unique_ptr_t(CBlock) * body, shared_ptr_t(struct Type) * fun_type, CStorageClass* storage_class, size_t info_at);
 void free_CFunctionDeclaration(unique_ptr_t(CFunctionDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -668,13 +668,13 @@ typedef struct CVariableDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier name;
     unique_ptr_t(CInitializer) init;
-    shared_ptr_t(Type) var_type;
+    shared_ptr_t(struct Type) var_type;
     CStorageClass storage_class;
     size_t info_at;
 } CVariableDeclaration;
 
 unique_ptr_t(CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(CInitializer) * init,
-    shared_ptr_t(Type) * var_type, CStorageClass* storage_class, size_t info_at);
+    shared_ptr_t(struct Type) * var_type, CStorageClass* storage_class, size_t info_at);
 void free_CVariableDeclaration(unique_ptr_t(CVariableDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

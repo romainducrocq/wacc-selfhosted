@@ -445,8 +445,8 @@ unique_ptr_t(TacTopLevel) make_TacFunction(
     return self;
 }
 
-unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(Type) * static_init_type,
-    vector_t(shared_ptr_t(StaticInit)) * static_inits) {
+unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(struct Type) * static_init_type,
+    vector_t(shared_ptr_t(struct StaticInit)) * static_inits) {
     unique_ptr_t(TacTopLevel) self = make_TacTopLevel();
     self->type = AST_TacStaticVariable_t;
     self->get._TacStaticVariable.name = name;
@@ -459,7 +459,7 @@ unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob,
 }
 
 unique_ptr_t(TacTopLevel) make_TacStaticConstant(
-    TIdentifier name, shared_ptr_t(Type) * static_init_type, shared_ptr_t(StaticInit) * static_init) {
+    TIdentifier name, shared_ptr_t(struct Type) * static_init_type, shared_ptr_t(struct StaticInit) * static_init) {
     unique_ptr_t(TacTopLevel) self = make_TacTopLevel();
     self->type = AST_TacStaticConstant_t;
     self->get._TacStaticConstant.name = name;

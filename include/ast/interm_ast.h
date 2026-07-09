@@ -354,14 +354,14 @@ typedef struct TacFunction {
 typedef struct TacStaticVariable {
     TIdentifier name;
     bool is_glob;
-    shared_ptr_t(Type) static_init_type;
-    vector_t(shared_ptr_t(StaticInit)) static_inits;
+    shared_ptr_t(struct Type) static_init_type;
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits;
 } TacStaticVariable;
 
 typedef struct TacStaticConstant {
     TIdentifier name;
-    shared_ptr_t(Type) static_init_type;
-    shared_ptr_t(StaticInit) static_init;
+    shared_ptr_t(struct Type) static_init_type;
+    shared_ptr_t(struct StaticInit) static_init;
 } TacStaticConstant;
 
 typedef struct TacTopLevel {
@@ -377,10 +377,10 @@ typedef struct TacTopLevel {
 unique_ptr_t(TacTopLevel) make_TacTopLevel(void);
 unique_ptr_t(TacTopLevel) make_TacFunction(
     TIdentifier name, bool is_glob, vector_t(TIdentifier) * params, vector_t(unique_ptr_t(TacInstruction)) * body);
-unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(Type) * static_init_type,
-    vector_t(shared_ptr_t(StaticInit)) * static_inits);
+unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(struct Type) * static_init_type,
+    vector_t(shared_ptr_t(struct StaticInit)) * static_inits);
 unique_ptr_t(TacTopLevel) make_TacStaticConstant(
-    TIdentifier name, shared_ptr_t(Type) * static_init_type, shared_ptr_t(StaticInit) * static_init);
+    TIdentifier name, shared_ptr_t(struct Type) * static_init_type, shared_ptr_t(struct StaticInit) * static_init);
 void free_TacTopLevel(unique_ptr_t(TacTopLevel) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

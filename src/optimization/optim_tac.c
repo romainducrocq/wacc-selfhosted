@@ -17,7 +17,7 @@ typedef struct DataFlowAnalysis DataFlowAnalysis;
 typedef struct DataFlowAnalysisO1 DataFlowAnalysisO1;
 
 typedef struct OptimTacContext {
-    FrontEndContext* frontend;
+    struct FrontEndContext* frontend;
     // Constant folding
     // Unreachable code elimination
     // Copy propagation
@@ -2668,7 +2668,7 @@ static void optim_program(Ctx ctx, TacProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void optimize_three_address_code(TacProgram* node, FrontEndContext* frontend, uint8_t optim_1_mask) {
+void optimize_three_address_code(TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask) {
     OptimTacContext ctx;
     {
         ctx.frontend = frontend;

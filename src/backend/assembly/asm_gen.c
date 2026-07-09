@@ -39,10 +39,10 @@ typedef struct Struct8Bytes {
 PairKeyValue(TIdentifier, Struct8Bytes);
 
 typedef struct AsmGenContext {
-    FrontEndContext* frontend;
+    struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Assembly generation
-    FunType* p_fun_type;
+    struct FunType* p_fun_type;
     REGISTER_KIND arg_regs[6];
     REGISTER_KIND sse_arg_regs[8];
     hashmap_t(TIdentifier, TIdentifier) dbl_const_table;
@@ -458,7 +458,7 @@ static shared_ptr_t(AssemblyType) gen_asm_type(Ctx ctx, TacValue* node) {
     }
 }
 
-static shared_ptr_t(AssemblyType) asm_type_8b(Ctx ctx, Structure* struct_type, TLong offset) {
+static shared_ptr_t(AssemblyType) asm_type_8b(Ctx ctx, struct Structure* struct_type, TLong offset) {
     TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size - offset;
     if (size >= 8l) {
         return make_QuadWord();
@@ -473,22 +473,22 @@ static shared_ptr_t(AssemblyType) asm_type_8b(Ctx ctx, Structure* struct_type, T
     }
 }
 
-static void struct_8b_class(Ctx ctx, Structure* struct_type);
+static void struct_8b_class(Ctx ctx, struct Structure* struct_type);
 
-static void struct_1_reg_8b_class(Ctx ctx, Structure* struct_type) {
+static void struct_1_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
     Struct8Bytes struct_8b = {1, {CLS_sse, CLS_memory}};
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     size_t members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
     for (size_t i = 0; i < members_front; ++i) {
         if (struct_8b.clss[0] == CLS_integer) {
             break;
         }
-        Type* member_type = get_struct_typedef_member(ctx->frontend, struct_type->tag, i)->member_type;
+        struct Type* member_type = get_struct_typedef_member(ctx->frontend, struct_type->tag, i)->member_type;
         while (member_type->type == AST_Array_t) {
             member_type = member_type->get._Array.elem_type;
         }
         if (member_type->type == AST_Structure_t) {
-            Structure* member_struct_type = &member_type->get._Structure;
+            struct Structure* member_struct_type = &member_type->get._Structure;
             struct_8b_class(ctx, member_struct_type);
             if (map_get(ctx->struct_8b_map, member_struct_type->tag).clss[0] == CLS_integer) {
                 struct_8b.clss[0] = CLS_integer;
@@ -501,19 +501,19 @@ static void struct_1_reg_8b_class(Ctx ctx, Structure* struct_type) {
     map_add(ctx->struct_8b_map, struct_type->tag, struct_8b);
 }
 
-static void struct_2_reg_8b_class(Ctx ctx, Structure* struct_type) {
+static void struct_2_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
     Struct8Bytes struct_8b = {2, {CLS_sse, CLS_sse}};
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     size_t members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
     for (size_t i = 0; i < members_front; ++i) {
         if (struct_8b.clss[0] == CLS_integer && struct_8b.clss[1] == CLS_integer) {
             break;
         }
         TLong size = 1l;
-        Type* member_type = get_struct_typedef_member(ctx->frontend, struct_type->tag, i)->member_type;
+        struct Type* member_type = get_struct_typedef_member(ctx->frontend, struct_type->tag, i)->member_type;
         if (member_type->type == AST_Array_t) {
             do {
-                Array* member_arr_type = &member_type->get._Array;
+                struct Array* member_arr_type = &member_type->get._Array;
                 member_type = member_arr_type->elem_type;
                 size *= member_arr_type->size;
             }
@@ -527,7 +527,7 @@ static void struct_2_reg_8b_class(Ctx ctx, Structure* struct_type) {
         }
         if (size > 8l) {
             if (member_type->type == AST_Structure_t) {
-                Structure* member_struct_type = &member_type->get._Structure;
+                struct Structure* member_struct_type = &member_type->get._Structure;
                 struct_8b_class(ctx, member_struct_type);
                 Struct8Bytes* member_struct_8b = &map_get(ctx->struct_8b_map, member_struct_type->tag);
                 if (member_struct_8b->size > 1) {
@@ -550,7 +550,7 @@ static void struct_2_reg_8b_class(Ctx ctx, Structure* struct_type) {
         }
         else {
             if (member_type->type == AST_Structure_t) {
-                Structure* member_struct_type = &member_type->get._Structure;
+                struct Structure* member_struct_type = &member_type->get._Structure;
                 struct_8b_class(ctx, member_struct_type);
                 if (map_get(ctx->struct_8b_map, member_struct_type->tag).clss[0] == CLS_integer) {
                     struct_8b.clss[0] = CLS_integer;
@@ -565,7 +565,7 @@ static void struct_2_reg_8b_class(Ctx ctx, Structure* struct_type) {
                     member_type = member_type->get._Array.elem_type;
                 }
                 if (member_type->type == AST_Structure_t) {
-                    Structure* member_struct_type = &member_type->get._Structure;
+                    struct Structure* member_struct_type = &member_type->get._Structure;
                     struct_8b_class(ctx, member_struct_type);
                     if (map_get(ctx->struct_8b_map, member_struct_type->tag).clss[0] == CLS_integer) {
                         struct_8b.clss[1] = CLS_integer;
@@ -580,7 +580,7 @@ static void struct_2_reg_8b_class(Ctx ctx, Structure* struct_type) {
     map_add(ctx->struct_8b_map, struct_type->tag, struct_8b);
 }
 
-static void struct_8b_class(Ctx ctx, Structure* struct_type) {
+static void struct_8b_class(Ctx ctx, struct Structure* struct_type) {
     if (map_find(ctx->struct_8b_map, struct_type->tag) == map_end()) {
         TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
         if (size > 16l) {
@@ -601,7 +601,7 @@ static void struct_8b_class(Ctx ctx, Structure* struct_type) {
     }
 }
 
-static void fun_param_reg_mask(Ctx ctx, FunType* fun_type, size_t reg_size, size_t sse_size) {
+static void fun_param_reg_mask(Ctx ctx, struct FunType* fun_type, size_t reg_size, size_t sse_size) {
     if (fun_type->param_reg_mask == NULL_REGISTER_MASK) {
         fun_type->param_reg_mask = REGISTER_MASK_FALSE;
         for (size_t i = 0; i < reg_size; ++i) {
@@ -613,14 +613,14 @@ static void fun_param_reg_mask(Ctx ctx, FunType* fun_type, size_t reg_size, size
     }
 }
 
-static void ret_1_reg_mask(FunType* fun_type, bool reg_size) {
+static void ret_1_reg_mask(struct FunType* fun_type, bool reg_size) {
     if (fun_type->ret_reg_mask == NULL_REGISTER_MASK) {
         fun_type->ret_reg_mask = REGISTER_MASK_FALSE;
         register_mask_set(&fun_type->ret_reg_mask, reg_size ? REG_Ax : REG_Xmm0, true);
     }
 }
 
-static void ret_2_reg_mask(FunType* fun_type, bool reg_size, bool sse_size) {
+static void ret_2_reg_mask(struct FunType* fun_type, bool reg_size, bool sse_size) {
     if (fun_type->ret_reg_mask == NULL_REGISTER_MASK) {
         fun_type->ret_reg_mask = REGISTER_MASK_FALSE;
         if (reg_size) {
@@ -652,7 +652,7 @@ static void ret_dbl_instr(Ctx ctx, TacReturn* node) {
     ret_1_reg_mask(ctx->p_fun_type, false);
 }
 
-static void ret_8b_instr(Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
+static void ret_8b_instr(Ctx ctx, TIdentifier name, TLong offset, struct Structure* struct_type, REGISTER_KIND arg_reg) {
     TIdentifier src_name = name;
     shared_ptr_t(AsmOperand) dst = gen_register(arg_reg);
     shared_ptr_t(AssemblyType) asm_type_src =
@@ -717,7 +717,7 @@ static void ret_8b_instr(Ctx ctx, TIdentifier name, TLong offset, Structure* str
 
 static void ret_struct_instr(Ctx ctx, TacReturn* node) {
     TIdentifier name = node->val->get._TacVariable.name;
-    Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+    struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
     struct_8b_class(ctx, struct_type);
     Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
     if (struct_8b->clss[0] == CLS_memory) {
@@ -1230,7 +1230,7 @@ static void stack_arg_call_instr(Ctx ctx, TacValue* node) {
 }
 
 static void reg_8b_arg_call_instr(
-    Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
+    Ctx ctx, TIdentifier name, TLong offset, struct Structure* struct_type, REGISTER_KIND arg_reg) {
     ret_8b_instr(ctx, name, offset, struct_type, arg_reg);
 }
 
@@ -1304,7 +1304,7 @@ static void bytearr_stack_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset
     }
 }
 
-static void stack_8b_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type) {
+static void stack_8b_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset, struct Structure* struct_type) {
     shared_ptr_t(AssemblyType) asm_type = asm_type_8b(ctx, struct_type, offset);
     switch (asm_type->type) {
         case AST_QuadWord_t:
@@ -1320,7 +1320,7 @@ static void stack_8b_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset, Str
     free_AssemblyType(&asm_type);
 }
 
-static TLong arg_call_instr(Ctx ctx, TacFunCall* node, FunType* fun_type, bool is_ret_memory) {
+static TLong arg_call_instr(Ctx ctx, TacFunCall* node, struct FunType* fun_type, bool is_ret_memory) {
     size_t reg_size = is_ret_memory ? 1 : 0;
     size_t sse_size = 0;
     TLong stack_padding = 0l;
@@ -1356,7 +1356,7 @@ static TLong arg_call_instr(Ctx ctx, TacFunCall* node, FunType* fun_type, bool i
             size_t struct_reg_size = 7;
             size_t struct_sse_size = 9;
             TIdentifier name = arg->get._TacVariable.name;
-            Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+            struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
             struct_8b_class(ctx, struct_type);
             Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
             if (struct_8b->clss[0] != CLS_memory) {
@@ -1418,7 +1418,7 @@ static void ret_call_instr(Ctx ctx, TacValue* node, REGISTER_KIND arg_reg) {
     push_instr(ctx, make_AsmMov(&asm_type_dst, &src, &dst));
 }
 
-static void ret_8b_call_instr(Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
+static void ret_8b_call_instr(Ctx ctx, TIdentifier name, TLong offset, struct Structure* struct_type, REGISTER_KIND arg_reg) {
     TIdentifier dst_name = name;
     shared_ptr_t(AsmOperand) src = gen_register(arg_reg);
     shared_ptr_t(AssemblyType) asm_type_dst =
@@ -1482,10 +1482,10 @@ static void ret_8b_call_instr(Ctx ctx, TIdentifier name, TLong offset, Structure
 
 static void call_instr(Ctx ctx, TacFunCall* node) {
     bool is_ret_memory = false;
-    FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
+    struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
     if (node->dst && is_value_struct(ctx, node->dst)) {
         TIdentifier name = node->dst->get._TacVariable.name;
-        Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+        struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
         struct_8b_class(ctx, struct_type);
         if (map_get(ctx->struct_8b_map, struct_type->tag).clss[0] == CLS_memory) {
             is_ret_memory = true;
@@ -1526,7 +1526,7 @@ static void call_instr(Ctx ctx, TacFunCall* node) {
     else {
         bool reg_size = false;
         TIdentifier name = node->dst->get._TacVariable.name;
-        Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+        struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
         Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
         switch (struct_8b->clss[0]) {
             case CLS_integer: {
@@ -1959,7 +1959,7 @@ static void binary_instr(Ctx ctx, TacBinary* node) {
 static void copy_struct_instr(Ctx ctx, TacCopy* node) {
     TIdentifier src_name = node->src->get._TacVariable.name;
     TIdentifier dst_name = node->dst->get._TacVariable.name;
-    Structure* struct_type = &map_get(ctx->frontend->symbol_table, src_name)->type_t->get._Structure;
+    struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, src_name)->type_t->get._Structure;
     TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
     TLong offset = 0l;
     while (size > 0l) {
@@ -2030,7 +2030,7 @@ static void load_struct_instr(Ctx ctx, TacLoad* node) {
     }
     {
         TIdentifier name = node->dst->get._TacVariable.name;
-        Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+        struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
         TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
         TLong offset = 0l;
         while (size > 0l) {
@@ -2090,7 +2090,7 @@ static void store_struct_instr(Ctx ctx, TacStore* node) {
     }
     {
         TIdentifier name = node->src->get._TacVariable.name;
-        Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
+        struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
         TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
         TLong offset = 0l;
         while (size > 0l) {
@@ -2247,7 +2247,7 @@ static void add_ptr_instr(Ctx ctx, TacAddPtr* node) {
 
 static void cp_to_offset_struct_instr(Ctx ctx, TacCopyToOffset* node) {
     TIdentifier src_name = node->src->get._TacVariable.name;
-    Structure* struct_type = &map_get(ctx->frontend->symbol_table, src_name)->type_t->get._Structure;
+    struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, src_name)->type_t->get._Structure;
     TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
     TLong offset = 0l;
     while (size > 0l) {
@@ -2301,7 +2301,7 @@ static void cp_to_offset_instr(Ctx ctx, TacCopyToOffset* node) {
 
 static void cp_from_offset_struct_instr(Ctx ctx, TacCopyFromOffset* node) {
     TIdentifier dst_name = node->dst->get._TacVariable.name;
-    Structure* struct_type = &map_get(ctx->frontend->symbol_table, dst_name)->type_t->get._Structure;
+    struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, dst_name)->type_t->get._Structure;
     TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
     TLong offset = 0l;
     while (size > 0l) {
@@ -2569,12 +2569,12 @@ static void stack_fun_param_instr(Ctx ctx, TIdentifier name, TLong stack_bytes) 
 }
 
 static void reg_8b_fun_param_instr(
-    Ctx ctx, TIdentifier name, TLong offset, Structure* struct_type, REGISTER_KIND arg_reg) {
+    Ctx ctx, TIdentifier name, TLong offset, struct Structure* struct_type, REGISTER_KIND arg_reg) {
     ret_8b_call_instr(ctx, name, offset, struct_type, arg_reg);
 }
 
 static void stack_8b_fun_param_instr(
-    Ctx ctx, TIdentifier name, TLong stack_bytes, TLong offset, Structure* struct_type) {
+    Ctx ctx, TIdentifier name, TLong stack_bytes, TLong offset, struct Structure* struct_type) {
     shared_ptr_t(AssemblyType) asm_type_dst = asm_type_8b(ctx, struct_type, offset);
     if (asm_type_dst->type == AST_ByteArray_t) {
         TLong size = asm_type_dst->get._ByteArray.size;
@@ -2609,13 +2609,13 @@ static void stack_8b_fun_param_instr(
     }
 }
 
-static void fun_param_toplvl(Ctx ctx, TacFunction* node, FunType* fun_type, bool is_ret_memory) {
+static void fun_param_toplvl(Ctx ctx, TacFunction* node, struct FunType* fun_type, bool is_ret_memory) {
     size_t reg_size = is_ret_memory ? 1 : 0;
     size_t sse_size = 0;
     TLong stack_bytes = 16l;
     for (size_t i = 0; i < vec_size(node->params); ++i) {
         TIdentifier param = node->params[i];
-        Type* param_type = map_get(ctx->frontend->symbol_table, param)->type_t;
+        struct Type* param_type = map_get(ctx->frontend->symbol_table, param)->type_t;
         if (param_type->type == AST_Double_t) {
             if (sse_size < 8) {
                 reg_fun_param_instr(ctx, param, ctx->sse_arg_regs[sse_size]);
@@ -2639,7 +2639,7 @@ static void fun_param_toplvl(Ctx ctx, TacFunction* node, FunType* fun_type, bool
         else {
             size_t struct_reg_size = 7;
             size_t struct_sse_size = 9;
-            Structure* struct_type = &param_type->get._Structure;
+            struct Structure* struct_type = &param_type->get._Structure;
             struct_8b_class(ctx, struct_type);
             Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
             if (struct_8b->clss[0] != CLS_memory) {
@@ -2691,9 +2691,9 @@ static unique_ptr_t(AsmTopLevel) gen_fun_toplvl(Ctx ctx, TacFunction* node) {
     {
         ctx->p_instrs = &body;
 
-        FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
+        struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
         if (fun_type->ret_type->type == AST_Structure_t) {
-            Structure* struct_type = &fun_type->ret_type->get._Structure;
+            struct Structure* struct_type = &fun_type->ret_type->get._Structure;
             struct_8b_class(ctx, struct_type);
             if (map_get(ctx->struct_8b_map, struct_type->tag).clss[0] == CLS_memory) {
                 is_ret_memory = true;
@@ -2720,10 +2720,10 @@ static unique_ptr_t(AsmTopLevel) gen_static_var_toplvl(Ctx ctx, TacStaticVariabl
     TIdentifier name = node->name;
     bool is_glob = node->is_glob;
     TInt alignment = gen_type_alignment(ctx->frontend, node->static_init_type);
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     vec_reserve(static_inits, vec_size(node->static_inits));
     for (size_t i = 0; i < vec_size(node->static_inits); ++i) {
-        shared_ptr_t(StaticInit) static_init = sptr_new();
+        shared_ptr_t(struct StaticInit) static_init = sptr_new();
         sptr_copy(StaticInit, node->static_inits[i], static_init);
         vec_move_back(static_inits, static_init);
     }
@@ -2737,14 +2737,14 @@ static void push_static_const_toplvl(Ctx ctx, unique_ptr_t(AsmTopLevel) static_c
 static void dbl_static_const_toplvl(Ctx ctx, TIdentifier identifier, TIdentifier dbl_const, TInt byte) {
     TIdentifier name = identifier;
     TInt alignment = byte;
-    shared_ptr_t(StaticInit) static_init = make_DoubleInit(dbl_const);
+    shared_ptr_t(struct StaticInit) static_init = make_DoubleInit(dbl_const);
     push_static_const_toplvl(ctx, make_AsmStaticConstant(name, alignment, &static_init));
 }
 
 static unique_ptr_t(AsmTopLevel) gen_static_const_toplvl(Ctx ctx, TacStaticConstant* node) {
     TIdentifier name = node->name;
     TInt alignment = gen_type_alignment(ctx->frontend, node->static_init_type);
-    shared_ptr_t(StaticInit) static_init = sptr_new();
+    shared_ptr_t(struct StaticInit) static_init = sptr_new();
     sptr_copy(StaticInit, node->static_init, static_init);
     return make_AsmStaticConstant(name, alignment, &static_init);
 }
@@ -2795,7 +2795,7 @@ static unique_ptr_t(AsmProgram) gen_program(Ctx ctx, TacProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unique_ptr_t(AsmProgram)
-    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
+    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     AsmGenContext ctx;
     {
         ctx.frontend = frontend;

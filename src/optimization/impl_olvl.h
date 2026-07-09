@@ -35,7 +35,7 @@ typedef struct ControlFlowGraph {
     vector_t(size_t) exit_pred_ids;
     vector_t(bool) reaching_code;
     vector_t(ControlFlowBlock) blocks;
-    hashmap_t(TIdentifier, size_t) identifier_id_map;
+    hashmap_t(TIdentifier, ulong_t) identifier_id_map;
 } ControlFlowGraph;
 
 typedef struct DataFlowAnalysis {
@@ -1343,7 +1343,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         GET_DFA_INSTR_SET_MASK(ctx->dfa_o1->addressed_idx, 0) = MASK_FALSE;
 #elif __OPTIM_LEVEL__ == 2
     {
-        FunType* fun_type = &map_get(ctx->frontend->symbol_table, fun_name)->type_t->get._FunType;
+        struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, fun_name)->type_t->get._FunType;
         GET_DFA_INSTR_SET_MASK(ctx->dfa->static_idx, 0) = fun_type->ret_reg_mask;
     }
 #endif
@@ -1355,7 +1355,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         }
 
         for (size_t i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
-            pair_t(TIdentifier, size_t)* name_id = &ctx->cfg->identifier_id_map[i];
+            pair_t(TIdentifier, ulong_t)* name_id = &ctx->cfg->identifier_id_map[i];
 #if __OPTIM_LEVEL__ == 1
             if (map_get(ctx->frontend->symbol_table, pair_first(*name_id))->attrs->type == AST_StaticAttr_t) {
                 SET_DFA_INSTR_SET_AT(ctx->dfa->static_idx, pair_second(*name_id), true);

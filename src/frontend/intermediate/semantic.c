@@ -15,17 +15,19 @@
 #include "frontend/intermediate/idents.h"
 #include "frontend/intermediate/semantic.h"
 
-PairKeyValue(TIdentifier, Structure);
+// TODO
+#define StructStructure struct Structure
+PairKeyValue(TIdentifier, StructStructure);
 
 typedef struct SemanticContext {
     struct ErrorsContext* errors;
-    FrontEndContext* frontend;
+    struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Type checking
-    hashmap_t(TIdentifier, size_t) extern_scope_map;
+    hashmap_t(TIdentifier, ulong_t) extern_scope_map;
     hashmap_t(TIdentifier, TIdentifier) goto_map;
     vector_t(hashmap_t(TIdentifier, TIdentifier)) scoped_identifier_maps;
-    vector_t(hashmap_t(TIdentifier, Structure)) scoped_struct_maps;
+    vector_t(hashmap_t(TIdentifier, StructStructure)) scoped_struct_maps;
     hashset_t(TIdentifier) label_set;
     // Loop labeling
     vector_t(TIdentifier) break_loop_labels;
@@ -36,7 +38,7 @@ typedef struct SemanticContext {
     hashset_t(TIdentifier) fun_def_set;
     hashset_t(TIdentifier) struct_def_set;
     hashset_t(TIdentifier) union_def_set;
-    vector_t(shared_ptr_t(StaticInit)) * p_static_inits;
+    vector_t(shared_ptr_t(struct StaticInit)) * p_static_inits;
 } SemanticContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,21 +51,21 @@ typedef SemanticContext* Ctx;
 
 // Type checking
 
-static bool is_same_type(Type* type_1, Type* type_2);
+static bool is_same_type(struct Type* type_1, struct Type* type_2);
 
-static bool is_same_ptr(Pointer* ptr_type_1, Pointer* ptr_type_2) {
+static bool is_same_ptr(struct Pointer* ptr_type_1, struct Pointer* ptr_type_2) {
     return is_same_type(ptr_type_1->ref_type, ptr_type_2->ref_type);
 }
 
-static bool is_same_arr(Array* arr_type_1, Array* arr_type_2) {
+static bool is_same_arr(struct Array* arr_type_1, struct Array* arr_type_2) {
     return arr_type_1->size == arr_type_2->size && is_same_type(arr_type_1->elem_type, arr_type_2->elem_type);
 }
 
-static bool is_same_struct(Structure* struct_type_1, Structure* struct_type_2) {
+static bool is_same_struct(struct Structure* struct_type_1, struct Structure* struct_type_2) {
     return struct_type_1->tag == struct_type_2->tag;
 }
 
-static bool is_same_type(Type* type_1, Type* type_2) {
+static bool is_same_type(struct Type* type_1, struct Type* type_2) {
     if (type_1->type == type_2->type) {
         switch (type_1->type) {
             case AST_Pointer_t:
@@ -82,7 +84,7 @@ static bool is_same_type(Type* type_1, Type* type_2) {
     return false;
 }
 
-static bool is_same_fun_type(FunType* fun_type_1, FunType* fun_type_2) {
+static bool is_same_fun_type(struct FunType* fun_type_1, struct FunType* fun_type_2) {
     if (vec_size(fun_type_1->param_types) != vec_size(fun_type_2->param_types)
         || !is_same_type(fun_type_1->ret_type, fun_type_2->ret_type)) {
         return false;
@@ -95,7 +97,7 @@ static bool is_same_fun_type(FunType* fun_type_1, FunType* fun_type_2) {
     return true;
 }
 
-static bool is_type_signed(Type* type) {
+static bool is_type_signed(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -108,7 +110,7 @@ static bool is_type_signed(Type* type) {
     }
 }
 
-static bool is_type_char(Type* type) {
+static bool is_type_char(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -119,7 +121,7 @@ static bool is_type_char(Type* type) {
     }
 }
 
-static bool is_type_int(Type* type) {
+static bool is_type_int(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -134,7 +136,7 @@ static bool is_type_int(Type* type) {
     }
 }
 
-static bool is_type_arithmetic(Type* type) {
+static bool is_type_arithmetic(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -150,7 +152,7 @@ static bool is_type_arithmetic(Type* type) {
     }
 }
 
-static bool is_type_scalar(Type* type) {
+static bool is_type_scalar(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -167,11 +169,11 @@ static bool is_type_scalar(Type* type) {
     }
 }
 
-static bool is_struct_complete(Ctx ctx, Structure* struct_type) {
+static bool is_struct_complete(Ctx ctx, struct Structure* struct_type) {
     return map_find(ctx->frontend->struct_typedef_table, struct_type->tag) != map_end();
 }
 
-static bool is_type_complete(Ctx ctx, Type* type) {
+static bool is_type_complete(Ctx ctx, struct Type* type) {
     switch (type->type) {
         case AST_Void_t:
             return false;
@@ -182,16 +184,16 @@ static bool is_type_complete(Ctx ctx, Type* type) {
     }
 }
 
-static error_t is_valid_type(Ctx ctx, Type* type);
+static error_t is_valid_type(Ctx ctx, struct Type* type);
 
-static error_t is_valid_ptr(Ctx ctx, Pointer* ptr_type) {
+static error_t is_valid_ptr(Ctx ctx, struct Pointer* ptr_type) {
     CATCH_ENTER;
     TRY(is_valid_type(ctx, ptr_type->ref_type));
     FINALLY;
     CATCH_EXIT;
 }
 
-static error_t is_valid_arr(Ctx ctx, Array* arr_type) {
+static error_t is_valid_arr(Ctx ctx, struct Array* arr_type) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
     CATCH_ENTER;
@@ -207,7 +209,7 @@ static error_t is_valid_arr(Ctx ctx, Array* arr_type) {
     CATCH_EXIT;
 }
 
-static error_t is_valid_type(Ctx ctx, Type* type) {
+static error_t is_valid_type(Ctx ctx, struct Type* type) {
     CATCH_ENTER;
     switch (type->type) {
         case AST_Pointer_t:
@@ -259,7 +261,7 @@ static bool is_const_null_ptr(CConstant* node) {
     }
 }
 
-static TInt get_scalar_size(Type* type) {
+static TInt get_scalar_size(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -278,9 +280,9 @@ static TInt get_scalar_size(Type* type) {
     }
 }
 
-static TLong get_type_scale(Ctx ctx, Type* type);
+static TLong get_type_scale(Ctx ctx, struct Type* type);
 
-static TLong get_arr_scale(Ctx ctx, Array* arr_type) {
+static TLong get_arr_scale(Ctx ctx, struct Array* arr_type) {
     TLong size = arr_type->size;
     while (arr_type->elem_type->type == AST_Array_t) {
         arr_type = &arr_type->elem_type->get._Array;
@@ -289,12 +291,12 @@ static TLong get_arr_scale(Ctx ctx, Array* arr_type) {
     return get_type_scale(ctx, arr_type->elem_type) * size;
 }
 
-static TLong get_struct_scale(Ctx ctx, Structure* struct_type) {
+static TLong get_struct_scale(Ctx ctx, struct Structure* struct_type) {
     THROW_ABORT_IF(map_find(ctx->frontend->struct_typedef_table, struct_type->tag) == map_end());
     return map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
 }
 
-static TLong get_type_scale(Ctx ctx, Type* type) {
+static TLong get_type_scale(Ctx ctx, struct Type* type) {
     switch (type->type) {
         case AST_Array_t:
             return get_arr_scale(ctx, &type->get._Array);
@@ -305,16 +307,16 @@ static TLong get_type_scale(Ctx ctx, Type* type) {
     }
 }
 
-static TInt get_type_alignment(Ctx ctx, Type* type);
+static TInt get_type_alignment(Ctx ctx, struct Type* type);
 
-static TInt get_arr_alignment(Ctx ctx, Array* arr_type) { return get_type_alignment(ctx, arr_type->elem_type); }
+static TInt get_arr_alignment(Ctx ctx, struct Array* arr_type) { return get_type_alignment(ctx, arr_type->elem_type); }
 
-static TInt get_struct_alignment(Ctx ctx, Structure* struct_type) {
+static TInt get_struct_alignment(Ctx ctx, struct Structure* struct_type) {
     THROW_ABORT_IF(map_find(ctx->frontend->struct_typedef_table, struct_type->tag) == map_end());
     return map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->alignment;
 }
 
-static TInt get_type_alignment(Ctx ctx, Type* type) {
+static TInt get_type_alignment(Ctx ctx, struct Type* type) {
     switch (type->type) {
         case AST_Array_t:
             return get_arr_alignment(ctx, &type->get._Array);
@@ -325,17 +327,17 @@ static TInt get_type_alignment(Ctx ctx, Type* type) {
     }
 }
 
-static shared_ptr_t(Type) get_joint_type(CExp* node_1, CExp* node_2) {
-    shared_ptr_t(Type) joint_type = sptr_new();
+static shared_ptr_t(struct Type) get_joint_type(CExp* node_1, CExp* node_2) {
+    shared_ptr_t(struct Type) joint_type = sptr_new();
     if (is_type_char(node_1->exp_type)) {
-        shared_ptr_t(Type) exp_type = sptr_new();
+        shared_ptr_t(struct Type) exp_type = sptr_new();
         sptr_move(Type, node_1->exp_type, exp_type);
         node_1->exp_type = make_Int();
         joint_type = get_joint_type(node_1, node_2);
         sptr_move(Type, exp_type, node_1->exp_type);
     }
     else if (is_type_char(node_2->exp_type)) {
-        shared_ptr_t(Type) exp_type = sptr_new();
+        shared_ptr_t(struct Type) exp_type = sptr_new();
         sptr_move(Type, node_2->exp_type, exp_type);
         node_2->exp_type = make_Int();
         joint_type = get_joint_type(node_1, node_2);
@@ -368,7 +370,7 @@ static shared_ptr_t(Type) get_joint_type(CExp* node_1, CExp* node_2) {
     return joint_type;
 }
 
-static error_t get_joint_ptr_type(Ctx ctx, CExp* node_1, CExp* node_2, shared_ptr_t(Type) * joint_type) {
+static error_t get_joint_ptr_type(Ctx ctx, CExp* node_1, CExp* node_2, shared_ptr_t(struct Type) * joint_type) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
     CATCH_ENTER;
@@ -572,7 +574,7 @@ static size_t get_compound_info_at(CCompoundInit* node) {
     return initializer->get._CSingleInit.exp->info_at;
 }
 
-static error_t reslv_struct_type(Ctx ctx, Type* type);
+static error_t reslv_struct_type(Ctx ctx, struct Type* type);
 
 static void check_const_exp(CConstant* node) {
     switch (node->constant->type) {
@@ -611,14 +613,14 @@ static void check_const_exp(CConstant* node) {
 
 static void check_string_exp(CString* node) {
     TLong size = ((TLong)vec_size(node->literal->value)) + 1l;
-    shared_ptr_t(Type) elem_type = make_Char();
+    shared_ptr_t(struct Type) elem_type = make_Char();
     node->_base->exp_type = make_Array(size, &elem_type);
 }
 
 static error_t check_var_exp(Ctx ctx, CVar* node) {
     string_t name_fmt = str_new(NULL);
     CATCH_ENTER;
-    Type* var_type = map_get(ctx->frontend->symbol_table, node->name)->type_t;
+    struct Type* var_type = map_get(ctx->frontend->symbol_table, node->name)->type_t;
     if (var_type->type == AST_FunType_t) {
         THROW_AT_TOKEN(
             node->_base->info_at, GET_SEMANTIC_MSG(1, MSG_fun_used_as_var, str_fmt_name(node->name, &name_fmt)));
@@ -651,8 +653,8 @@ static error_t check_cast_exp(Ctx ctx, CCast* node) {
     CATCH_EXIT;
 }
 
-static error_t cast_exp(Ctx ctx, shared_ptr_t(Type) * exp_type, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(Type) exp_type_cp = sptr_new();
+static error_t cast_exp(Ctx ctx, shared_ptr_t(struct Type) * exp_type, unique_ptr_t(CExp) * exp) {
+    shared_ptr_t(struct Type) exp_type_cp = sptr_new();
     CATCH_ENTER;
     size_t info_at = (*exp)->info_at;
     sptr_copy(Type, *exp_type, exp_type_cp);
@@ -663,7 +665,7 @@ static error_t cast_exp(Ctx ctx, shared_ptr_t(Type) * exp_type, unique_ptr_t(CEx
     CATCH_EXIT;
 }
 
-static error_t cast_assign(Ctx ctx, shared_ptr_t(Type) * exp_type, unique_ptr_t(CExp) * exp) {
+static error_t cast_assign(Ctx ctx, shared_ptr_t(struct Type) * exp_type, unique_ptr_t(CExp) * exp) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
     CATCH_ENTER;
@@ -688,7 +690,7 @@ static error_t cast_assign(Ctx ctx, shared_ptr_t(Type) * exp_type, unique_ptr_t(
 }
 
 static error_t promote_char_to_int(Ctx ctx, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(Type) promote_type = sptr_new();
+    shared_ptr_t(struct Type) promote_type = sptr_new();
     CATCH_ENTER;
     promote_type = make_Int();
     TRY(cast_exp(ctx, &promote_type, exp));
@@ -782,7 +784,7 @@ static error_t check_unary_exp(Ctx ctx, CUnary* node) {
 static error_t check_binary_add_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (is_type_arithmetic(node->exp_left->exp_type) && is_type_arithmetic(node->exp_right->exp_type)) {
         common_type = get_joint_type(node->exp_left, node->exp_right);
@@ -829,7 +831,7 @@ static error_t check_binary_add_exp(Ctx ctx, CBinary* node) {
 static error_t check_binary_subtract_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (is_type_arithmetic(node->exp_left->exp_type) && is_type_arithmetic(node->exp_right->exp_type)) {
         common_type = get_joint_type(node->exp_left, node->exp_right);
@@ -880,7 +882,7 @@ static error_t check_binary_subtract_exp(Ctx ctx, CBinary* node) {
 static error_t check_multiply_divide_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (!is_type_arithmetic(node->exp_left->exp_type) || !is_type_arithmetic(node->exp_right->exp_type)) {
         THROW_AT_TOKEN(node->_base->info_at, GET_SEMANTIC_MSG(3, MSG_invalid_binary_ops, get_binop_fmt(&node->binop),
@@ -906,7 +908,7 @@ static error_t check_multiply_divide_exp(Ctx ctx, CBinary* node) {
 static error_t check_remainder_bitwise_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (!is_type_arithmetic(node->exp_left->exp_type) || !is_type_arithmetic(node->exp_right->exp_type)) {
         THROW_AT_TOKEN(node->_base->info_at, GET_SEMANTIC_MSG(3, MSG_invalid_binary_ops, get_binop_fmt(&node->binop),
@@ -990,7 +992,7 @@ static error_t check_binary_logical_exp(Ctx ctx, CBinary* node) {
 static error_t check_binary_equality_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (node->exp_left->exp_type->type == AST_Pointer_t || node->exp_right->exp_type->type == AST_Pointer_t) {
         TRY(get_joint_ptr_type(ctx, node->exp_left, node->exp_right, &common_type));
@@ -1021,7 +1023,7 @@ static error_t check_binary_equality_exp(Ctx ctx, CBinary* node) {
 static error_t check_binary_relational_exp(Ctx ctx, CBinary* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (!is_type_scalar(node->exp_left->exp_type) || !is_type_scalar(node->exp_right->exp_type)
         || (node->exp_left->exp_type->type == AST_Pointer_t
@@ -1133,7 +1135,7 @@ static error_t check_assign_exp(Ctx ctx, CAssignment* node) {
 static error_t check_conditional_exp(Ctx ctx, CConditional* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) common_type = sptr_new();
+    shared_ptr_t(struct Type) common_type = sptr_new();
     CATCH_ENTER;
     if (!is_type_scalar(node->condition->exp_type)) {
         THROW_AT_TOKEN(node->_base->info_at,
@@ -1184,8 +1186,8 @@ static error_t check_call_exp(Ctx ctx, CFunctionCall* node) {
     string_t strto_fmt_1 = str_new(NULL);
     string_t strto_fmt_2 = str_new(NULL);
     CATCH_ENTER;
-    Symbol* fun_symbol = map_get(ctx->frontend->symbol_table, node->name);
-    FunType* fun_type = &fun_symbol->type_t->get._FunType;
+    struct Symbol* fun_symbol = map_get(ctx->frontend->symbol_table, node->name);
+    struct FunType* fun_type = &fun_symbol->type_t->get._FunType;
     if (fun_symbol->type_t->type != AST_FunType_t) {
         THROW_AT_TOKEN(
             node->_base->info_at, GET_SEMANTIC_MSG(1, MSG_var_used_as_fun, str_fmt_name(node->name, &name_fmt)));
@@ -1223,7 +1225,7 @@ static error_t check_deref_exp(Ctx ctx, CDereference* node) {
 }
 
 static error_t check_addrof_exp(Ctx ctx, CAddrOf* node) {
-    shared_ptr_t(Type) ref_type = sptr_new();
+    shared_ptr_t(struct Type) ref_type = sptr_new();
     CATCH_ENTER;
     if (!is_exp_lvalue(node->exp)) {
         THROW_AT_TOKEN(node->_base->info_at, GET_SEMANTIC_MSG(0, MSG_addrof_rvalue));
@@ -1238,8 +1240,8 @@ static error_t check_addrof_exp(Ctx ctx, CAddrOf* node) {
 static error_t check_subscript_exp(Ctx ctx, CSubscript* node) {
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    shared_ptr_t(Type) ref_type = sptr_new();
-    shared_ptr_t(Type) subscript_type = sptr_new();
+    shared_ptr_t(struct Type) ref_type = sptr_new();
+    shared_ptr_t(struct Type) subscript_type = sptr_new();
     CATCH_ENTER;
     if (node->primary_exp->exp_type->type == AST_Pointer_t
         && is_type_complete(ctx, node->primary_exp->exp_type->get._Pointer.ref_type)
@@ -1305,9 +1307,9 @@ static error_t check_dot_exp(Ctx ctx, CDot* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
-    Structure* struct_type;
-    StructTypedef* struct_typedef;
-    Type* member_type;
+    struct Structure* struct_type;
+    struct StructTypedef* struct_typedef;
+    struct Type* member_type;
     ssize_t map_it;
     if (node->structure->exp_type->type != AST_Structure_t) {
         THROW_AT_TOKEN(
@@ -1334,10 +1336,10 @@ static error_t check_arrow_exp(Ctx ctx, CArrow* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
-    Pointer* ptr_type;
-    Structure* struct_type;
-    StructTypedef* struct_typedef;
-    Type* member_type;
+    struct Pointer* ptr_type;
+    struct Structure* struct_type;
+    struct StructTypedef* struct_typedef;
+    struct Type* member_type;
     ssize_t map_it;
     if (node->pointer->exp_type->type != AST_Pointer_t) {
         THROW_AT_TOKEN(
@@ -1374,7 +1376,7 @@ static error_t check_arrow_exp(Ctx ctx, CArrow* node) {
 
 static void check_arr_typed_exp(unique_ptr_t(CExp) * addrof) {
     {
-        shared_ptr_t(Type) ref_type = sptr_new();
+        shared_ptr_t(struct Type) ref_type = sptr_new();
         sptr_copy(Type, (*addrof)->exp_type->get._Array.elem_type, ref_type);
         free_Type(&(*addrof)->exp_type);
         (*addrof)->exp_type = make_Pointer(&ref_type);
@@ -1415,7 +1417,7 @@ static error_t check_ret_statement(Ctx ctx, CReturn* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
-    FunType* fun_type = &map_get(ctx->frontend->symbol_table, ctx->fun_def_name)->type_t->get._FunType;
+    struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, ctx->fun_def_name)->type_t->get._FunType;
     if (fun_type->ret_type->type == AST_Void_t) {
         if (node->exp) {
             THROW_AT_TOKEN(node->info_at,
@@ -1624,7 +1626,7 @@ static error_t check_switch_statement(Ctx ctx, CSwitch* node) {
     CATCH_EXIT;
 }
 
-static error_t check_bound_string_init(Ctx ctx, CString* node, Array* arr_type) {
+static error_t check_bound_string_init(Ctx ctx, CString* node, struct Array* arr_type) {
     string_t type_fmt = str_new(NULL);
     string_t strto_fmt_1 = str_new(NULL);
     string_t strto_fmt_2 = str_new(NULL);
@@ -1645,7 +1647,7 @@ static error_t check_bound_string_init(Ctx ctx, CString* node, Array* arr_type) 
     CATCH_EXIT;
 }
 
-static error_t check_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(Type) * init_type) {
+static error_t check_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(struct Type) * init_type) {
     CATCH_ENTER;
     if (!is_same_type(node->exp->exp_type, *init_type)) {
         TRY(cast_assign(ctx, init_type, &node->exp));
@@ -1655,14 +1657,14 @@ static error_t check_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(Type) 
     CATCH_EXIT;
 }
 
-static void check_string_init(CSingleInit* node, shared_ptr_t(Type) * init_type) {
+static void check_string_init(CSingleInit* node, shared_ptr_t(struct Type) * init_type) {
     sptr_copy(Type, *init_type, node->exp->exp_type);
     sptr_copy(Type, *init_type, node->_base->init_type);
 }
 
-static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, Type* init_type);
+static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, struct Type* init_type);
 
-static unique_ptr_t(CInitializer) check_single_zero_init(Type* elem_type) {
+static unique_ptr_t(CInitializer) check_single_zero_init(struct Type* elem_type) {
     unique_ptr_t(CExp) exp = uptr_new();
     {
         shared_ptr_t(struct CConst) constant = sptr_new();
@@ -1705,7 +1707,7 @@ static unique_ptr_t(CInitializer) check_single_zero_init(Type* elem_type) {
     return make_CSingleInit(&exp);
 }
 
-static unique_ptr_t(CInitializer) check_arr_zero_init(Ctx ctx, Array* arr_type) {
+static unique_ptr_t(CInitializer) check_arr_zero_init(Ctx ctx, struct Array* arr_type) {
     vector_t(unique_ptr_t(CInitializer)) zero_inits = vec_new();
     size_t arr_type_size = (size_t)arr_type->size;
     vec_reserve(zero_inits, arr_type_size);
@@ -1716,19 +1718,19 @@ static unique_ptr_t(CInitializer) check_arr_zero_init(Ctx ctx, Array* arr_type) 
     return make_CCompoundInit(&zero_inits);
 }
 
-static unique_ptr_t(CInitializer) check_struct_zero_init(Ctx ctx, Structure* struct_type) {
+static unique_ptr_t(CInitializer) check_struct_zero_init(Ctx ctx, struct Structure* struct_type) {
     vector_t(unique_ptr_t(CInitializer)) zero_inits = vec_new();
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     vec_reserve(zero_inits, vec_size(struct_typedef->member_names));
     for (size_t i = 0; i < vec_size(struct_typedef->member_names); ++i) {
-        StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
+        struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         unique_ptr_t(CInitializer) initializer = check_zero_init(ctx, member->member_type);
         vec_move_back(zero_inits, initializer);
     }
     return make_CCompoundInit(&zero_inits);
 }
 
-static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, Type* init_type) {
+static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, struct Type* init_type) {
     switch (init_type->type) {
         case AST_Array_t:
             return check_arr_zero_init(ctx, &init_type->get._Array);
@@ -1739,7 +1741,7 @@ static unique_ptr_t(CInitializer) check_zero_init(Ctx ctx, Type* init_type) {
     }
 }
 
-static error_t check_bound_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type) {
+static error_t check_bound_arr_init(Ctx ctx, CCompoundInit* node, struct Array* arr_type) {
     string_t type_fmt = str_new(NULL);
     string_t strto_fmt_1 = str_new(NULL);
     string_t strto_fmt_2 = str_new(NULL);
@@ -1757,12 +1759,12 @@ static error_t check_bound_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_typ
     CATCH_EXIT;
 }
 
-static error_t check_bound_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type) {
+static error_t check_bound_struct_init(Ctx ctx, CCompoundInit* node, struct Structure* struct_type) {
     string_t type_fmt = str_new(NULL);
     string_t strto_fmt_1 = str_new(NULL);
     string_t strto_fmt_2 = str_new(NULL);
     CATCH_ENTER;
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     size_t bound = struct_type->is_union ? 1 : map_size(struct_typedef->members);
     if (vec_size(node->initializers) > bound) {
         strto_fmt_1 = str_to_string(vec_size(node->initializers));
@@ -1778,7 +1780,7 @@ static error_t check_bound_struct_init(Ctx ctx, CCompoundInit* node, Structure* 
     CATCH_EXIT;
 }
 
-static void check_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, shared_ptr_t(Type) * init_type) {
+static void check_arr_init(Ctx ctx, CCompoundInit* node, struct Array* arr_type, shared_ptr_t(struct Type) * init_type) {
     while (vec_size(node->initializers) < (size_t)arr_type->size) {
         unique_ptr_t(CInitializer) zero_init = check_zero_init(ctx, arr_type->elem_type);
         vec_move_back(node->initializers, zero_init);
@@ -1786,10 +1788,10 @@ static void check_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, shared
     sptr_copy(Type, *init_type, node->_base->init_type);
 }
 
-static void check_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
-    StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
+static void check_struct_init(Ctx ctx, CCompoundInit* node, struct Structure* struct_type, shared_ptr_t(struct Type) * init_type) {
+    struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     for (size_t i = vec_size(node->initializers); i < map_size(struct_typedef->members); ++i) {
-        StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
+        struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         unique_ptr_t(CInitializer) zero_init = check_zero_init(ctx, member->member_type);
         vec_move_back(node->initializers, zero_init);
     }
@@ -1800,7 +1802,7 @@ static error_t check_ret_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
-    FunType* fun_type = &node->fun_type->get._FunType;
+    struct FunType* fun_type = &node->fun_type->get._FunType;
     ctx->errors->info_at_buf = node->info_at;
     TRY(reslv_struct_type(ctx, fun_type->ret_type));
     TRY(is_valid_type(ctx, fun_type->ret_type));
@@ -1826,8 +1828,8 @@ static error_t check_ret_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
     CATCH_EXIT;
 }
 
-static void check_arr_param_decl(FunType* fun_type, size_t i) {
-    shared_ptr_t(Type) ref_type = sptr_new();
+static void check_arr_param_decl(struct FunType* fun_type, size_t i) {
+    shared_ptr_t(struct Type) ref_type = sptr_new();
     sptr_copy(Type, fun_type->param_types[i]->get._Array.elem_type, ref_type);
     free_Type(&fun_type->param_types[i]);
     fun_type->param_types[i] = make_Pointer(&ref_type);
@@ -1837,11 +1839,11 @@ static error_t check_fun_params_decl(Ctx ctx, CFunctionDeclaration* node) {
     string_t name_fmt_1 = str_new(NULL);
     string_t name_fmt_2 = str_new(NULL);
     string_t type_fmt = str_new(NULL);
-    unique_ptr_t(IdentifierAttr) param_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(Type) param_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) param_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct Type) param_type = sptr_new();
     CATCH_ENTER;
-    FunType* fun_type = &node->fun_type->get._FunType;
+    struct FunType* fun_type = &node->fun_type->get._FunType;
     for (size_t i = 0; i < vec_size(node->params); ++i) {
         ctx->errors->info_at_buf = node->info_at;
         TRY(reslv_struct_type(ctx, fun_type->param_types[i]));
@@ -1882,9 +1884,9 @@ static error_t check_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    unique_ptr_t(IdentifierAttr) glob_fun_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(Type) glob_fun_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) glob_fun_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct Type) glob_fun_type = sptr_new();
     CATCH_ENTER;
     THROW_ABORT_IF(node->fun_type->type == AST_Void_t);
 
@@ -1893,8 +1895,8 @@ static error_t check_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
 
     ssize_t map_it = map_find(ctx->frontend->symbol_table, node->name);
     if (map_it != map_end()) {
-        Symbol* fun_symbol = pair_second(ctx->frontend->symbol_table[map_it]);
-        FunType* fun_type = &fun_symbol->type_t->get._FunType;
+        struct Symbol* fun_symbol = pair_second(ctx->frontend->symbol_table[map_it]);
+        struct FunType* fun_type = &fun_symbol->type_t->get._FunType;
         if (!(fun_symbol->type_t->type == AST_FunType_t && vec_size(fun_type->param_types) == vec_size(node->params)
                 && is_same_fun_type(&node->fun_type->get._FunType, fun_type))) {
             THROW_AT_TOKEN(node->info_at,
@@ -1906,7 +1908,7 @@ static error_t check_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
                                               str_fmt_type(node->fun_type, &type_fmt_1)));
         }
 
-        FunAttr* fun_attrs = &fun_symbol->attrs->get._FunAttr;
+        struct FunAttr* fun_attrs = &fun_symbol->attrs->get._FunAttr;
         if (!is_glob && fun_attrs->is_glob) {
             THROW_AT_TOKEN(
                 node->info_at, GET_SEMANTIC_MSG(1, MSG_redecl_static_conflict, str_fmt_name(node->name, &name_fmt)));
@@ -1935,7 +1937,7 @@ static error_t check_fun_decl(Ctx ctx, CFunctionDeclaration* node) {
     CATCH_EXIT;
 }
 
-static void push_static_init(Ctx ctx, shared_ptr_t(StaticInit) static_init) {
+static void push_static_init(Ctx ctx, shared_ptr_t(struct StaticInit) static_init) {
     vec_move_back(*ctx->p_static_inits, static_init);
 }
 
@@ -1948,15 +1950,15 @@ static void push_zero_static_init(Ctx ctx, TLong byte) {
     }
 }
 
-static error_t check_static_init(Ctx ctx, CInitializer* node, Type* static_init_type);
+static error_t check_static_init(Ctx ctx, CInitializer* node, struct Type* static_init_type);
 
-static void check_static_no_init(Ctx ctx, Type* static_init_type, TLong size) {
+static void check_static_no_init(Ctx ctx, struct Type* static_init_type, TLong size) {
     TLong byte = static_init_type == NULL ? size : get_type_scale(ctx, static_init_type) * size;
     push_zero_static_init(ctx, byte);
 }
 
-static shared_ptr_t(InitialValue) check_no_initializer(Ctx ctx, Type* static_init_type) {
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+static shared_ptr_t(struct InitialValue) check_no_initializer(Ctx ctx, struct Type* static_init_type) {
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     {
         ctx->p_static_inits = &static_inits;
         check_static_no_init(ctx, static_init_type, 1l);
@@ -1970,7 +1972,7 @@ static TIdentifier make_binary_identifier(Ctx ctx, TULong binary) {
     return make_string_identifier(ctx->identifiers, &strto_binary);
 }
 
-static error_t check_static_const_init(Ctx ctx, CConstant* node, Type* static_init_type) {
+static error_t check_static_const_init(Ctx ctx, CConstant* node, struct Type* static_init_type) {
     string_t type_fmt = str_new(NULL);
     string_t strto_fmt = str_new(NULL);
     CATCH_ENTER;
@@ -2078,7 +2080,7 @@ static error_t check_static_const_init(Ctx ctx, CConstant* node, Type* static_in
     CATCH_EXIT;
 }
 
-static error_t check_literal_string_init(Ctx ctx, CString* node, Pointer* static_ptr_type) {
+static error_t check_literal_string_init(Ctx ctx, CString* node, struct Pointer* static_ptr_type) {
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
     if (static_ptr_type->ref_type->type != AST_Char_t) {
@@ -2106,15 +2108,15 @@ static void check_static_ptr_string_init(Ctx ctx, CString* node) {
         else {
             string_const_label = repr_label_identifier(ctx->identifiers, LBL_Lstring);
             map_add(ctx->frontend->string_const_table, string_const, string_const_label);
-            shared_ptr_t(Type) constant_type = sptr_new();
+            shared_ptr_t(struct Type) constant_type = sptr_new();
             {
                 TLong size = ((TLong)vec_size(node->literal->value)) + 1l;
-                shared_ptr_t(Type) elem_type = make_Char();
+                shared_ptr_t(struct Type) elem_type = make_Char();
                 constant_type = make_Array(size, &elem_type);
             }
-            unique_ptr_t(IdentifierAttr) constant_attrs = uptr_new();
+            unique_ptr_t(struct IdentifierAttr) constant_attrs = uptr_new();
             {
-                shared_ptr_t(StaticInit) static_init = sptr_new();
+                shared_ptr_t(struct StaticInit) static_init = sptr_new();
                 {
                     shared_ptr_t(struct CStringLiteral) literal = sptr_new();
                     sptr_copy(CStringLiteral, node->literal, literal);
@@ -2122,14 +2124,14 @@ static void check_static_ptr_string_init(Ctx ctx, CString* node) {
                 }
                 constant_attrs = make_ConstantAttr(&static_init);
             }
-            unique_ptr_t(Symbol) symbol = make_Symbol(&constant_type, &constant_attrs);
+            unique_ptr_t(struct Symbol) symbol = make_Symbol(&constant_type, &constant_attrs);
             map_move_add(ctx->frontend->symbol_table, string_const_label, symbol);
         }
     }
     push_static_init(ctx, make_PointerInit(string_const_label));
 }
 
-static error_t check_static_arr_string_init(Ctx ctx, CString* node, Array* static_arr_type) {
+static error_t check_static_arr_string_init(Ctx ctx, CString* node, struct Array* static_arr_type) {
     shared_ptr_t(struct CStringLiteral) literal = sptr_new();
     CATCH_ENTER;
     TLong byte;
@@ -2149,7 +2151,7 @@ static error_t check_static_arr_string_init(Ctx ctx, CString* node, Array* stati
     CATCH_EXIT;
 }
 
-static error_t check_static_string_init(Ctx ctx, CString* node, Type* static_init_type) {
+static error_t check_static_string_init(Ctx ctx, CString* node, struct Type* static_init_type) {
     CATCH_ENTER;
     switch (static_init_type->type) {
         case AST_Pointer_t:
@@ -2166,7 +2168,7 @@ static error_t check_static_string_init(Ctx ctx, CString* node, Type* static_ini
     CATCH_EXIT;
 }
 
-static error_t check_single_static_init(Ctx ctx, CSingleInit* node, Type* static_init_type) {
+static error_t check_single_static_init(Ctx ctx, CSingleInit* node, struct Type* static_init_type) {
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
     switch (node->exp->type) {
@@ -2185,7 +2187,7 @@ static error_t check_single_static_init(Ctx ctx, CSingleInit* node, Type* static
     CATCH_EXIT;
 }
 
-static error_t check_static_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type) {
+static error_t check_static_arr_init(Ctx ctx, CCompoundInit* node, struct Array* arr_type) {
     CATCH_ENTER;
     TRY(check_bound_arr_init(ctx, node, arr_type));
 
@@ -2199,14 +2201,14 @@ static error_t check_static_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_ty
     CATCH_EXIT;
 }
 
-static error_t check_static_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type) {
+static error_t check_static_struct_init(Ctx ctx, CCompoundInit* node, struct Structure* struct_type) {
     CATCH_ENTER;
     TLong size;
     TRY(check_bound_struct_init(ctx, node, struct_type));
 
     size = 0l;
     for (size_t i = 0; i < vec_size(node->initializers); ++i) {
-        StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
+        struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         if (member->offset != size) {
             check_static_no_init(ctx, NULL, member->offset - size);
             size = member->offset;
@@ -2222,7 +2224,7 @@ static error_t check_static_struct_init(Ctx ctx, CCompoundInit* node, Structure*
     CATCH_EXIT;
 }
 
-static error_t check_static_compound_init(Ctx ctx, CCompoundInit* node, Type* static_init_type) {
+static error_t check_static_compound_init(Ctx ctx, CCompoundInit* node, struct Type* static_init_type) {
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
     switch (static_init_type->type) {
@@ -2241,7 +2243,7 @@ static error_t check_static_compound_init(Ctx ctx, CCompoundInit* node, Type* st
     CATCH_EXIT;
 }
 
-static error_t check_static_init(Ctx ctx, CInitializer* node, Type* static_init_type) {
+static error_t check_static_init(Ctx ctx, CInitializer* node, struct Type* static_init_type) {
     CATCH_ENTER;
     switch (node->type) {
         case AST_CSingleInit_t:
@@ -2258,8 +2260,8 @@ static error_t check_static_init(Ctx ctx, CInitializer* node, Type* static_init_
 }
 
 static error_t check_initializer(
-    Ctx ctx, CInitializer* node, Type* static_init_type, shared_ptr_t(InitialValue) * init_value) {
-    vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
+    Ctx ctx, CInitializer* node, struct Type* static_init_type, shared_ptr_t(struct InitialValue) * init_value) {
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits = vec_new();
     CATCH_ENTER;
     {
         ctx->p_static_inits = &static_inits;
@@ -2279,10 +2281,10 @@ static error_t check_file_var_decl(Ctx ctx, CVariableDeclaration* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    unique_ptr_t(IdentifierAttr) glob_var_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(InitialValue) init_value = sptr_new();
-    shared_ptr_t(Type) glob_var_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) glob_var_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct InitialValue) init_value = sptr_new();
+    shared_ptr_t(struct Type) glob_var_type = sptr_new();
     CATCH_ENTER;
     bool is_glob;
     ssize_t map_it;
@@ -2319,14 +2321,14 @@ static error_t check_file_var_decl(Ctx ctx, CVariableDeclaration* node) {
 
     map_it = map_find(ctx->frontend->symbol_table, node->name);
     if (map_it != map_end()) {
-        Symbol* var_symbol = pair_second(ctx->frontend->symbol_table[map_it]);
+        struct Symbol* var_symbol = pair_second(ctx->frontend->symbol_table[map_it]);
         if (!is_same_type(var_symbol->type_t, node->var_type)) {
             THROW_AT_TOKEN(node->info_at,
                 GET_SEMANTIC_MSG(3, MSG_redecl_var_conflict, str_fmt_name(node->name, &name_fmt),
                     str_fmt_type(node->var_type, &type_fmt_1), str_fmt_type(var_symbol->type_t, &type_fmt_2)));
         }
 
-        StaticAttr* var_attrs = &var_symbol->attrs->get._StaticAttr;
+        struct StaticAttr* var_attrs = &var_symbol->attrs->get._StaticAttr;
         if (node->storage_class.type == AST_CExtern_t) {
             is_glob = var_attrs->is_glob;
         }
@@ -2366,10 +2368,10 @@ static error_t check_extern_block_var_decl(Ctx ctx, CVariableDeclaration* node) 
     string_t name_fmt = str_new(NULL);
     string_t type_fmt_1 = str_new(NULL);
     string_t type_fmt_2 = str_new(NULL);
-    unique_ptr_t(IdentifierAttr) local_var_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(InitialValue) init_value = sptr_new();
-    shared_ptr_t(Type) local_var_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) local_var_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct InitialValue) init_value = sptr_new();
+    shared_ptr_t(struct Type) local_var_type = sptr_new();
     CATCH_ENTER;
     ssize_t map_it;
     if (node->init) {
@@ -2377,7 +2379,7 @@ static error_t check_extern_block_var_decl(Ctx ctx, CVariableDeclaration* node) 
     }
     map_it = map_find(ctx->frontend->symbol_table, node->name);
     if (map_it != map_end()) {
-        Type* var_type = pair_second(ctx->frontend->symbol_table[map_it])->type_t;
+        struct Type* var_type = pair_second(ctx->frontend->symbol_table[map_it])->type_t;
         if (!is_same_type(var_type, node->var_type)) {
             THROW_AT_TOKEN(
                 node->info_at, GET_SEMANTIC_MSG(3, MSG_redecl_var_conflict, str_fmt_name(node->name, &name_fmt),
@@ -2403,10 +2405,10 @@ static error_t check_extern_block_var_decl(Ctx ctx, CVariableDeclaration* node) 
 }
 
 static error_t check_static_block_var_decl(Ctx ctx, CVariableDeclaration* node) {
-    unique_ptr_t(IdentifierAttr) local_var_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(InitialValue) init_value = sptr_new();
-    shared_ptr_t(Type) local_var_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) local_var_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct InitialValue) init_value = sptr_new();
+    shared_ptr_t(struct Type) local_var_type = sptr_new();
     CATCH_ENTER;
     THROW_ABORT_IF(
         node->var_type->type == AST_Structure_t && !is_struct_complete(ctx, &node->var_type->get._Structure));
@@ -2434,9 +2436,9 @@ static error_t check_static_block_var_decl(Ctx ctx, CVariableDeclaration* node) 
 static error_t check_auto_block_var_decl(Ctx ctx, CVariableDeclaration* node) {
     string_t name_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
-    unique_ptr_t(IdentifierAttr) local_var_attrs = uptr_new();
-    unique_ptr_t(Symbol) symbol = uptr_new();
-    shared_ptr_t(Type) local_var_type = sptr_new();
+    unique_ptr_t(struct IdentifierAttr) local_var_attrs = uptr_new();
+    unique_ptr_t(struct Symbol) symbol = uptr_new();
+    shared_ptr_t(struct Type) local_var_type = sptr_new();
     CATCH_ENTER;
     if (node->var_type->type == AST_Structure_t && !is_struct_complete(ctx, &node->var_type->get._Structure)) {
         THROW_AT_TOKEN(node->info_at, GET_SEMANTIC_MSG(2, MSG_incomplete_var_decl, str_fmt_name(node->name, &name_fmt),
@@ -2519,9 +2521,9 @@ static error_t check_struct_members_decl(Ctx ctx, CStructDeclaration* node) {
 
 static error_t check_struct_decl(Ctx ctx, CStructDeclaration* node) {
     string_t struct_fmt = str_new(NULL);
-    unique_ptr_t(StructMember) struct_member = uptr_new();
-    unique_ptr_t(StructTypedef) struct_typedef = uptr_new();
-    shared_ptr_t(Type) member_type = sptr_new();
+    unique_ptr_t(struct StructMember) struct_member = uptr_new();
+    unique_ptr_t(struct StructTypedef) struct_typedef = uptr_new();
+    shared_ptr_t(struct Type) member_type = sptr_new();
     vector_t(TIdentifier) member_names = vec_new();
     hashmap_t(TIdentifier, UPtrStructMember) members = map_new();
     CATCH_ENTER;
@@ -2723,21 +2725,21 @@ static error_t reslv_label(Ctx ctx, CFunctionDeclaration* node) {
     CATCH_EXIT;
 }
 
-static error_t reslv_ptr_struct(Ctx ctx, Pointer* ptr_type) {
+static error_t reslv_ptr_struct(Ctx ctx, struct Pointer* ptr_type) {
     CATCH_ENTER;
     TRY(reslv_struct_type(ctx, ptr_type->ref_type));
     FINALLY;
     CATCH_EXIT;
 }
 
-static error_t reslv_arr_struct(Ctx ctx, Array* arr_type) {
+static error_t reslv_arr_struct(Ctx ctx, struct Array* arr_type) {
     CATCH_ENTER;
     TRY(reslv_struct_type(ctx, arr_type->elem_type));
     FINALLY;
     CATCH_EXIT;
 }
 
-static error_t reslv_struct(Ctx ctx, Structure* struct_type) {
+static error_t reslv_struct(Ctx ctx, struct Structure* struct_type) {
     string_t struct_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
@@ -2752,7 +2754,7 @@ static error_t reslv_struct(Ctx ctx, Structure* struct_type) {
     for (size_t i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
         ssize_t map_it = map_find(ctx->scoped_struct_maps[i], struct_type->tag);
         if (map_it != map_end()) {
-            Structure* structure = &pair_second(ctx->scoped_struct_maps[i][map_it]);
+            struct Structure* structure = &pair_second(ctx->scoped_struct_maps[i][map_it]);
             if (structure->is_union != struct_type->is_union) {
                 THROW_AT_TOKEN(ctx->errors->info_at_buf,
                     GET_SEMANTIC_MSG(2, MSG_redecl_struct_conflict, str_fmt_struct(struct_type, &type_fmt),
@@ -2770,7 +2772,7 @@ static error_t reslv_struct(Ctx ctx, Structure* struct_type) {
     CATCH_EXIT;
 }
 
-static error_t reslv_struct_type(Ctx ctx, Type* type) {
+static error_t reslv_struct_type(Ctx ctx, struct Type* type) {
     CATCH_ENTER;
     switch (type->type) {
         case AST_Pointer_t:
@@ -3297,9 +3299,9 @@ static error_t reslv_block(Ctx ctx, CBlock* node) {
     CATCH_EXIT;
 }
 
-static error_t reslv_initializer(Ctx ctx, CInitializer* node, shared_ptr_t(Type) * init_type);
+static error_t reslv_initializer(Ctx ctx, CInitializer* node, shared_ptr_t(struct Type) * init_type);
 
-static error_t reslv_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(Type) * init_type) {
+static error_t reslv_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(struct Type) * init_type) {
     CATCH_ENTER;
     if (node->exp->type == AST_CString_t && (*init_type)->type == AST_Array_t) {
         TRY(check_bound_string_init(ctx, &node->exp->get._CString, &(*init_type)->get._Array));
@@ -3313,7 +3315,7 @@ static error_t reslv_single_init(Ctx ctx, CSingleInit* node, shared_ptr_t(Type) 
     CATCH_EXIT;
 }
 
-static error_t reslv_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, shared_ptr_t(Type) * init_type) {
+static error_t reslv_arr_init(Ctx ctx, CCompoundInit* node, struct Array* arr_type, shared_ptr_t(struct Type) * init_type) {
     CATCH_ENTER;
     TRY(check_bound_arr_init(ctx, node, arr_type));
 
@@ -3325,12 +3327,12 @@ static error_t reslv_arr_init(Ctx ctx, CCompoundInit* node, Array* arr_type, sha
     CATCH_EXIT;
 }
 
-static error_t reslv_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct_type, shared_ptr_t(Type) * init_type) {
+static error_t reslv_struct_init(Ctx ctx, CCompoundInit* node, struct Structure* struct_type, shared_ptr_t(struct Type) * init_type) {
     CATCH_ENTER;
     TRY(check_bound_struct_init(ctx, node, struct_type));
 
     for (size_t i = 0; i < vec_size(node->initializers); ++i) {
-        StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
+        struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         TRY(reslv_initializer(ctx, node->initializers[i], &member->member_type));
     }
     check_struct_init(ctx, node, struct_type, init_type);
@@ -3338,7 +3340,7 @@ static error_t reslv_struct_init(Ctx ctx, CCompoundInit* node, Structure* struct
     CATCH_EXIT;
 }
 
-static error_t reslv_compound_init(Ctx ctx, CCompoundInit* node, shared_ptr_t(Type) * init_type) {
+static error_t reslv_compound_init(Ctx ctx, CCompoundInit* node, shared_ptr_t(struct Type) * init_type) {
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
     switch ((*init_type)->type) {
@@ -3357,7 +3359,7 @@ static error_t reslv_compound_init(Ctx ctx, CCompoundInit* node, shared_ptr_t(Ty
     CATCH_EXIT;
 }
 
-static error_t reslv_initializer(Ctx ctx, CInitializer* node, shared_ptr_t(Type) * init_type) {
+static error_t reslv_initializer(Ctx ctx, CInitializer* node, shared_ptr_t(struct Type) * init_type) {
     CATCH_ENTER;
     switch (node->type) {
         case AST_CSingleInit_t:
@@ -3504,7 +3506,7 @@ static error_t reslv_struct_declaration(Ctx ctx, CStructDeclaration* node) {
     }
     else {
         {
-            Structure structure = {rslv_struct_tag(ctx->identifiers, node->tag), node->is_union};
+            struct Structure structure = {rslv_struct_tag(ctx->identifiers, node->tag), node->is_union};
             map_add(vec_back(ctx->scoped_struct_maps), node->tag, structure);
             node->tag = structure.tag;
         }
@@ -3593,7 +3595,7 @@ static error_t resolve_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t analyze_semantic(
-    CProgram* node, struct ErrorsContext* errors, FrontEndContext* frontend, struct IdentifierContext* identifiers) {
+    CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     SemanticContext ctx;
     {
         ctx.errors = errors;

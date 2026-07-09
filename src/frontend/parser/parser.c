@@ -17,12 +17,12 @@
 #include "frontend/intermediate/idents.h"
 
 typedef struct AbstractDeclarator {
-    shared_ptr_t(Type) derived_type;
+    shared_ptr_t(struct Type) derived_type;
 } AbstractDeclarator;
 
 typedef struct Declarator {
     TIdentifier name;
-    shared_ptr_t(Type) derived_type;
+    shared_ptr_t(struct Type) derived_type;
     vector_t(TIdentifier) params;
 } Declarator;
 
@@ -414,27 +414,27 @@ static error_t parse_binop(Ctx ctx, CBinaryOp* binop) {
 }
 
 static void proc_abstract_decltor(
-    CAbstractDeclarator* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor);
+    CAbstractDeclarator* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor);
 
 static void proc_ptr_abstract_decltor(
-    CAbstractPointer* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
-    shared_ptr_t(Type) derived_type = make_Pointer(base_type);
+    CAbstractPointer* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    shared_ptr_t(struct Type) derived_type = make_Pointer(base_type);
     proc_abstract_decltor(node->abstract_decltor, &derived_type, abstract_decltor);
 }
 
 static void proc_arr_abstract_decltor(
-    CAbstractArray* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    CAbstractArray* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
     TLong size = node->size;
-    shared_ptr_t(Type) derived_type = make_Array(size, base_type);
+    shared_ptr_t(struct Type) derived_type = make_Array(size, base_type);
     proc_abstract_decltor(node->abstract_decltor, &derived_type, abstract_decltor);
 }
 
-static void proc_base_abstract_decltor(shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
+static void proc_base_abstract_decltor(shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
     sptr_move(Type, *base_type, abstract_decltor->derived_type);
 }
 
 static void proc_abstract_decltor(
-    CAbstractDeclarator* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    CAbstractDeclarator* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
     switch (node->type) {
         case AST_CAbstractPointer_t:
             proc_ptr_abstract_decltor(&node->get._CAbstractPointer, base_type, abstract_decltor);
@@ -523,13 +523,13 @@ static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator)
     CATCH_EXIT;
 }
 
-static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(Type) * type_specifier);
+static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(struct Type) * type_specifier);
 
 static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp);
 static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp);
 static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(CExp) * exp);
 
-static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(Type) * target_type) {
+static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(struct Type) * target_type) {
     AbstractDeclarator abstract_decltor = {sptr_new()};
     unique_ptr_t(CAbstractDeclarator) abstract_decltor_1 = uptr_new();
     CATCH_ENTER;
@@ -543,7 +543,7 @@ static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(Type) * target_ty
 }
 
 // <type-name> ::= { <type-specifier> }+ [ <abstract-declarator> ]
-static error_t parse_type_name(Ctx ctx, shared_ptr_t(Type) * target_type) {
+static error_t parse_type_name(Ctx ctx, shared_ptr_t(struct Type) * target_type) {
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, target_type));
     TRY(peek_next(ctx));
@@ -794,7 +794,7 @@ static error_t parse_ptr_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
 }
 
 static error_t parse_sizeoft_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
-    shared_ptr_t(Type) target_type = sptr_new();
+    shared_ptr_t(struct Type) target_type = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -847,7 +847,7 @@ static error_t parse_sizeof_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
 
 static error_t parse_cast_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     unique_ptr_t(CExp) cast_exp = uptr_new();
-    shared_ptr_t(Type) target_type = sptr_new();
+    shared_ptr_t(struct Type) target_type = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1667,7 +1667,7 @@ static error_t parse_block(Ctx ctx, unique_ptr_t(CBlock) * block) {
 
 // <type-specifier> ::= "int" | "long" | "unsigned" | "signed" | "double" | "char" | "void"
 //                    | ( "struct" | "union" ) <identifier>
-static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(Type) * type_specifier) {
+static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(struct Type) * type_specifier) {
     size_t type_tok_kinds_size = 0;
     string_t type_tok_kinds_fmt = str_new(NULL);
     TOKEN_KIND type_tok_kinds[4] = {TOK_error, TOK_error, TOK_error, TOK_error};
@@ -1926,16 +1926,16 @@ static error_t parse_initializer(Ctx ctx, unique_ptr_t(CInitializer) * initializ
 }
 
 static error_t parse_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor);
-static error_t proc_decltor(Ctx ctx, CDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor);
+static error_t proc_decltor(Ctx ctx, CDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor);
 
-static void proc_ident_decltor(CIdent* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+static void proc_ident_decltor(CIdent* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
     decltor->name = node->name;
     sptr_move(Type, *base_type, decltor->derived_type);
 }
 
 static error_t proc_ptr_decltor(
-    Ctx ctx, CPointerDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(Type) derived_type = sptr_new();
+    Ctx ctx, CPointerDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(struct Type) derived_type = sptr_new();
     CATCH_ENTER;
     derived_type = make_Pointer(base_type);
     TRY(proc_decltor(ctx, node->decltor, &derived_type, decltor));
@@ -1944,8 +1944,8 @@ static error_t proc_ptr_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_arr_decltor(Ctx ctx, CArrayDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(Type) derived_type = sptr_new();
+static error_t proc_arr_decltor(Ctx ctx, CArrayDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(struct Type) derived_type = sptr_new();
     CATCH_ENTER;
     TLong size = node->size;
     derived_type = make_Array(size, base_type);
@@ -1956,9 +1956,9 @@ static error_t proc_arr_decltor(Ctx ctx, CArrayDeclarator* node, shared_ptr_t(Ty
 }
 
 static error_t proc_param_decltor(
-    Ctx ctx, CParam* node, vector_t(TIdentifier) * params, vector_t(shared_ptr_t(Type)) * param_types) {
+    Ctx ctx, CParam* node, vector_t(TIdentifier) * params, vector_t(shared_ptr_t(struct Type)) * param_types) {
     Declarator decltor = {0, sptr_new(), vec_new()};
-    shared_ptr_t(Type) param_type = sptr_new();
+    shared_ptr_t(struct Type) param_type = sptr_new();
     CATCH_ENTER;
     sptr_copy(Type, node->param_type, param_type);
     TRY(proc_decltor(ctx, node->decltor, &param_type, &decltor));
@@ -1972,10 +1972,10 @@ static error_t proc_param_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_fun_decltor(Ctx ctx, CFunDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(Type) derived_type = sptr_new();
+static error_t proc_fun_decltor(Ctx ctx, CFunDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(struct Type) derived_type = sptr_new();
     vector_t(TIdentifier) params = vec_new();
-    vector_t(shared_ptr_t(Type)) param_types = vec_new();
+    vector_t(shared_ptr_t(struct Type)) param_types = vec_new();
     CATCH_ENTER;
     if (node->decltor->type != AST_CIdent_t) {
         THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(0, MSG_derived_fun_decl));
@@ -2002,7 +2002,7 @@ static error_t proc_fun_decltor(Ctx ctx, CFunDeclarator* node, shared_ptr_t(Type
     CATCH_EXIT;
 }
 
-static error_t proc_decltor(Ctx ctx, CDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+static error_t proc_decltor(Ctx ctx, CDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
     CATCH_ENTER;
     switch (node->type) {
         case AST_CIdent_t:
@@ -2066,7 +2066,7 @@ static error_t parse_simple_decltor_decl(Ctx ctx, unique_ptr_t(CDeclarator) * de
 // param_info = Param(type, declarator)
 static error_t parse_param(Ctx ctx, unique_ptr_t(CParam) * param) {
     unique_ptr_t(CDeclarator) decltor = uptr_new();
-    shared_ptr_t(Type) param_type = sptr_new();
+    shared_ptr_t(struct Type) param_type = sptr_new();
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, &param_type));
     TRY(parse_decltor(ctx, &decltor));
@@ -2348,7 +2348,7 @@ static error_t parse_struct_decl(Ctx ctx, unique_ptr_t(CDeclaration) * declarati
 
 static error_t parse_decltor_decl(Ctx ctx, Declarator* decltor, CStorageClass* storage_class) {
     unique_ptr_t(CDeclarator) decltor_1 = uptr_new();
-    shared_ptr_t(Type) type_specifier = sptr_new();
+    shared_ptr_t(struct Type) type_specifier = sptr_new();
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, &type_specifier));
     TRY(peek_next(ctx));

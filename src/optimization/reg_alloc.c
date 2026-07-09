@@ -41,7 +41,7 @@ typedef struct InferenceGraph {
 
 typedef struct RegAllocContext {
     BackEndContext* backend;
-    FrontEndContext* frontend;
+    struct FrontEndContext* frontend;
     // Register allocation
     mask_t callee_saved_reg_mask;
     BackendFun* p_backend_fun;
@@ -196,7 +196,7 @@ static void infer_transfer_used_op(Ctx ctx, AsmOperand* node, size_t next_instr_
 }
 
 static void infer_transfer_used_call(Ctx ctx, AsmCall* node, size_t next_instr_idx) {
-    FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
+    struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
     GET_DFA_INSTR_SET_MASK(next_instr_idx, 0) |= fun_type->param_reg_mask;
 }
 
@@ -1231,7 +1231,7 @@ static void reallocate_registers(Ctx ctx) {
 
 // Register coalescing
 
-static TInt get_type_size(Type* type) {
+static TInt get_type_size(struct Type* type) {
     switch (type->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -1307,8 +1307,8 @@ static bool get_coalescable_infer_regs(
         else {
             TIdentifier src_name = ctx->dfa_o2->data_name_map[src_idx - REGISTER_MASK_SIZE];
             TIdentifier dst_name = ctx->dfa_o2->data_name_map[dst_idx - REGISTER_MASK_SIZE];
-            Type* src_type = map_get(ctx->frontend->symbol_table, src_name)->type_t;
-            Type* dst_type = map_get(ctx->frontend->symbol_table, dst_name)->type_t;
+            struct Type* src_type = map_get(ctx->frontend->symbol_table, src_name)->type_t;
+            struct Type* dst_type = map_get(ctx->frontend->symbol_table, dst_name)->type_t;
             bool is_dbl = src_type->type == AST_Double_t;
             if (is_dbl == (dst_type->type == AST_Double_t) && get_type_size(src_type) == get_type_size(dst_type)) {
                 set_p_infer_graph(ctx, is_dbl);
@@ -1812,7 +1812,7 @@ static void alloc_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void allocate_registers(AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code) {
+void allocate_registers(AsmProgram* node, BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
     RegAllocContext ctx;
     {
         ctx.backend = backend;

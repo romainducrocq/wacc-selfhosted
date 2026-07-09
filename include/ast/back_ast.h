@@ -442,13 +442,13 @@ typedef struct AsmStaticVariable {
     TIdentifier name;
     TInt alignment;
     bool is_glob;
-    vector_t(shared_ptr_t(StaticInit)) static_inits;
+    vector_t(shared_ptr_t(struct StaticInit)) static_inits;
 } AsmStaticVariable;
 
 typedef struct AsmStaticConstant {
     TIdentifier name;
     TInt alignment;
-    shared_ptr_t(StaticInit) static_init;
+    shared_ptr_t(struct StaticInit) static_init;
 } AsmStaticConstant;
 
 typedef struct AsmTopLevel {
@@ -465,9 +465,9 @@ unique_ptr_t(AsmTopLevel) make_AsmTopLevel(void);
 unique_ptr_t(AsmTopLevel) make_AsmFunction(
     TIdentifier name, bool is_glob, bool is_ret_memory, vector_t(unique_ptr_t(AsmInstruction)) * instructions);
 unique_ptr_t(AsmTopLevel) make_AsmStaticVariable(
-    TIdentifier name, TInt alignment, bool is_glob, vector_t(shared_ptr_t(StaticInit)) * static_inits);
+    TIdentifier name, TInt alignment, bool is_glob, vector_t(shared_ptr_t(struct StaticInit)) * static_inits);
 unique_ptr_t(AsmTopLevel)
-    make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(StaticInit) * static_init);
+    make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(struct StaticInit) * static_init);
 void free_AsmTopLevel(unique_ptr_t(AsmTopLevel) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

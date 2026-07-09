@@ -1,4 +1,5 @@
 #include <sys/types.h>
+#include <stddef.h>
 
 #include "util/c_std.h"
 #include "util/fileio.h"
@@ -873,7 +874,7 @@ static void emit_fun_toplvl(Ctx ctx, AsmFunction* node) {
 
 // -> if zero initialized $ .bss
 // ->                else $ .data
-static void static_section_toplvl(Ctx ctx, vector_t(shared_ptr_t(StaticInit)) node_list) {
+static void static_section_toplvl(Ctx ctx, vector_t(shared_ptr_t(struct StaticInit)) node_list) {
     if (vec_size(node_list) == 1 && node_list[0]->type == AST_ZeroInit_t) {
         emit(ctx, TAB ".bss" LF);
     }
@@ -901,7 +902,7 @@ static void align_directive_toplvl(Ctx ctx, TInt alignment) {
 // StringInit(s, b) if null terminated -> .asciz "<s>"
 //                                else -> .ascii "<s>"
 // PointerInit(label)                  -> .quad .L<label>
-static void static_init_toplvl(Ctx ctx, StaticInit* node) {
+static void static_init_toplvl(Ctx ctx, struct StaticInit* node) {
     switch (node->type) {
         case AST_CharInit_t:
             emit(ctx, TAB TAB ".byte ");
@@ -946,7 +947,7 @@ static void static_init_toplvl(Ctx ctx, StaticInit* node) {
         case AST_StringInit_t:
             emit(ctx, TAB TAB ".asci");
             {
-                StringInit* string_init = &node->get._StringInit;
+                struct StringInit* string_init = &node->get._StringInit;
                 emit(ctx, string_init->is_null_term ? "z" : "i");
                 emit(ctx, " \"");
                 emit_string(ctx, string_init->string_const);

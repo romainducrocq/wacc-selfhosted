@@ -361,7 +361,7 @@ char* get_struct_name_fmt(struct IdentifierContext* ctx, TIdentifier name, bool 
     return *struct_fmt;
 }
 
-char* get_fun_fmt(struct IdentifierContext* ctx, FunType* fun_type, string_t* fun_fmt) {
+char* get_fun_fmt(struct IdentifierContext* ctx, struct FunType* fun_type, string_t* fun_fmt) {
     *fun_fmt = str_new("(");
     {
         string_t type_fmt = str_new(NULL);
@@ -385,7 +385,7 @@ char* get_fun_fmt(struct IdentifierContext* ctx, FunType* fun_type, string_t* fu
     return *fun_fmt;
 }
 
-char* get_ptr_fmt(struct IdentifierContext* ctx, Pointer* ptr_type, string_t* ptr_fmt) {
+char* get_ptr_fmt(struct IdentifierContext* ctx, struct Pointer* ptr_type, string_t* ptr_fmt) {
     *ptr_fmt = str_new("");
     string_t decltor_fmt = str_new("*");
     while (ptr_type->ref_type->type == AST_Pointer_t) {
@@ -402,7 +402,7 @@ char* get_ptr_fmt(struct IdentifierContext* ctx, Pointer* ptr_type, string_t* pt
     return *ptr_fmt;
 }
 
-char* get_arr_fmt(struct IdentifierContext* ctx, Array* arr_type, string_t* arr_fmt) {
+char* get_arr_fmt(struct IdentifierContext* ctx, struct Array* arr_type, string_t* arr_fmt) {
     *arr_fmt = str_new("");
     string_t decltor_fmt = str_new("[");
     {
@@ -431,11 +431,11 @@ char* get_arr_fmt(struct IdentifierContext* ctx, Array* arr_type, string_t* arr_
     return *arr_fmt;
 }
 
-char* get_struct_fmt(struct IdentifierContext* ctx, Structure* struct_type, string_t* struct_fmt) {
+char* get_struct_fmt(struct IdentifierContext* ctx, struct Structure* struct_type, string_t* struct_fmt) {
     return get_struct_name_fmt(ctx, struct_type->tag, struct_type->is_union, struct_fmt);
 }
 
-char* get_type_fmt(struct IdentifierContext* ctx, Type* type, string_t* type_fmt) {
+char* get_type_fmt(struct IdentifierContext* ctx, struct Type* type, string_t* type_fmt) {
     switch (type->type) {
         case AST_Char_t:
             return "char";

@@ -1,6 +1,8 @@
 #ifndef _BACK_ASSEMBLY_REGISTERS_H
 #define _BACK_ASSEMBLY_REGISTERS_H
 
+#include <stddef.h>
+
 #include "util/c_std.h"
 
 #include "ast_t.h" // ast

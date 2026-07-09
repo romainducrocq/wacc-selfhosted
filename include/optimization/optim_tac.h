@@ -4,7 +4,7 @@
 #include <inttypes.h>
 
 typedef struct TacProgram TacProgram;
-typedef struct FrontEndContext FrontEndContext;
+struct FrontEndContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -17,6 +17,6 @@ typedef struct FrontEndContext FrontEndContext;
 // Copy propagation
 // Dead store elimination
 
-void optimize_three_address_code(TacProgram* node, FrontEndContext* frontend, uint8_t optim_1_mask);
+void optimize_three_address_code(TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask);
 
 #endif

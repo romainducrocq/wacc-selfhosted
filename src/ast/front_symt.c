@@ -14,69 +14,69 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-shared_ptr_t(Type) make_Type(void) {
-    shared_ptr_t(Type) self = sptr_new();
+shared_ptr_t(struct Type) make_Type(void) {
+    shared_ptr_t(struct Type) self = sptr_new();
     sptr_alloc(Type, self);
     self->type = AST_Type_t;
     return self;
 }
 
-shared_ptr_t(Type) make_Char(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Char(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Char_t;
     return self;
 }
 
-shared_ptr_t(Type) make_SChar(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_SChar(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_SChar_t;
     return self;
 }
 
-shared_ptr_t(Type) make_UChar(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_UChar(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_UChar_t;
     return self;
 }
 
-shared_ptr_t(Type) make_Int(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Int(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Int_t;
     return self;
 }
 
-shared_ptr_t(Type) make_Long(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Long(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Long_t;
     return self;
 }
 
-shared_ptr_t(Type) make_UInt(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_UInt(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_UInt_t;
     return self;
 }
 
-shared_ptr_t(Type) make_ULong(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_ULong(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_ULong_t;
     return self;
 }
 
-shared_ptr_t(Type) make_Double(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Double(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Double_t;
     return self;
 }
 
-shared_ptr_t(Type) make_Void(void) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Void(void) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Void_t;
     return self;
 }
 
-shared_ptr_t(Type) make_FunType(vector_t(shared_ptr_t(Type)) * param_types, shared_ptr_t(Type) * ret_type) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_FunType(vector_t(shared_ptr_t(struct Type)) * param_types, shared_ptr_t(struct Type) * ret_type) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_FunType_t;
     self->get._FunType.param_reg_mask = 0ul;
     self->get._FunType.ret_reg_mask = 0ul;
@@ -89,16 +89,16 @@ shared_ptr_t(Type) make_FunType(vector_t(shared_ptr_t(Type)) * param_types, shar
     return self;
 }
 
-shared_ptr_t(Type) make_Pointer(shared_ptr_t(Type) * ref_type) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Pointer(shared_ptr_t(struct Type) * ref_type) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Pointer_t;
     self->get._Pointer.ref_type = sptr_new();
     sptr_move(Type, *ref_type, self->get._Pointer.ref_type);
     return self;
 }
 
-shared_ptr_t(Type) make_Array(TLong size, shared_ptr_t(Type) * elem_type) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Array(TLong size, shared_ptr_t(struct Type) * elem_type) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Array_t;
     self->get._Array.size = size;
     self->get._Array.elem_type = sptr_new();
@@ -106,15 +106,15 @@ shared_ptr_t(Type) make_Array(TLong size, shared_ptr_t(Type) * elem_type) {
     return self;
 }
 
-shared_ptr_t(Type) make_Structure(TIdentifier tag, bool is_union) {
-    shared_ptr_t(Type) self = make_Type();
+shared_ptr_t(struct Type) make_Structure(TIdentifier tag, bool is_union) {
+    shared_ptr_t(struct Type) self = make_Type();
     self->type = AST_Structure_t;
     self->get._Structure.tag = tag;
     self->get._Structure.is_union = is_union;
     return self;
 }
 
-void free_Type(shared_ptr_t(Type) * self) {
+void free_Type(shared_ptr_t(struct Type) * self) {
     sptr_delete(*self);
     switch ((*self)->type) {
         case AST_Type_t:
@@ -149,72 +149,72 @@ void free_Type(shared_ptr_t(Type) * self) {
     sptr_free(*self);
 }
 
-shared_ptr_t(StaticInit) make_StaticInit(void) {
-    shared_ptr_t(StaticInit) self = sptr_new();
+shared_ptr_t(struct StaticInit) make_StaticInit(void) {
+    shared_ptr_t(struct StaticInit) self = sptr_new();
     sptr_alloc(StaticInit, self);
     self->type = AST_StaticInit_t;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_IntInit(TInt value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_IntInit(TInt value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_IntInit_t;
     self->get._IntInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_LongInit(TLong value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_LongInit(TLong value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_LongInit_t;
     self->get._LongInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_UIntInit(TUInt value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_UIntInit(TUInt value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_UIntInit_t;
     self->get._UIntInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_ULongInit(TULong value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_ULongInit(TULong value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_ULongInit_t;
     self->get._ULongInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_CharInit(TChar value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_CharInit(TChar value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_CharInit_t;
     self->get._CharInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_UCharInit(TUChar value) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_UCharInit(TUChar value) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_UCharInit_t;
     self->get._UCharInit.value = value;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_DoubleInit(TIdentifier dbl_const) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_DoubleInit(TIdentifier dbl_const) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_DoubleInit_t;
     self->get._DoubleInit.dbl_const = dbl_const;
     return self;
 }
 
-shared_ptr_t(StaticInit) make_ZeroInit(TLong byte) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_ZeroInit(TLong byte) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_ZeroInit_t;
     self->get._ZeroInit.byte = byte;
     return self;
 }
 
-shared_ptr_t(StaticInit)
+shared_ptr_t(struct StaticInit)
     make_StringInit(TIdentifier string_const, bool is_null_term, shared_ptr_t(struct CStringLiteral) * literal) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_StringInit_t;
     self->get._StringInit.string_const = string_const;
     self->get._StringInit.is_null_term = is_null_term;
@@ -223,14 +223,14 @@ shared_ptr_t(StaticInit)
     return self;
 }
 
-shared_ptr_t(StaticInit) make_PointerInit(TIdentifier name) {
-    shared_ptr_t(StaticInit) self = make_StaticInit();
+shared_ptr_t(struct StaticInit) make_PointerInit(TIdentifier name) {
+    shared_ptr_t(struct StaticInit) self = make_StaticInit();
     self->type = AST_PointerInit_t;
     self->get._PointerInit.name = name;
     return self;
 }
 
-void free_StaticInit(shared_ptr_t(StaticInit) * self) {
+void free_StaticInit(shared_ptr_t(struct StaticInit) * self) {
     sptr_delete(*self);
     switch ((*self)->type) {
         case AST_StaticInit_t:
@@ -256,34 +256,34 @@ void free_StaticInit(shared_ptr_t(StaticInit) * self) {
     sptr_free(*self);
 }
 
-shared_ptr_t(InitialValue) make_InitialValue(void) {
-    shared_ptr_t(InitialValue) self = sptr_new();
+shared_ptr_t(struct InitialValue) make_InitialValue(void) {
+    shared_ptr_t(struct InitialValue) self = sptr_new();
     sptr_alloc(InitialValue, self);
     self->type = AST_InitialValue_t;
     return self;
 }
 
-shared_ptr_t(InitialValue) make_Tentative(void) {
-    shared_ptr_t(InitialValue) self = make_InitialValue();
+shared_ptr_t(struct InitialValue) make_Tentative(void) {
+    shared_ptr_t(struct InitialValue) self = make_InitialValue();
     self->type = AST_Tentative_t;
     return self;
 }
 
-shared_ptr_t(InitialValue) make_Initial(vector_t(shared_ptr_t(StaticInit)) * static_inits) {
-    shared_ptr_t(InitialValue) self = make_InitialValue();
+shared_ptr_t(struct InitialValue) make_Initial(vector_t(shared_ptr_t(struct StaticInit)) * static_inits) {
+    shared_ptr_t(struct InitialValue) self = make_InitialValue();
     self->type = AST_Initial_t;
     self->get._Initial.static_inits = vec_new();
     vec_move(*static_inits, self->get._Initial.static_inits);
     return self;
 }
 
-shared_ptr_t(InitialValue) make_NoInitializer(void) {
-    shared_ptr_t(InitialValue) self = make_InitialValue();
+shared_ptr_t(struct InitialValue) make_NoInitializer(void) {
+    shared_ptr_t(struct InitialValue) self = make_InitialValue();
     self->type = AST_NoInitializer_t;
     return self;
 }
 
-void free_InitialValue(shared_ptr_t(InitialValue) * self) {
+void free_InitialValue(shared_ptr_t(struct InitialValue) * self) {
     sptr_delete(*self);
     switch ((*self)->type) {
         case AST_InitialValue_t:
@@ -303,23 +303,23 @@ void free_InitialValue(shared_ptr_t(InitialValue) * self) {
     sptr_free(*self);
 }
 
-unique_ptr_t(IdentifierAttr) make_IdentifierAttr(void) {
-    unique_ptr_t(IdentifierAttr) self = uptr_new();
+unique_ptr_t(struct IdentifierAttr) make_IdentifierAttr(void) {
+    unique_ptr_t(struct IdentifierAttr) self = uptr_new();
     uptr_alloc(IdentifierAttr, self);
     self->type = AST_IdentifierAttr_t;
     return self;
 }
 
-unique_ptr_t(IdentifierAttr) make_FunAttr(bool is_def, bool is_glob) {
-    unique_ptr_t(IdentifierAttr) self = make_IdentifierAttr();
+unique_ptr_t(struct IdentifierAttr) make_FunAttr(bool is_def, bool is_glob) {
+    unique_ptr_t(struct IdentifierAttr) self = make_IdentifierAttr();
     self->type = AST_FunAttr_t;
     self->get._FunAttr.is_def = is_def;
     self->get._FunAttr.is_glob = is_glob;
     return self;
 }
 
-unique_ptr_t(IdentifierAttr) make_StaticAttr(bool is_glob, shared_ptr_t(InitialValue) * init) {
-    unique_ptr_t(IdentifierAttr) self = make_IdentifierAttr();
+unique_ptr_t(struct IdentifierAttr) make_StaticAttr(bool is_glob, shared_ptr_t(struct InitialValue) * init) {
+    unique_ptr_t(struct IdentifierAttr) self = make_IdentifierAttr();
     self->type = AST_StaticAttr_t;
     self->get._StaticAttr.is_glob = is_glob;
     self->get._StaticAttr.init = sptr_new();
@@ -327,21 +327,21 @@ unique_ptr_t(IdentifierAttr) make_StaticAttr(bool is_glob, shared_ptr_t(InitialV
     return self;
 }
 
-unique_ptr_t(IdentifierAttr) make_ConstantAttr(shared_ptr_t(StaticInit) * static_init) {
-    unique_ptr_t(IdentifierAttr) self = make_IdentifierAttr();
+unique_ptr_t(struct IdentifierAttr) make_ConstantAttr(shared_ptr_t(struct StaticInit) * static_init) {
+    unique_ptr_t(struct IdentifierAttr) self = make_IdentifierAttr();
     self->type = AST_ConstantAttr_t;
     self->get._ConstantAttr.static_init = sptr_new();
     sptr_move(StaticInit, *static_init, self->get._ConstantAttr.static_init);
     return self;
 }
 
-unique_ptr_t(IdentifierAttr) make_LocalAttr(void) {
-    unique_ptr_t(IdentifierAttr) self = make_IdentifierAttr();
+unique_ptr_t(struct IdentifierAttr) make_LocalAttr(void) {
+    unique_ptr_t(struct IdentifierAttr) self = make_IdentifierAttr();
     self->type = AST_LocalAttr_t;
     return self;
 }
 
-void free_IdentifierAttr(unique_ptr_t(IdentifierAttr) * self) {
+void free_IdentifierAttr(unique_ptr_t(struct IdentifierAttr) * self) {
     uptr_delete(*self);
     switch ((*self)->type) {
         case AST_IdentifierAttr_t:
@@ -361,8 +361,8 @@ void free_IdentifierAttr(unique_ptr_t(IdentifierAttr) * self) {
     uptr_free(*self);
 }
 
-unique_ptr_t(Symbol) make_Symbol(shared_ptr_t(Type) * type_t, unique_ptr_t(IdentifierAttr) * attrs) {
-    unique_ptr_t(Symbol) self = uptr_new();
+unique_ptr_t(struct Symbol) make_Symbol(shared_ptr_t(struct Type) * type_t, unique_ptr_t(struct IdentifierAttr) * attrs) {
+    unique_ptr_t(struct Symbol) self = uptr_new();
     uptr_alloc(Symbol, self);
     self->type = AST_Symbol_t;
     self->type_t = sptr_new();
@@ -372,7 +372,7 @@ unique_ptr_t(Symbol) make_Symbol(shared_ptr_t(Type) * type_t, unique_ptr_t(Ident
     return self;
 }
 
-void free_Symbol(unique_ptr_t(Symbol) * self) {
+void free_Symbol(unique_ptr_t(struct Symbol) * self) {
     uptr_delete(*self);
     switch ((*self)->type) {
         case AST_Symbol_t:
@@ -385,8 +385,8 @@ void free_Symbol(unique_ptr_t(Symbol) * self) {
     uptr_free(*self);
 }
 
-unique_ptr_t(StructMember) make_StructMember(TLong offset, shared_ptr_t(Type) * member_type) {
-    unique_ptr_t(StructMember) self = uptr_new();
+unique_ptr_t(struct StructMember) make_StructMember(TLong offset, shared_ptr_t(struct Type) * member_type) {
+    unique_ptr_t(struct StructMember) self = uptr_new();
     uptr_alloc(StructMember, self);
     self->type = AST_StructMember_t;
     self->offset = offset;
@@ -395,7 +395,7 @@ unique_ptr_t(StructMember) make_StructMember(TLong offset, shared_ptr_t(Type) * 
     return self;
 }
 
-void free_StructMember(unique_ptr_t(StructMember) * self) {
+void free_StructMember(unique_ptr_t(struct StructMember) * self) {
     uptr_delete(*self);
     switch ((*self)->type) {
         case AST_StructMember_t:
@@ -407,9 +407,9 @@ void free_StructMember(unique_ptr_t(StructMember) * self) {
     uptr_free(*self);
 }
 
-unique_ptr_t(StructTypedef) make_StructTypedef(TInt alignment, TLong size, vector_t(TIdentifier) * member_names,
+unique_ptr_t(struct StructTypedef) make_StructTypedef(TInt alignment, TLong size, vector_t(TIdentifier) * member_names,
     hashmap_t(TIdentifier, UPtrStructMember) * members) {
-    unique_ptr_t(StructTypedef) self = uptr_new();
+    unique_ptr_t(struct StructTypedef) self = uptr_new();
     uptr_alloc(StructTypedef, self);
     self->type = AST_StructTypedef_t;
     self->alignment = alignment;
@@ -421,7 +421,7 @@ unique_ptr_t(StructTypedef) make_StructTypedef(TInt alignment, TLong size, vecto
     return self;
 }
 
-void free_StructTypedef(unique_ptr_t(StructTypedef) * self) {
+void free_StructTypedef(unique_ptr_t(struct StructTypedef) * self) {
     uptr_delete(*self);
     switch ((*self)->type) {
         case AST_StructTypedef_t:
@@ -439,14 +439,14 @@ void free_StructTypedef(unique_ptr_t(StructTypedef) * self) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef FrontEndContext* Ctx;
+typedef struct FrontEndContext* Ctx;
 
-StructMember* get_struct_typedef_member(Ctx ctx, TIdentifier tag, TIdentifier member_name) {
-    StructTypedef* struct_typedef = map_get(ctx->struct_typedef_table, tag);
+struct StructMember* get_struct_typedef_member(Ctx ctx, TIdentifier tag, TIdentifier member_name) {
+    struct StructTypedef* struct_typedef = map_get(ctx->struct_typedef_table, tag);
     return map_get(struct_typedef->members, struct_typedef->member_names[member_name]);
 }
 
-StructMember* get_struct_typedef_back(Ctx ctx, TIdentifier tag) {
-    StructTypedef* struct_typedef = map_get(ctx->struct_typedef_table, tag);
+struct StructMember* get_struct_typedef_back(Ctx ctx, TIdentifier tag) {
+    struct StructTypedef* struct_typedef = map_get(ctx->struct_typedef_table, tag);
     return map_get(struct_typedef->members, vec_back(struct_typedef->member_names));
 }

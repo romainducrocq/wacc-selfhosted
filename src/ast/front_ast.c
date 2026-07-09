@@ -63,7 +63,7 @@ void free_CAbstractDeclarator(unique_ptr_t(CAbstractDeclarator) * self) {
     uptr_free(*self);
 }
 
-unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(Type) * param_type) {
+unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(struct Type) * param_type) {
     unique_ptr_t(CParam) self = uptr_new();
     uptr_alloc(CParam, self);
     self->type = AST_CParam_t;
@@ -190,7 +190,7 @@ unique_ptr_t(CExp) make_CVar(TIdentifier name, size_t info_at) {
     return self;
 }
 
-unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(Type) * target_type, size_t info_at) {
+unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(struct Type) * target_type, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CCast_t;
     self->get._CCast.exp = uptr_new();
@@ -300,7 +300,7 @@ unique_ptr_t(CExp) make_CSizeOf(unique_ptr_t(CExp) * exp, size_t info_at) {
     return self;
 }
 
-unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(Type) * target_type, size_t info_at) {
+unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(struct Type) * target_type, size_t info_at) {
     unique_ptr_t(CExp) self = make_CExp(info_at);
     self->type = AST_CSizeOfT_t;
     self->get._CSizeOfT.target_type = sptr_new();
@@ -779,7 +779,7 @@ void free_CInitializer(unique_ptr_t(CInitializer) * self) {
 }
 
 unique_ptr_t(CMemberDeclaration)
-    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(Type) * member_type, size_t info_at) {
+    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(struct Type) * member_type, size_t info_at) {
     unique_ptr_t(CMemberDeclaration) self = uptr_new();
     uptr_alloc(CMemberDeclaration, self);
     self->type = AST_CMemberDeclaration_t;
@@ -831,7 +831,7 @@ void free_CStructDeclaration(unique_ptr_t(CStructDeclaration) * self) {
 }
 
 unique_ptr_t(CFunctionDeclaration) make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params,
-    unique_ptr_t(CBlock) * body, shared_ptr_t(Type) * fun_type, CStorageClass* storage_class, size_t info_at) {
+    unique_ptr_t(CBlock) * body, shared_ptr_t(struct Type) * fun_type, CStorageClass* storage_class, size_t info_at) {
     unique_ptr_t(CFunctionDeclaration) self = uptr_new();
     uptr_alloc(CFunctionDeclaration, self);
     self->type = AST_CFunctionDeclaration_t;
@@ -862,7 +862,7 @@ void free_CFunctionDeclaration(unique_ptr_t(CFunctionDeclaration) * self) {
 }
 
 unique_ptr_t(CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(CInitializer) * init,
-    shared_ptr_t(Type) * var_type, CStorageClass* storage_class, size_t info_at) {
+    shared_ptr_t(struct Type) * var_type, CStorageClass* storage_class, size_t info_at) {
     unique_ptr_t(CVariableDeclaration) self = uptr_new();
     uptr_alloc(CVariableDeclaration, self);
     self->type = AST_CVariableDeclaration_t;

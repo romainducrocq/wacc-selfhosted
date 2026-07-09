@@ -5,18 +5,18 @@
 
 #include "ast_t.h" // ast
 
-typedef struct Type Type;
+struct Type;
 typedef struct AssemblyType AssemblyType;
 typedef struct AsmProgram AsmProgram;
 typedef struct BackEndContext BackEndContext;
-typedef struct FrontEndContext FrontEndContext;
+struct FrontEndContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Symbol table conversion
 
-TInt gen_type_alignment(FrontEndContext* ctx, Type* type);
-shared_ptr_t(AssemblyType) cvt_backend_asm_type(FrontEndContext* ctx, TIdentifier name);
-void convert_symbol_table(AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend);
+TInt gen_type_alignment(struct FrontEndContext* ctx, struct Type* type);
+shared_ptr_t(AssemblyType) cvt_backend_asm_type(struct FrontEndContext* ctx, TIdentifier name);
+void convert_symbol_table(AsmProgram* node, BackEndContext* backend, struct FrontEndContext* frontend);
 
 #endif

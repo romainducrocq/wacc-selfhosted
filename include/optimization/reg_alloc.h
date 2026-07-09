@@ -5,7 +5,7 @@
 
 typedef struct AsmProgram AsmProgram;
 typedef struct BackEndContext BackEndContext;
-typedef struct FrontEndContext FrontEndContext;
+struct FrontEndContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -16,6 +16,6 @@ typedef struct FrontEndContext FrontEndContext;
 // Register allocation
 // Register coalescing
 
-void allocate_registers(AsmProgram* node, BackEndContext* backend, FrontEndContext* frontend, uint8_t optim_2_code);
+void allocate_registers(AsmProgram* node, BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code);
 
 #endif

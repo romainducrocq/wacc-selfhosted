@@ -15,9 +15,8 @@
 #include "frontend/intermediate/idents.h"
 #include "frontend/intermediate/semantic.h"
 
-// TODO
-#define StructStructure struct Structure
-PairKeyValue(TIdentifier, StructStructure);
+#define StStructure struct Structure
+PairKeyValue(TIdentifier, StStructure);
 
 typedef struct SemanticContext {
     struct ErrorsContext* errors;
@@ -27,7 +26,7 @@ typedef struct SemanticContext {
     hashmap_t(TIdentifier, ulong_t) extern_scope_map;
     hashmap_t(TIdentifier, TIdentifier) goto_map;
     vector_t(hashmap_t(TIdentifier, TIdentifier)) scoped_identifier_maps;
-    vector_t(hashmap_t(TIdentifier, StructStructure)) scoped_struct_maps;
+    vector_t(hashmap_t(TIdentifier, StStructure)) scoped_struct_maps;
     hashset_t(TIdentifier) label_set;
     // Loop labeling
     vector_t(TIdentifier) break_loop_labels;

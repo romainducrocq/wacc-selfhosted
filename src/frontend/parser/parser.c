@@ -48,7 +48,7 @@ static error_t expect_next(Ctx ctx, Token* next_tok, TOKEN_KIND expect_tok) {
     CATCH_ENTER;
     if (next_tok->tok_kind != expect_tok) {
         THROW_AT_TOKEN(next_tok->info_at,
-            GET_PARSER_MSG(MSG_unexpected_next_tok, str_fmt_tok(next_tok), get_tok_kind_fmt(expect_tok)));
+            GET_PARSER_MSG(2, MSG_unexpected_next_tok, str_fmt_tok(next_tok), get_tok_kind_fmt(expect_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -207,7 +207,7 @@ static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     strto_value = map_get(ctx->identifiers->hash_table, ctx->next_tok->tok);
     TRY(string_to_long(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
     if (value > 9223372036854775807ll) {
-        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_overflow_long_const, strto_value));
+        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_overflow_long_const, strto_value));
     }
     else if (ctx->next_tok->tok_kind == TOK_int_const && value <= 2147483647l) {
         *constant = parse_int_const(value);
@@ -230,7 +230,7 @@ static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     strto_value = map_get(ctx->identifiers->hash_table, ctx->next_tok->tok);
     TRY(string_to_ulong(ctx->errors, strto_value, ctx->next_tok->info_at, &value));
     if (value > 18446744073709551615ull) {
-        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_overflow_ulong_const, strto_value));
+        THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_overflow_ulong_const, strto_value));
     }
     else if (ctx->next_tok->tok_kind == TOK_uint_const && value <= 4294967295ul) {
         *constant = parse_uint_const(value);
@@ -259,7 +259,7 @@ static error_t parse_arr_size(Ctx ctx, TLong* size) {
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_arr_size_not_int_const, str_fmt_tok(ctx->peek_tok)));
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_arr_size_not_int_const, str_fmt_tok(ctx->peek_tok)));
     }
     TRY(pop_next(ctx));
     TRY(expect_next(ctx, ctx->next_tok, TOK_close_bracket));
@@ -307,7 +307,7 @@ static error_t parse_unop(Ctx ctx, CUnaryOp* unop) {
             break;
         }
         default:
-            THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_expect_unop, str_fmt_tok(ctx->next_tok)));
+            THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_expect_unop, str_fmt_tok(ctx->next_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -407,7 +407,7 @@ static error_t parse_binop(Ctx ctx, CBinaryOp* binop) {
             break;
         }
         default:
-            THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(MSG_expect_binop, str_fmt_tok(ctx->next_tok)));
+            THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_expect_binop, str_fmt_tok(ctx->next_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -517,7 +517,7 @@ static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator)
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_expect_abstract_decltor, str_fmt_tok(ctx->peek_tok)));
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_expect_abstract_decltor, str_fmt_tok(ctx->peek_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -787,7 +787,7 @@ static error_t parse_ptr_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->next_tok->info_at, GET_PARSER_MSG(MSG_expect_ptr_unary_factor, str_fmt_tok(ctx->next_tok)));
+                ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_expect_ptr_unary_factor, str_fmt_tok(ctx->next_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -895,7 +895,7 @@ static error_t parse_primary_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_expect_primary_exp_factor, str_fmt_tok(ctx->peek_tok)));
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_expect_primary_exp_factor, str_fmt_tok(ctx->peek_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -1169,7 +1169,7 @@ static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(CExp) * e
                 TRY(parse_ternary_exp(ctx, precedence, exp));
                 break;
             default:
-                THROW_AT_TOKEN(ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_expect_exp, str_fmt_tok(ctx->peek_tok)));
+                THROW_AT_TOKEN(ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_expect_exp, str_fmt_tok(ctx->peek_tok)));
         }
     }
     FINALLY;
@@ -1391,7 +1391,7 @@ static error_t parse_case_statement(Ctx ctx, unique_ptr_t(CStatement) * statemen
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_case_value_not_int_const, str_fmt_tok(ctx->peek_tok)));
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_case_value_not_int_const, str_fmt_tok(ctx->peek_tok)));
     }
     value = make_CConstant(&constant, info_at);
     TRY(pop_next(ctx));
@@ -1532,7 +1532,7 @@ static error_t parse_for_init_decl(Ctx ctx, unique_ptr_t(CForInit) * for_init) {
     TRY(parse_decltor_decl(ctx, &decltor, &storage_class));
     if (decltor.derived_type->type == AST_FunType_t) {
         THROW_AT_TOKEN(ctx->next_tok->info_at,
-            GET_PARSER_MSG(MSG_for_init_decl_as_fun, map_get(ctx->identifiers->hash_table, decltor.name)));
+            GET_PARSER_MSG(1, MSG_for_init_decl_as_fun, map_get(ctx->identifiers->hash_table, decltor.name)));
     }
     TRY(parse_var_declaration(ctx, &storage_class, &decltor, &var_decl));
     *for_init = make_CInitDecl(&var_decl);
@@ -1720,7 +1720,7 @@ static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(Type) * type_specifier
             }
             default:
                 THROW_AT_TOKEN(
-                    ctx->peek_tok_i->info_at, GET_PARSER_MSG(MSG_expect_specifier, str_fmt_tok(ctx->peek_tok_i)));
+                    ctx->peek_tok_i->info_at, GET_PARSER_MSG(1, MSG_expect_specifier, str_fmt_tok(ctx->peek_tok_i)));
         }
     }
 Lbreak:
@@ -1839,7 +1839,7 @@ Lbreak:
         str_pop_back(type_tok_kinds_fmt);
     }
     str_append(type_tok_kinds_fmt, ")");
-    THROW_AT_TOKEN(info_at, GET_PARSER_MSG(MSG_expect_specifier_list, type_tok_kinds_fmt));
+    THROW_AT_TOKEN(info_at, GET_PARSER_MSG(1, MSG_expect_specifier_list, type_tok_kinds_fmt));
     FINALLY;
     str_delete(type_tok_kinds_fmt);
     CATCH_EXIT;
@@ -1861,7 +1861,7 @@ static error_t parse_storage_class(Ctx ctx, CStorageClass* storage_class) {
         }
         default:
             THROW_AT_TOKEN(
-                ctx->next_tok->info_at, GET_PARSER_MSG(MSG_expect_storage_class, str_fmt_tok(ctx->next_tok)));
+                ctx->next_tok->info_at, GET_PARSER_MSG(1, MSG_expect_storage_class, str_fmt_tok(ctx->next_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -2056,7 +2056,7 @@ static error_t parse_simple_decltor_decl(Ctx ctx, unique_ptr_t(CDeclarator) * de
             break;
         default:
             THROW_AT_TOKEN(
-                ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_expect_simple_decltor, str_fmt_tok(ctx->peek_tok)));
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_expect_simple_decltor, str_fmt_tok(ctx->peek_tok)));
     }
     FINALLY;
     CATCH_EXIT;
@@ -2128,7 +2128,8 @@ static error_t parse_param_list(Ctx ctx, vector_t(unique_ptr_t(CParam)) * param_
             TRY(parse_non_empty_param_list(ctx, param_list));
             break;
         default:
-            THROW_AT_TOKEN(ctx->peek_tok->info_at, GET_PARSER_MSG(MSG_expect_param_list, str_fmt_tok(ctx->peek_tok)));
+            THROW_AT_TOKEN(
+                ctx->peek_tok->info_at, GET_PARSER_MSG(1, MSG_expect_param_list, str_fmt_tok(ctx->peek_tok)));
     }
     TRY(pop_next(ctx));
     TRY(expect_next(ctx, ctx->next_tok, TOK_close_paren));
@@ -2260,12 +2261,12 @@ static error_t parse_member_declaration(Ctx ctx, unique_ptr_t(CMemberDeclaration
     TRY(parse_decltor_decl(ctx, &decltor, &storage_class));
     if (storage_class.type != AST_CStorageClass_t) {
         THROW_AT_TOKEN(ctx->next_tok->info_at,
-            GET_PARSER_MSG(MSG_member_decl_not_auto, map_get(ctx->identifiers->hash_table, decltor.name),
+            GET_PARSER_MSG(2, MSG_member_decl_not_auto, map_get(ctx->identifiers->hash_table, decltor.name),
                 get_storage_class_fmt(&storage_class)));
     }
     if (decltor.derived_type->type == AST_FunType_t) {
         THROW_AT_TOKEN(ctx->next_tok->info_at,
-            GET_PARSER_MSG(MSG_member_decl_as_fun, map_get(ctx->identifiers->hash_table, decltor.name)));
+            GET_PARSER_MSG(1, MSG_member_decl_as_fun, map_get(ctx->identifiers->hash_table, decltor.name)));
     }
     info_at = ctx->next_tok->info_at;
     TRY(pop_next(ctx));

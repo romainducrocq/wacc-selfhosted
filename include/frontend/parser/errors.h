@@ -84,10 +84,11 @@ char* get_util_msg(MESSAGE_UTIL msg);
 char* get_lexer_msg(MESSAGE_LEXER msg);
 char* get_parser_msg(MESSAGE_PARSER msg);
 char* get_semantic_msg(MESSAGE_SEMANTIC msg);
-#define GET_MESSAGE_0(E, X) get_##E##_msg(X), #X
-#define GET_MESSAGE_1(E, N, X) GET_MESSAGE_0(E, N), X
-#define GET_MESSAGE_2(E, N, X, Y) GET_MESSAGE_1(E, N, X), Y
-#define GET_MESSAGE_3(E, N, X, Y, Z) GET_MESSAGE_2(E, N, X, Y), Z
+#define GET_MESSAGE(E, N) get_##E##_msg(N), #N
+#define GET_MESSAGE_0(E, N) GET_MESSAGE(E, N), "", "", ""
+#define GET_MESSAGE_1(E, N, X) GET_MESSAGE(E, N), "", "", X
+#define GET_MESSAGE_2(E, N, X, Y) GET_MESSAGE(E, N), "", X, Y
+#define GET_MESSAGE_3(E, N, X, Y, Z) GET_MESSAGE(E, N), X, Y, Z
 #define GET_FATAL_MSG(N, ...) GET_MESSAGE_##N(fatal, __VA_ARGS__)
 #define GET_ARG_MSG(N, ...) GET_MESSAGE_##N(arg, __VA_ARGS__)
 #define GET_UTIL_MSG(N, ...) GET_MESSAGE_##N(util, __VA_ARGS__)

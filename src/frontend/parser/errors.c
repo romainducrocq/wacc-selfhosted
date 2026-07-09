@@ -472,8 +472,11 @@ char* get_type_fmt(IdentifierContext* ctx, Type* type, string_t* type_fmt) {
 
 #define EM_CSTR(X) "\033[1m‘" X "’\033[0m"
 #define EM_VARG "\033[1m‘%s’\033[0m"
-#define RET_ERRNO return "(no. %s) "
-#define RET_ERR(X) RET_ERRNO
+#define PAD_ERR_0 "%s%s%s"
+#define PAD_ERR_1 "%s%s"
+#define PAD_ERR_2 "%s"
+#define PAD_ERR_3 ""
+#define RET_ERR(N) return "(no. %s) " PAD_ERR_##N
 
 char* get_fatal_msg(MESSAGE_FATAL msg) {
     switch (msg) {

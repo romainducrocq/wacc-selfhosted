@@ -1,6 +1,4 @@
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/fileio.h"
@@ -13,30 +11,30 @@
 
 ElementKey(hash_t);
 
-typedef struct LexerContext {
+struct LexerContext {
     struct ErrorsContext* errors;
     struct FileIoContext* fileio;
     struct IdentifierContext* identifiers;
     // Lexer
     char* line;
-    size_t line_size;
-    size_t match_at;
-    size_t match_size;
+    unsigned long line_size;
+    unsigned long match_at;
+    unsigned long match_size;
     hashset_t(hash_t) includename_set;
     vector_t(char*) * p_includedirs;
     vector_t(char*) * p_stdlibdirs;
     vector_t(struct Token) * p_toks;
-    size_t total_linenum;
-} LexerContext;
+    unsigned long total_linenum;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Lexer
 
-typedef LexerContext* Ctx;
+#define Ctx struct LexerContext*
 
 static char get_char(Ctx ctx) {
-    size_t i = ctx->match_at + ctx->match_size;
+    unsigned long i = ctx->match_at + ctx->match_size;
     if (i < ctx->line_size) {
         return ctx->line[i];
     }
@@ -71,8 +69,8 @@ static bool match_char(Ctx ctx, char c) {
     }
 }
 
-static bool match_chars(Ctx ctx, char* cs, size_t n) {
-    for (size_t i = 0; i < n; ++i) {
+static bool match_chars(Ctx ctx, char* cs, unsigned long n) {
+    for (unsigned long i = 0; i < n; ++i) {
         if (!match_char(ctx, cs[i])) {
             return false;
         }
@@ -678,18 +676,18 @@ static TOKEN_KIND match_comment_end(Ctx ctx) {
     }
 }
 
-static string_t get_match(Ctx ctx, size_t match_at, size_t match_size) {
+static string_t get_match(Ctx ctx, unsigned long match_at, unsigned long match_size) {
     string_t match = str_new("");
     str_resize(match, match_size);
-    for (size_t i = 0; i < match_size; ++i) {
+    for (unsigned long i = 0; i < match_size; ++i) {
         match[i] = ctx->line[match_at + i];
     }
     return match;
 }
 
-static error_t tokenize_include(Ctx ctx, size_t linenum);
+static error_t tokenize_include(Ctx ctx, unsigned long linenum);
 
-static size_t push_token_info(Ctx ctx) {
+static unsigned long push_token_info(Ctx ctx) {
     struct TokenInfo token_info = {(int)ctx->match_at, (int)ctx->match_size, ctx->total_linenum};
     vec_push_back(ctx->errors->token_infos, token_info);
     return vec_size(ctx->errors->token_infos) - 1;
@@ -699,7 +697,7 @@ static error_t tokenize_file(Ctx ctx) {
     string_t match = str_new(NULL);
     CATCH_ENTER;
     bool is_comment = false;
-    for (size_t linenum = 1; read_line(ctx->fileio, &ctx->line, &ctx->line_size); ++linenum) {
+    for (unsigned long linenum = 1; read_line(ctx->fileio, &ctx->line, &ctx->line_size); ++linenum) {
         ctx->total_linenum++;
 
         for (ctx->match_at = 0; ctx->match_at < ctx->line_size; ctx->match_at += ctx->match_size) {
@@ -736,7 +734,7 @@ static error_t tokenize_file(Ctx ctx) {
                 }
                 case TOK_error: {
                     match = get_match(ctx, ctx->match_at, ctx->match_size);
-                    size_t info_at = push_token_info(ctx);
+                    unsigned long info_at = push_token_info(ctx);
                     THROW_AT_TOKEN(info_at, GET_LEXER_MSG(1, MSG_invalid_tok, match));
                 }
                 default:
@@ -747,7 +745,7 @@ static error_t tokenize_file(Ctx ctx) {
         Lcontinue:
             continue;
         Lpass:;
-            size_t info_at = push_token_info(ctx);
+            unsigned long info_at = push_token_info(ctx);
             struct Token token = {match_kind, match_tok, info_at};
             vec_push_back(*ctx->p_toks, token);
         }
@@ -758,7 +756,7 @@ static error_t tokenize_file(Ctx ctx) {
 }
 
 static bool find_include(vector_t(char*) dirnames, string_t* filename) {
-    for (size_t i = 0; i < vec_size(dirnames); ++i) {
+    for (unsigned long i = 0; i < vec_size(dirnames); ++i) {
         string_t dirname = str_new(dirnames[i]);
         str_append(dirname, *filename);
         if (find_file(dirname)) {
@@ -770,14 +768,14 @@ static bool find_include(vector_t(char*) dirnames, string_t* filename) {
     return false;
 }
 
-static error_t tokenize_include(Ctx ctx, size_t linenum) {
+static error_t tokenize_include(Ctx ctx, unsigned long linenum) {
     string_t filename = str_new(NULL);
     string_t fopen_name = str_new(NULL);
     CATCH_ENTER;
     char* line;
-    size_t line_size;
-    size_t match_at;
-    size_t match_size;
+    unsigned long line_size;
+    unsigned long match_at;
+    unsigned long match_size;
 
     filename = get_match(ctx, ctx->match_at + 1, ctx->match_size - 2);
     {
@@ -790,14 +788,14 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
     switch (ctx->line[ctx->match_at]) {
         case '<': {
             if (!find_include(*ctx->p_stdlibdirs, &filename) && !find_include(*ctx->p_includedirs, &filename)) {
-                size_t info_at = push_token_info(ctx);
+                unsigned long info_at = push_token_info(ctx);
                 THROW_AT_TOKEN(info_at, GET_LEXER_MSG(1, MSG_failed_include, filename));
             }
             break;
         }
         case '"': {
             if (!find_include(*ctx->p_includedirs, &filename)) {
-                size_t info_at = push_token_info(ctx);
+                unsigned long info_at = push_token_info(ctx);
                 THROW_AT_TOKEN(info_at, GET_LEXER_MSG(1, MSG_failed_include, filename));
             }
             break;
@@ -841,7 +839,7 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
     struct ErrorsContext* errors, struct FileIoContext* fileio, struct IdentifierContext* identifiers,
     vector_t(struct Token) * tokens) {
-    LexerContext ctx;
+    struct LexerContext ctx;
     {
         ctx.errors = errors;
         ctx.fileio = fileio;
@@ -870,7 +868,7 @@ error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(ch
     FINALLY;
     set_delete(ctx.includename_set);
 
-    for (size_t i = 0; i < vec_size(fileio->file_reads); ++i) {
+    for (unsigned long i = 0; i < vec_size(fileio->file_reads); ++i) {
         str_delete(fileio->file_reads[i].filename);
     }
     vec_delete(fileio->file_reads);

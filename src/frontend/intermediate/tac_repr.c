@@ -30,7 +30,7 @@ typedef struct TacReprContext {
 typedef TacReprContext* Ctx;
 
 // unary_operator = Complement | Negate | Not
-static TacUnaryOp repr_unop(CUnaryOp* node) {
+static TacUnaryOp repr_unop(struct CUnaryOp* node) {
     switch (node->type) {
         case AST_CComplement_t:
             return init_TacComplement();
@@ -46,7 +46,7 @@ static TacUnaryOp repr_unop(CUnaryOp* node) {
 // binary_operator = Add | Subtract | Multiply | Divide | Remainder | BitAnd | BitOr | BitXor | BitShiftLeft
 //                 | BitShiftRight | BitShrArithmetic | Equal | NotEqual | LessThan | LessOrEqual | GreaterThan |
 //                 GreaterOrEqual
-static TacBinaryOp repr_binop(CBinaryOp* node) {
+static TacBinaryOp repr_binop(struct CBinaryOp* node) {
     switch (node->type) {
         case AST_CAdd_t:
             return init_TacAdd();
@@ -87,18 +87,18 @@ static TacBinaryOp repr_binop(CBinaryOp* node) {
     }
 }
 
-static shared_ptr_t(TacValue) const_value(CConstant* node) {
+static shared_ptr_t(TacValue) const_value(struct CConstant* node) {
     shared_ptr_t(struct CConst) constant = sptr_new();
     sptr_copy(CConst, node->constant, constant);
     return make_TacConstant(&constant);
 }
 
-static shared_ptr_t(TacValue) var_value(CVar* node) {
+static shared_ptr_t(TacValue) var_value(struct CVar* node) {
     TIdentifier name = node->name;
     return make_TacVariable(name);
 }
 
-static shared_ptr_t(TacValue) exp_inner_value(Ctx ctx, CExp* node, bool is_ptr) {
+static shared_ptr_t(TacValue) exp_inner_value(Ctx ctx, struct CExp* node, bool is_ptr) {
     TIdentifier inner_name = repr_var_identifier(ctx->identifiers, node);
     if (map_find(ctx->frontend->symbol_table, inner_name) == map_end()) {
         shared_ptr_t(struct Type) inner_type = sptr_new();
@@ -115,12 +115,12 @@ static shared_ptr_t(TacValue) exp_inner_value(Ctx ctx, CExp* node, bool is_ptr) 
     return make_TacVariable(inner_name);
 }
 
-static shared_ptr_t(TacValue) plain_inner_value(Ctx ctx, CExp* node) { return exp_inner_value(ctx, node, false); }
+static shared_ptr_t(TacValue) plain_inner_value(Ctx ctx, struct CExp* node) { return exp_inner_value(ctx, node, false); }
 
-static shared_ptr_t(TacValue) ptr_inner_value(Ctx ctx, CExp* node) { return exp_inner_value(ctx, node, true); }
+static shared_ptr_t(TacValue) ptr_inner_value(Ctx ctx, struct CExp* node) { return exp_inner_value(ctx, node, true); }
 
 // val = Constant(int) | Var(identifier)
-static shared_ptr_t(TacValue) repr_value(CExp* node) {
+static shared_ptr_t(TacValue) repr_value(struct CExp* node) {
     switch (node->type) {
         case AST_CConstant_t:
             return const_value(&node->get._CConstant);
@@ -133,10 +133,10 @@ static shared_ptr_t(TacValue) repr_value(CExp* node) {
 
 static void push_instr(Ctx ctx, unique_ptr_t(TacInstruction) instr) { vec_move_back(*ctx->p_instrs, instr); }
 
-static unique_ptr_t(TacExpResult) repr_res_instr(Ctx ctx, CExp* node);
-static shared_ptr_t(TacValue) repr_exp_instr(Ctx ctx, CExp* node);
+static unique_ptr_t(TacExpResult) repr_res_instr(Ctx ctx, struct CExp* node);
+static shared_ptr_t(TacValue) repr_exp_instr(Ctx ctx, struct CExp* node);
 
-static unique_ptr_t(TacExpResult) const_res_instr(CConstant* node) {
+static unique_ptr_t(TacExpResult) const_res_instr(struct CConstant* node) {
     shared_ptr_t(TacValue) val = repr_value(node->_base);
     return make_TacPlainOperand(&val);
 }
@@ -146,7 +146,7 @@ static TIdentifier make_literal_identifier(Ctx ctx, struct CStringLiteral* node)
     return make_string_identifier(ctx->identifiers, &value);
 }
 
-static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, CString* node) {
+static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, struct CString* node) {
     TIdentifier string_const_label;
     {
         TIdentifier string_const = make_literal_identifier(ctx, node->literal);
@@ -181,7 +181,7 @@ static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, CString* node) {
     return make_TacPlainOperand(&val);
 }
 
-static unique_ptr_t(TacExpResult) var_res_instr(CVar* node) {
+static unique_ptr_t(TacExpResult) var_res_instr(struct CVar* node) {
     shared_ptr_t(TacValue) val = repr_value(node->_base);
     return make_TacPlainOperand(&val);
 }
@@ -244,7 +244,7 @@ static TLong get_type_scale(Ctx ctx, struct Type* type) {
     }
 }
 
-static unique_ptr_t(TacExpResult) cast_complete_res_instr(Ctx ctx, CCast* node) {
+static unique_ptr_t(TacExpResult) cast_complete_res_instr(Ctx ctx, struct CCast* node) {
     shared_ptr_t(TacValue) src = repr_exp_instr(ctx, node->exp);
     if (node->target_type->type == node->exp->exp_type->type) {
         return make_TacPlainOperand(&src);
@@ -288,13 +288,13 @@ static unique_ptr_t(TacExpResult) cast_complete_res_instr(Ctx ctx, CCast* node) 
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) cast_void_res_instr(Ctx ctx, CCast* node) {
+static unique_ptr_t(TacExpResult) cast_void_res_instr(Ctx ctx, struct CCast* node) {
     shared_ptr_t(TacValue) dst = repr_exp_instr(ctx, node->exp);
     free_TacValue(&dst);
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) cast_res_instr(Ctx ctx, CCast* node) {
+static unique_ptr_t(TacExpResult) cast_res_instr(Ctx ctx, struct CCast* node) {
     if (node->target_type->type == AST_Void_t) {
         return cast_void_res_instr(ctx, node);
     }
@@ -303,7 +303,7 @@ static unique_ptr_t(TacExpResult) cast_res_instr(Ctx ctx, CCast* node) {
     }
 }
 
-static unique_ptr_t(TacExpResult) unary_res_instr(Ctx ctx, CUnary* node) {
+static unique_ptr_t(TacExpResult) unary_res_instr(Ctx ctx, struct CUnary* node) {
     shared_ptr_t(TacValue) src = repr_exp_instr(ctx, node->exp);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
     shared_ptr_t(TacValue) dst_cp = sptr_new();
@@ -313,9 +313,9 @@ static unique_ptr_t(TacExpResult) unary_res_instr(Ctx ctx, CUnary* node) {
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_any_res_instr(Ctx ctx, CBinary* node);
+static unique_ptr_t(TacExpResult) binary_any_res_instr(Ctx ctx, struct CBinary* node);
 
-static unique_ptr_t(TacExpResult) binary_add_ptr_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_add_ptr_res_instr(Ctx ctx, struct CBinary* node) {
     TLong scale;
     shared_ptr_t(TacValue) src_ptr = sptr_new();
     shared_ptr_t(TacValue) idx = sptr_new();
@@ -336,7 +336,7 @@ static unique_ptr_t(TacExpResult) binary_add_ptr_res_instr(Ctx ctx, CBinary* nod
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_add_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_add_res_instr(Ctx ctx, struct CBinary* node) {
     if (node->exp_left->exp_type->type == AST_Pointer_t || node->exp_right->exp_type->type == AST_Pointer_t) {
         return binary_add_ptr_res_instr(ctx, node);
     }
@@ -345,7 +345,7 @@ static unique_ptr_t(TacExpResult) binary_add_res_instr(Ctx ctx, CBinary* node) {
     }
 }
 
-static unique_ptr_t(TacExpResult) binary_sub_to_ptr_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_sub_to_ptr_res_instr(Ctx ctx, struct CBinary* node) {
     TLong scale = get_type_scale(ctx, node->exp_left->exp_type->get._Pointer.ref_type);
     shared_ptr_t(TacValue) src_ptr = repr_exp_instr(ctx, node->exp_left);
     shared_ptr_t(TacValue) idx = sptr_new();
@@ -365,7 +365,7 @@ static unique_ptr_t(TacExpResult) binary_sub_to_ptr_res_instr(Ctx ctx, CBinary* 
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_subtract_ptr_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_subtract_ptr_res_instr(Ctx ctx, struct CBinary* node) {
     shared_ptr_t(TacValue) src_1 = sptr_new();
     {
         src_1 = repr_exp_instr(ctx, node->exp_left);
@@ -391,7 +391,7 @@ static unique_ptr_t(TacExpResult) binary_subtract_ptr_res_instr(Ctx ctx, CBinary
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_subtract_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_subtract_res_instr(Ctx ctx, struct CBinary* node) {
     if (node->exp_left->exp_type->type == AST_Pointer_t) {
         if (node->exp_right->exp_type->type == AST_Pointer_t) {
             return binary_subtract_ptr_res_instr(ctx, node);
@@ -405,7 +405,7 @@ static unique_ptr_t(TacExpResult) binary_subtract_res_instr(Ctx ctx, CBinary* no
     }
 }
 
-static unique_ptr_t(TacExpResult) binary_and_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_and_res_instr(Ctx ctx, struct CBinary* node) {
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Land_false);
     TIdentifier target_true = repr_label_identifier(ctx->identifiers, LBL_Land_true);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
@@ -437,7 +437,7 @@ static unique_ptr_t(TacExpResult) binary_and_res_instr(Ctx ctx, CBinary* node) {
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_or_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_or_res_instr(Ctx ctx, struct CBinary* node) {
     TIdentifier target_true = repr_label_identifier(ctx->identifiers, LBL_Lor_true);
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Lor_false);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
@@ -469,7 +469,7 @@ static unique_ptr_t(TacExpResult) binary_or_res_instr(Ctx ctx, CBinary* node) {
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_any_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_any_res_instr(Ctx ctx, struct CBinary* node) {
     shared_ptr_t(TacValue) src1 = repr_exp_instr(ctx, node->exp_left);
     shared_ptr_t(TacValue) src2 = repr_exp_instr(ctx, node->exp_right);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
@@ -480,7 +480,7 @@ static unique_ptr_t(TacExpResult) binary_any_res_instr(Ctx ctx, CBinary* node) {
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) binary_res_instr(Ctx ctx, CBinary* node) {
+static unique_ptr_t(TacExpResult) binary_res_instr(Ctx ctx, struct CBinary* node) {
     switch (node->binop.type) {
         case AST_CAdd_t:
             return binary_add_res_instr(ctx, node);
@@ -547,7 +547,7 @@ static void sub_obj_assign_res_instr(
     *exp_res = make_TacPlainOperand(src);
 }
 
-static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, CAssignment* node) {
+static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, struct CAssignment* node) {
     shared_ptr_t(TacValue) src = sptr_new();
     unique_ptr_t(TacExpResult) res = uptr_new();
     unique_ptr_t(TacExpResult) res_postfix = uptr_new();
@@ -571,7 +571,7 @@ static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, CAssignment* node) {
         ctx->identifiers->struct_count = struct_count_1;
 
         {
-            CExp* exp_left = node->exp_right;
+            struct CExp* exp_left = node->exp_right;
             if (exp_left->type == AST_CCast_t) {
                 exp_left = exp_left->get._CCast.exp;
             }
@@ -637,7 +637,7 @@ static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, CAssignment* node) {
     }
 }
 
-static unique_ptr_t(TacExpResult) conditional_complete_res_instr(Ctx ctx, CConditional* node) {
+static unique_ptr_t(TacExpResult) conditional_complete_res_instr(Ctx ctx, struct CConditional* node) {
     TIdentifier target_else = repr_label_identifier(ctx->identifiers, LBL_Lternary_else);
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Lternary_false);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node->_base);
@@ -663,7 +663,7 @@ static unique_ptr_t(TacExpResult) conditional_complete_res_instr(Ctx ctx, CCondi
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) conditional_void_res_instr(Ctx ctx, CConditional* node) {
+static unique_ptr_t(TacExpResult) conditional_void_res_instr(Ctx ctx, struct CConditional* node) {
     TIdentifier target_else = repr_label_identifier(ctx->identifiers, LBL_Lternary_else);
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Lternary_false);
     shared_ptr_t(TacValue) dst = sptr_new();
@@ -681,7 +681,7 @@ static unique_ptr_t(TacExpResult) conditional_void_res_instr(Ctx ctx, CCondition
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) conditional_res_instr(Ctx ctx, CConditional* node) {
+static unique_ptr_t(TacExpResult) conditional_res_instr(Ctx ctx, struct CConditional* node) {
     if (node->exp_middle->exp_type->type == AST_Void_t) {
         return conditional_void_res_instr(ctx, node);
     }
@@ -690,7 +690,7 @@ static unique_ptr_t(TacExpResult) conditional_res_instr(Ctx ctx, CConditional* n
     }
 }
 
-static unique_ptr_t(TacExpResult) call_res_instr(Ctx ctx, CFunctionCall* node) {
+static unique_ptr_t(TacExpResult) call_res_instr(Ctx ctx, struct CFunctionCall* node) {
     TIdentifier name = node->name;
     vector_t(shared_ptr_t(TacValue)) args = vec_new();
     vec_reserve(args, vec_size(node->args));
@@ -708,12 +708,12 @@ static unique_ptr_t(TacExpResult) call_res_instr(Ctx ctx, CFunctionCall* node) {
     return make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) deref_res_instr(Ctx ctx, CDereference* node) {
+static unique_ptr_t(TacExpResult) deref_res_instr(Ctx ctx, struct CDereference* node) {
     shared_ptr_t(TacValue) val = repr_exp_instr(ctx, node->exp);
     return make_TacDereferencedPointer(&val);
 }
 
-static void plain_op_addrof_res_instr(Ctx ctx, TacPlainOperand* res, CAddrOf* node) {
+static void plain_op_addrof_res_instr(Ctx ctx, TacPlainOperand* res, struct CAddrOf* node) {
     shared_ptr_t(TacValue) src = sptr_new();
     sptr_move(TacValue, res->val, src);
     shared_ptr_t(TacValue) dst = ptr_inner_value(ctx, node->_base);
@@ -730,7 +730,7 @@ static void deref_ptr_addrof_res_instr(TacDereferencedPointer* res, unique_ptr_t
     *exp_res = make_TacPlainOperand(&val);
 }
 
-static void sub_obj_addrof_res_instr(Ctx ctx, TacSubObject* res, CAddrOf* node, unique_ptr_t(TacExpResult) * exp_res) {
+static void sub_obj_addrof_res_instr(Ctx ctx, TacSubObject* res, struct CAddrOf* node, unique_ptr_t(TacExpResult) * exp_res) {
     shared_ptr_t(TacValue) dst = ptr_inner_value(ctx, node->_base);
     {
         TIdentifier name = res->base_name;
@@ -756,7 +756,7 @@ static void sub_obj_addrof_res_instr(Ctx ctx, TacSubObject* res, CAddrOf* node, 
     *exp_res = make_TacPlainOperand(&dst);
 }
 
-static unique_ptr_t(TacExpResult) addrof_res_instr(Ctx ctx, CAddrOf* node) {
+static unique_ptr_t(TacExpResult) addrof_res_instr(Ctx ctx, struct CAddrOf* node) {
     unique_ptr_t(TacExpResult) res = repr_res_instr(ctx, node->exp);
     switch (res->type) {
         case AST_TacPlainOperand_t:
@@ -774,7 +774,7 @@ static unique_ptr_t(TacExpResult) addrof_res_instr(Ctx ctx, CAddrOf* node) {
     return res;
 }
 
-static unique_ptr_t(TacExpResult) subscript_res_instr(Ctx ctx, CSubscript* node) {
+static unique_ptr_t(TacExpResult) subscript_res_instr(Ctx ctx, struct CSubscript* node) {
     TLong scale;
     shared_ptr_t(TacValue) src_ptr = sptr_new();
     shared_ptr_t(TacValue) idx = sptr_new();
@@ -795,7 +795,7 @@ static unique_ptr_t(TacExpResult) subscript_res_instr(Ctx ctx, CSubscript* node)
     return make_TacDereferencedPointer(&dst);
 }
 
-static unique_ptr_t(TacExpResult) sizeof_res_instr(Ctx ctx, CSizeOf* node) {
+static unique_ptr_t(TacExpResult) sizeof_res_instr(Ctx ctx, struct CSizeOf* node) {
     shared_ptr_t(struct CConst) constant = sptr_new();
     {
         TULong value = (TULong)get_type_scale(ctx, node->exp->exp_type);
@@ -805,7 +805,7 @@ static unique_ptr_t(TacExpResult) sizeof_res_instr(Ctx ctx, CSizeOf* node) {
     return make_TacPlainOperand(&val);
 }
 
-static unique_ptr_t(TacExpResult) sizeoft_res_instr(Ctx ctx, CSizeOfT* node) {
+static unique_ptr_t(TacExpResult) sizeoft_res_instr(Ctx ctx, struct CSizeOfT* node) {
     shared_ptr_t(struct CConst) constant = sptr_new();
     {
         TULong value = (TULong)get_type_scale(ctx, node->target_type);
@@ -823,7 +823,7 @@ static void plain_op_dot_res_instr(TacPlainOperand* res, TLong member_offset, un
     *exp_res = make_TacSubObject(base_name, offset);
 }
 
-static void deref_ptr_dot_res_instr(Ctx ctx, TacDereferencedPointer* res, CDot* node, TLong member_offset) {
+static void deref_ptr_dot_res_instr(Ctx ctx, TacDereferencedPointer* res, struct CDot* node, TLong member_offset) {
     if (member_offset > 0l) {
         shared_ptr_t(TacValue) src_ptr = sptr_new();
         sptr_move(TacValue, res->val, src_ptr);
@@ -843,7 +843,7 @@ static void deref_ptr_dot_res_instr(Ctx ctx, TacDereferencedPointer* res, CDot* 
 
 static void sub_obj_dot_res_instr(TacSubObject* res, TLong member_offset) { res->offset += member_offset; }
 
-static unique_ptr_t(TacExpResult) dot_res_instr(Ctx ctx, CDot* node) {
+static unique_ptr_t(TacExpResult) dot_res_instr(Ctx ctx, struct CDot* node) {
     THROW_ABORT_IF(node->structure->exp_type->type != AST_Structure_t);
     struct Structure* struct_type = &node->structure->exp_type->get._Structure;
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
@@ -865,7 +865,7 @@ static unique_ptr_t(TacExpResult) dot_res_instr(Ctx ctx, CDot* node) {
     return res;
 }
 
-static unique_ptr_t(TacExpResult) arrow_res_instr(Ctx ctx, CArrow* node) {
+static unique_ptr_t(TacExpResult) arrow_res_instr(Ctx ctx, struct CArrow* node) {
     THROW_ABORT_IF(node->pointer->exp_type->type != AST_Pointer_t);
     struct Pointer* ptr_type = &node->pointer->exp_type->get._Pointer;
     THROW_ABORT_IF(ptr_type->ref_type->type != AST_Structure_t);
@@ -889,7 +889,7 @@ static unique_ptr_t(TacExpResult) arrow_res_instr(Ctx ctx, CArrow* node) {
     return make_TacDereferencedPointer(&val);
 }
 
-static unique_ptr_t(TacExpResult) repr_res_instr(Ctx ctx, CExp* node) {
+static unique_ptr_t(TacExpResult) repr_res_instr(Ctx ctx, struct CExp* node) {
     switch (node->type) {
         case AST_CConstant_t:
             return const_res_instr(&node->get._CConstant);
@@ -934,7 +934,7 @@ static shared_ptr_t(TacValue) plain_op_exp_instr(TacPlainOperand* res) {
     return dst;
 }
 
-static shared_ptr_t(TacValue) deref_ptr_exp_instr(Ctx ctx, TacDereferencedPointer* res, CExp* node) {
+static shared_ptr_t(TacValue) deref_ptr_exp_instr(Ctx ctx, TacDereferencedPointer* res, struct CExp* node) {
     shared_ptr_t(TacValue) src = sptr_new();
     sptr_move(TacValue, res->val, src);
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node);
@@ -944,7 +944,7 @@ static shared_ptr_t(TacValue) deref_ptr_exp_instr(Ctx ctx, TacDereferencedPointe
     return dst;
 }
 
-static shared_ptr_t(TacValue) sub_obj_exp_instr(Ctx ctx, TacSubObject* res, CExp* node) {
+static shared_ptr_t(TacValue) sub_obj_exp_instr(Ctx ctx, TacSubObject* res, struct CExp* node) {
     TIdentifier src_name = res->base_name;
     TLong offset = res->offset;
     shared_ptr_t(TacValue) dst = plain_inner_value(ctx, node);
@@ -955,7 +955,7 @@ static shared_ptr_t(TacValue) sub_obj_exp_instr(Ctx ctx, TacSubObject* res, CExp
 }
 
 // exp_result = PlainOperand(val) | DereferencedPointer(val) | SubObject(val)
-static shared_ptr_t(TacValue) repr_exp_instr(Ctx ctx, CExp* node) {
+static shared_ptr_t(TacValue) repr_exp_instr(Ctx ctx, struct CExp* node) {
     shared_ptr_t(TacValue) val = sptr_new();
     unique_ptr_t(TacExpResult) res = repr_res_instr(ctx, node);
     switch (res->type) {
@@ -978,12 +978,12 @@ static shared_ptr_t(TacValue) repr_exp_instr(Ctx ctx, CExp* node) {
     return val;
 }
 
-static void repr_block(Ctx ctx, CBlock* node);
+static void repr_block(Ctx ctx, struct CBlock* node);
 
-static void statement_instr(Ctx ctx, CStatement* node);
-static void var_decl_instr(Ctx ctx, CVariableDeclaration* node);
+static void statement_instr(Ctx ctx, struct CStatement* node);
+static void var_decl_instr(Ctx ctx, struct CVariableDeclaration* node);
 
-static void ret_statement_instr(Ctx ctx, CReturn* node) {
+static void ret_statement_instr(Ctx ctx, struct CReturn* node) {
     shared_ptr_t(TacValue) val = sptr_new();
     if (node->exp) {
         val = repr_exp_instr(ctx, node->exp);
@@ -991,12 +991,12 @@ static void ret_statement_instr(Ctx ctx, CReturn* node) {
     push_instr(ctx, make_TacReturn(&val));
 }
 
-static void exp_statement_instr(Ctx ctx, CExpression* node) {
+static void exp_statement_instr(Ctx ctx, struct CExpression* node) {
     unique_ptr_t(TacExpResult) res = repr_res_instr(ctx, node->exp);
     free_TacExpResult(&res);
 }
 
-static void if_only_statement_instr(Ctx ctx, CIf* node) {
+static void if_only_statement_instr(Ctx ctx, struct CIf* node) {
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Lif_false);
     {
         shared_ptr_t(TacValue) condition = repr_exp_instr(ctx, node->condition);
@@ -1006,7 +1006,7 @@ static void if_only_statement_instr(Ctx ctx, CIf* node) {
     push_instr(ctx, make_TacLabel(target_false));
 }
 
-static void if_else_statement_instr(Ctx ctx, CIf* node) {
+static void if_else_statement_instr(Ctx ctx, struct CIf* node) {
     TIdentifier target_else = repr_label_identifier(ctx->identifiers, LBL_Lif_else);
     TIdentifier target_false = repr_label_identifier(ctx->identifiers, LBL_Lif_false);
     {
@@ -1020,7 +1020,7 @@ static void if_else_statement_instr(Ctx ctx, CIf* node) {
     push_instr(ctx, make_TacLabel(target_false));
 }
 
-static void if_statement_instr(Ctx ctx, CIf* node) {
+static void if_statement_instr(Ctx ctx, struct CIf* node) {
     if (node->else_fi) {
         if_else_statement_instr(ctx, node);
     }
@@ -1029,20 +1029,20 @@ static void if_statement_instr(Ctx ctx, CIf* node) {
     }
 }
 
-static void goto_statement_instr(Ctx ctx, CGoto* node) {
+static void goto_statement_instr(Ctx ctx, struct CGoto* node) {
     TIdentifier target_label = node->target;
     push_instr(ctx, make_TacJump(target_label));
 }
 
-static void label_statement_instr(Ctx ctx, CLabel* node) {
+static void label_statement_instr(Ctx ctx, struct CLabel* node) {
     TIdentifier target_label = node->target;
     push_instr(ctx, make_TacLabel(target_label));
     statement_instr(ctx, node->jump_to);
 }
 
-static void statement_compound_instr(Ctx ctx, CCompound* node) { repr_block(ctx, node->block); }
+static void statement_compound_instr(Ctx ctx, struct CCompound* node) { repr_block(ctx, node->block); }
 
-static void while_statement_instr(Ctx ctx, CWhile* node) {
+static void while_statement_instr(Ctx ctx, struct CWhile* node) {
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     TIdentifier target_continue = repr_loop_identifier(ctx->identifiers, LBL_Lcontinue, node->target);
     push_instr(ctx, make_TacLabel(target_continue));
@@ -1055,7 +1055,7 @@ static void while_statement_instr(Ctx ctx, CWhile* node) {
     push_instr(ctx, make_TacLabel(target_break));
 }
 
-static void do_while_statement_instr(Ctx ctx, CDoWhile* node) {
+static void do_while_statement_instr(Ctx ctx, struct CDoWhile* node) {
     TIdentifier target_do_while_start = repr_label_identifier(ctx->identifiers, LBL_Ldo_while_start);
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     TIdentifier target_continue = repr_loop_identifier(ctx->identifiers, LBL_Lcontinue, node->target);
@@ -1069,20 +1069,20 @@ static void do_while_statement_instr(Ctx ctx, CDoWhile* node) {
     push_instr(ctx, make_TacLabel(target_break));
 }
 
-static void for_init_decl_instr(Ctx ctx, CInitDecl* node) {
+static void for_init_decl_instr(Ctx ctx, struct CInitDecl* node) {
     if (node->init && node->init->init) {
         var_decl_instr(ctx, node->init);
     }
 }
 
-static void for_init_exp_instr(Ctx ctx, CInitExp* node) {
+static void for_init_exp_instr(Ctx ctx, struct CInitExp* node) {
     if (node->init) {
         unique_ptr_t(TacExpResult) res = repr_res_instr(ctx, node->init);
         free_TacExpResult(&res);
     }
 }
 
-static void for_init_statement_instr(Ctx ctx, CForInit* node) {
+static void for_init_statement_instr(Ctx ctx, struct CForInit* node) {
     switch (node->type) {
         case AST_CInitDecl_t:
             for_init_decl_instr(ctx, &node->get._CInitDecl);
@@ -1095,7 +1095,7 @@ static void for_init_statement_instr(Ctx ctx, CForInit* node) {
     }
 }
 
-static void for_statement_instr(Ctx ctx, CFor* node) {
+static void for_statement_instr(Ctx ctx, struct CFor* node) {
     TIdentifier target_for_start = repr_label_identifier(ctx->identifiers, LBL_Lfor_start);
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     TIdentifier target_continue = repr_loop_identifier(ctx->identifiers, LBL_Lcontinue, node->target);
@@ -1115,7 +1115,7 @@ static void for_statement_instr(Ctx ctx, CFor* node) {
     push_instr(ctx, make_TacLabel(target_break));
 }
 
-static void switch_statement_instr(Ctx ctx, CSwitch* node) {
+static void switch_statement_instr(Ctx ctx, struct CSwitch* node) {
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     {
         shared_ptr_t(TacValue) match = repr_exp_instr(ctx, node->match);
@@ -1148,29 +1148,29 @@ static void switch_statement_instr(Ctx ctx, CSwitch* node) {
     push_instr(ctx, make_TacLabel(target_break));
 }
 
-static void case_statement_instr(Ctx ctx, CCase* node) {
+static void case_statement_instr(Ctx ctx, struct CCase* node) {
     TIdentifier target_case = repr_loop_identifier(ctx->identifiers, LBL_Lcase, node->target);
     push_instr(ctx, make_TacLabel(target_case));
     statement_instr(ctx, node->jump_to);
 }
 
-static void default_statement_instr(Ctx ctx, CDefault* node) {
+static void default_statement_instr(Ctx ctx, struct CDefault* node) {
     TIdentifier target_default = repr_loop_identifier(ctx->identifiers, LBL_Ldefault, node->target);
     push_instr(ctx, make_TacLabel(target_default));
     statement_instr(ctx, node->jump_to);
 }
 
-static void break_statement_instr(Ctx ctx, CBreak* node) {
+static void break_statement_instr(Ctx ctx, struct CBreak* node) {
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     push_instr(ctx, make_TacJump(target_break));
 }
 
-static void continue_statement_instr(Ctx ctx, CContinue* node) {
+static void continue_statement_instr(Ctx ctx, struct CContinue* node) {
     TIdentifier target_continue = repr_loop_identifier(ctx->identifiers, LBL_Lcontinue, node->target);
     push_instr(ctx, make_TacJump(target_continue));
 }
 
-static void statement_instr(Ctx ctx, CStatement* node) {
+static void statement_instr(Ctx ctx, struct CStatement* node) {
     switch (node->type) {
         case AST_CReturn_t:
             ret_statement_instr(ctx, &node->get._CReturn);
@@ -1221,9 +1221,9 @@ static void statement_instr(Ctx ctx, CStatement* node) {
     }
 }
 
-static void compound_init_instr(Ctx ctx, CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size);
+static void compound_init_instr(Ctx ctx, struct CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size);
 
-static void string_single_init_instr(Ctx ctx, CString* node, struct Array* arr_type, TIdentifier symbol, TLong size) {
+static void string_single_init_instr(Ctx ctx, struct CString* node, struct Array* arr_type, TIdentifier symbol, TLong size) {
     size_t byte_at = 0;
 
     size_t bytes_size = (size_t)arr_type->size;
@@ -1286,7 +1286,7 @@ static void string_single_init_instr(Ctx ctx, CString* node, struct Array* arr_t
     }
 }
 
-static void single_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type, TIdentifier symbol) {
+static void single_init_instr(Ctx ctx, struct CSingleInit* node, struct Type* init_type, TIdentifier symbol) {
     if (node->exp->type == AST_CString_t && init_type->type == AST_Array_t) {
         string_single_init_instr(ctx, &node->exp->get._CString, &init_type->get._Array, symbol, 0l);
     }
@@ -1295,7 +1295,7 @@ static void single_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type
         shared_ptr_t(TacValue) dst = sptr_new();
         {
             TIdentifier name = symbol;
-            unique_ptr_t(CExp) exp = make_CVar(name, 0);
+            unique_ptr_t(struct CExp) exp = make_CVar(name, 0);
             dst = repr_value(exp);
             free_CExp(&exp);
         }
@@ -1303,7 +1303,7 @@ static void single_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type
     }
 }
 
-static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, struct Type* init_type, TIdentifier symbol, TLong size) {
+static void scalar_compound_init_instr(Ctx ctx, struct CSingleInit* node, struct Type* init_type, TIdentifier symbol, TLong size) {
     if (node->exp->type == AST_CString_t && init_type->type == AST_Array_t) {
         string_single_init_instr(ctx, &node->exp->get._CString, &init_type->get._Array, symbol, size);
     }
@@ -1315,7 +1315,7 @@ static void scalar_compound_init_instr(Ctx ctx, CSingleInit* node, struct Type* 
     }
 }
 
-static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Array* arr_type, TIdentifier symbol, TLong* size) {
+static void arr_compound_init_instr(Ctx ctx, struct CCompoundInit* node, struct Array* arr_type, TIdentifier symbol, TLong* size) {
     for (size_t i = 0; i < vec_size(node->initializers); ++i) {
         compound_init_instr(ctx, node->initializers[i], arr_type->elem_type, symbol, size);
         if (node->initializers[i]->type == AST_CSingleInit_t) {
@@ -1325,7 +1325,7 @@ static void arr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Array* 
 }
 
 static void struct_compound_init_instr(
-    Ctx ctx, CCompoundInit* node, struct Structure* struct_type, TIdentifier symbol, TLong* size) {
+    Ctx ctx, struct CCompoundInit* node, struct Structure* struct_type, TIdentifier symbol, TLong* size) {
     for (size_t i = vec_size(node->initializers); i-- > 0;) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         TLong offset = *size + member->offset;
@@ -1334,7 +1334,7 @@ static void struct_compound_init_instr(
     *size += get_struct_scale(ctx, struct_type);
 }
 
-static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
+static void aggr_compound_init_instr(Ctx ctx, struct CCompoundInit* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
     switch (init_type->type) {
         case AST_Array_t:
             arr_compound_init_instr(ctx, node, &init_type->get._Array, symbol, size);
@@ -1347,7 +1347,7 @@ static void aggr_compound_init_instr(Ctx ctx, CCompoundInit* node, struct Type* 
     }
 }
 
-static void compound_init_instr(Ctx ctx, CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
+static void compound_init_instr(Ctx ctx, struct CInitializer* node, struct Type* init_type, TIdentifier symbol, TLong* size) {
     switch (node->type) {
         case AST_CSingleInit_t:
             scalar_compound_init_instr(ctx, &node->get._CSingleInit, init_type, symbol, *size);
@@ -1360,7 +1360,7 @@ static void compound_init_instr(Ctx ctx, CInitializer* node, struct Type* init_t
     }
 }
 
-static void var_decl_instr(Ctx ctx, CVariableDeclaration* node) {
+static void var_decl_instr(Ctx ctx, struct CVariableDeclaration* node) {
     struct Type* init_type = map_get(ctx->frontend->symbol_table, node->name)->type_t;
     switch (node->init->type) {
         case AST_CSingleInit_t:
@@ -1376,14 +1376,14 @@ static void var_decl_instr(Ctx ctx, CVariableDeclaration* node) {
     }
 }
 
-static void var_declaration_instr(Ctx ctx, CVarDecl* node) {
+static void var_declaration_instr(Ctx ctx, struct CVarDecl* node) {
     if (node->var_decl->init
         && map_get(ctx->frontend->symbol_table, node->var_decl->name)->attrs->type != AST_StaticAttr_t) {
         var_decl_instr(ctx, node->var_decl);
     }
 }
 
-static void declaration_instr(Ctx ctx, CDeclaration* node) {
+static void declaration_instr(Ctx ctx, struct CDeclaration* node) {
     switch (node->type) {
         case AST_CFunDecl_t:
         case AST_CStructDecl_t:
@@ -1403,7 +1403,7 @@ static void declaration_instr(Ctx ctx, CDeclaration* node) {
 //             | Store(val, val) | AddPtr(int, val, val, val) | CopyToOffset(identifier, int, val)
 //             | CopyFromOffset(identifier, int, val) | Jump(identifier) | JumpIfZero(val, identifier)
 //             | JumpIfNotZero(val, identifier) | Label(identifier)
-static void repr_instr_list(Ctx ctx, vector_t(unique_ptr_t(CBlockItem)) node_list) {
+static void repr_instr_list(Ctx ctx, vector_t(unique_ptr_t(struct CBlockItem)) node_list) {
     for (size_t i = 0; i < vec_size(node_list); ++i) {
         switch (node_list[i]->type) {
             case AST_CS_t:
@@ -1418,7 +1418,7 @@ static void repr_instr_list(Ctx ctx, vector_t(unique_ptr_t(CBlockItem)) node_lis
     }
 }
 
-static void repr_block(Ctx ctx, CBlock* node) {
+static void repr_block(Ctx ctx, struct CBlock* node) {
     if (node->type == AST_CB_t) {
         repr_instr_list(ctx, node->get._CB.block_items);
     }
@@ -1427,7 +1427,7 @@ static void repr_block(Ctx ctx, CBlock* node) {
     }
 }
 
-static unique_ptr_t(TacTopLevel) repr_fun_toplvl(Ctx ctx, CFunctionDeclaration* node) {
+static unique_ptr_t(TacTopLevel) repr_fun_toplvl(Ctx ctx, struct CFunctionDeclaration* node) {
     TIdentifier name = node->name;
     bool is_glob = map_get(ctx->frontend->symbol_table, node->name)->attrs->get._FunAttr.is_glob;
 
@@ -1452,14 +1452,14 @@ static unique_ptr_t(TacTopLevel) repr_fun_toplvl(Ctx ctx, CFunctionDeclaration* 
 
 static void push_toplvl(Ctx ctx, unique_ptr_t(TacTopLevel) top_level) { vec_move_back(*ctx->p_toplvls, top_level); }
 
-static void fun_decl_toplvl(Ctx ctx, CFunDecl* node) {
+static void fun_decl_toplvl(Ctx ctx, struct CFunDecl* node) {
     if (node->fun_decl->body) {
         push_toplvl(ctx, repr_fun_toplvl(ctx, node->fun_decl));
     }
 }
 
 // (function) top_level = Function(identifier, bool, identifier*, instruction*)
-static void declaration_toplvl(Ctx ctx, CDeclaration* node) {
+static void declaration_toplvl(Ctx ctx, struct CDeclaration* node) {
     switch (node->type) {
         case AST_CFunDecl_t:
             fun_decl_toplvl(ctx, &node->get._CFunDecl);
@@ -1547,7 +1547,7 @@ static void symbol_toplvl(Ctx ctx, struct Symbol* node, TIdentifier symbol) {
 }
 
 // AST = Program(top_level*, top_level*, top_level*)
-static unique_ptr_t(TacProgram) repr_program(Ctx ctx, CProgram* node) {
+static unique_ptr_t(TacProgram) repr_program(Ctx ctx, struct CProgram* node) {
     vector_t(unique_ptr_t(TacTopLevel)) fun_toplvls = vec_new();
     {
         ctx->p_toplvls = &fun_toplvls;
@@ -1576,7 +1576,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, CProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 unique_ptr_t(TacProgram) represent_three_address_code(
-    unique_ptr_t(CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
+    unique_ptr_t(struct CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
     TacReprContext ctx;
     {
         ctx.frontend = frontend;

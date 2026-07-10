@@ -68,7 +68,7 @@
 #define tagged_def_t(E, T) E##_##T##_t
 #define tagged_def_impl(T) T type
 #define tagged_def_init(E, T1, T2) \
-    (T1) { tagged_def_t(E, T2) }
+    (struct T1) { tagged_def_t(E, T2) }
 
 #define unique_ptr_t(T) T*
 #define unique_ptr_impl(T) tagged_def_impl(T)

@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 
@@ -210,7 +212,7 @@ char* get_const_fmt(struct CConst* node) {
     }
 }
 
-char* get_storage_class_fmt(CStorageClass* node) {
+char* get_storage_class_fmt(struct CStorageClass* node) {
     switch (node->type) {
         case AST_CStatic_t:
             return "static";
@@ -221,7 +223,7 @@ char* get_storage_class_fmt(CStorageClass* node) {
     }
 }
 
-char* get_unop_fmt(CUnaryOp* node) {
+char* get_unop_fmt(struct CUnaryOp* node) {
     switch (node->type) {
         case AST_CComplement_t:
             return "~";
@@ -234,7 +236,7 @@ char* get_unop_fmt(CUnaryOp* node) {
     }
 }
 
-char* get_binop_fmt(CBinaryOp* node) {
+char* get_binop_fmt(struct CBinaryOp* node) {
     switch (node->type) {
         case AST_CAdd_t:
             return "+";
@@ -279,7 +281,7 @@ char* get_binop_fmt(CBinaryOp* node) {
     }
 }
 
-char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop) {
+char* get_assign_fmt(struct CBinaryOp* node, struct CUnaryOp* unop) {
     if (!node) {
         return "=";
     }

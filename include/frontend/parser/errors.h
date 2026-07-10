@@ -17,9 +17,9 @@ struct Array;
 struct Structure;
 struct Type;
 struct CConst;
-typedef struct CUnaryOp CUnaryOp;
-typedef struct CBinaryOp CBinaryOp;
-typedef struct CStorageClass CStorageClass;
+struct CUnaryOp;
+struct CBinaryOp;
+struct CStorageClass;
 struct IdentifierContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -57,10 +57,10 @@ struct IdentifierContext;
 char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
 char* get_tok_fmt(struct IdentifierContext* ctx, Token* token);
 char* get_const_fmt(struct CConst* node);
-char* get_storage_class_fmt(CStorageClass* node);
-char* get_unop_fmt(CUnaryOp* node);
-char* get_binop_fmt(CBinaryOp* node);
-char* get_assign_fmt(CBinaryOp* node, CUnaryOp* unop);
+char* get_storage_class_fmt(struct CStorageClass* node);
+char* get_unop_fmt(struct CUnaryOp* node);
+char* get_binop_fmt(struct CBinaryOp* node);
+char* get_assign_fmt(struct CBinaryOp* node, struct CUnaryOp* unop);
 char* get_name_fmt(struct IdentifierContext* ctx, TIdentifier name, string_t* name_fmt);
 char* get_struct_name_fmt(struct IdentifierContext* ctx, TIdentifier name, bool is_union, string_t* struct_fmt);
 char* get_fun_fmt(struct IdentifierContext* ctx, struct FunType* fun_type, string_t* fun_fmt);

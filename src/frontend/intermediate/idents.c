@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "util/c_std.h"
 #include "util/throw.h"
 
@@ -139,7 +141,7 @@ TIdentifier repr_case_identifier(Ctx ctx, TIdentifier target, bool is_label, siz
     return make_string_identifier(ctx, &name);
 }
 
-TIdentifier repr_var_identifier(Ctx ctx, CExp* node) {
+TIdentifier repr_var_identifier(Ctx ctx, struct CExp* node) {
     string_t name = str_new(NULL);
     switch (node->type) {
         case AST_CConstant_t: {

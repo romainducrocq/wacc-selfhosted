@@ -3,7 +3,7 @@
 
 #include "util/throw.h"
 
-typedef struct CProgram CProgram;
+struct CProgram;
 struct ErrorsContext;
 struct FrontEndContext;
 struct IdentifierContext;
@@ -19,6 +19,6 @@ struct IdentifierContext;
 // Identifier resolution
 
 error_t analyze_semantic(
-    CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
+    struct CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

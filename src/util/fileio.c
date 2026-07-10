@@ -1,7 +1,3 @@
-#ifdef __LIB_TINYDIR__
-#include "tinydir/tinydir.h"
-#endif
-
 #include "c_lib.h"
 
 #include "util/c_std.h"
@@ -19,12 +15,14 @@
 #define WRITE_BUF_SIZE 4096
 
 bool find_file(char* filename) {
-#ifdef __LIB_TINYDIR__
-    tinydir_file file = {0};
-    return tinydir_file_open(&file, filename) != -1 && !file.is_dir;
-#else
-    return filename && false;
-#endif
+    struct FILE* fd = fopen(filename, "rb");
+    if (fd) {
+        fclose(fd);
+        return true;
+    }
+    else {
+        return false;
+    }
 }
 
 char* get_filename(Ctx ctx) {
@@ -43,8 +41,8 @@ error_t open_fread(Ctx ctx, string_t filename) {
     for (unsigned long i = 0; i < vec_size(ctx->file_reads); ++i) {
         if (ctx->file_reads[i].fd) {
             unsigned long n_fopens = vec_size(ctx->file_reads) - i;
-            THROW_ABORT_IF(n_fopens > FOPEN_MAX);
-            if (n_fopens == FOPEN_MAX) {
+            THROW_ABORT_IF(n_fopens > FOPEN_MAX - 1);
+            if (n_fopens == FOPEN_MAX - 1) {
                 ctx->file_reads[i].len = 0;
                 free(ctx->file_reads[i].buf);
                 ctx->file_reads[i].buf = NULL;

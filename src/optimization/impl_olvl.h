@@ -14,7 +14,7 @@ typedef OptimTacContext* Ctx;
 #define free_AstInstruction(X) free_TacInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(TacInstruction, X, Y)
 #elif __OPTIM_LEVEL__ == 2
-typedef AsmInstruction AstInstruction;
+typedef struct AsmInstruction AstInstruction;
 typedef RegAllocContext* Ctx;
 #define free_AstInstruction(X) free_AsmInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(AsmInstruction, X, Y)
@@ -307,7 +307,7 @@ static void cfg_init_label_block(Ctx ctx, struct TacLabel* node) {
     map_add(ctx->cfg->identifier_id_map, node->name, vec_size(ctx->cfg->blocks) - 1);
 }
 #elif __OPTIM_LEVEL__ == 2
-static void cfg_init_label_block(Ctx ctx, AsmLabel* node) {
+static void cfg_init_label_block(Ctx ctx, struct AsmLabel* node) {
     map_add(ctx->cfg->identifier_id_map, node->name, vec_size(ctx->cfg->blocks) - 1);
 }
 #endif
@@ -371,11 +371,11 @@ static void cfg_init_jmp_ne_0_edges(Ctx ctx, struct TacJumpIfNotZero* node, size
     cfg_add_succ_edge(ctx, block_id, block_id + 1);
 }
 #elif __OPTIM_LEVEL__ == 2
-static void cfg_init_jmp_edges(Ctx ctx, AsmJmp* node, size_t block_id) {
+static void cfg_init_jmp_edges(Ctx ctx, struct AsmJmp* node, size_t block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
 }
 
-static void cfg_init_jmp_cc_edges(Ctx ctx, AsmJmpCC* node, size_t block_id) {
+static void cfg_init_jmp_cc_edges(Ctx ctx, struct AsmJmpCC* node, size_t block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
     cfg_add_succ_edge(ctx, block_id, block_id + 1);
 }
@@ -927,7 +927,7 @@ static void infer_add_data_name(Ctx ctx, TIdentifier name) {
     }
 }
 
-static void infer_add_data_op(Ctx ctx, AsmOperand* node) {
+static void infer_add_data_op(Ctx ctx, struct AsmOperand* node) {
     if (node->type == AST_AsmPseudo_t) {
         infer_add_data_name(ctx, node->get._AsmPseudo.name);
     }
@@ -1161,37 +1161,37 @@ static bool init_data_flow_analysis(Ctx ctx,
                         }
 #elif __OPTIM_LEVEL__ == 2
                         case AST_AsmMov_t: {
-                            AsmMov* p_node = &node->get._AsmMov;
+                            struct AsmMov* p_node = &node->get._AsmMov;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmMovSx_t: {
-                            AsmMovSx* p_node = &node->get._AsmMovSx;
+                            struct AsmMovSx* p_node = &node->get._AsmMovSx;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmMovZeroExtend_t: {
-                            AsmMovZeroExtend* p_node = &node->get._AsmMovZeroExtend;
+                            struct AsmMovZeroExtend* p_node = &node->get._AsmMovZeroExtend;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmLea_t: {
-                            AsmLea* p_node = &node->get._AsmLea;
+                            struct AsmLea* p_node = &node->get._AsmLea;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmCvttsd2si_t: {
-                            AsmCvttsd2si* p_node = &node->get._AsmCvttsd2si;
+                            struct AsmCvttsd2si* p_node = &node->get._AsmCvttsd2si;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmCvtsi2sd_t: {
-                            AsmCvtsi2sd* p_node = &node->get._AsmCvtsi2sd;
+                            struct AsmCvtsi2sd* p_node = &node->get._AsmCvtsi2sd;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
@@ -1200,13 +1200,13 @@ static bool init_data_flow_analysis(Ctx ctx,
                             infer_add_data_op(ctx, node->get._AsmUnary.dst);
                             break;
                         case AST_AsmBinary_t: {
-                            AsmBinary* p_node = &node->get._AsmBinary;
+                            struct AsmBinary* p_node = &node->get._AsmBinary;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;
                         }
                         case AST_AsmCmp_t: {
-                            AsmCmp* p_node = &node->get._AsmCmp;
+                            struct AsmCmp* p_node = &node->get._AsmCmp;
                             infer_add_data_op(ctx, p_node->src);
                             infer_add_data_op(ctx, p_node->dst);
                             break;

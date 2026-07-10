@@ -53,7 +53,7 @@ typedef struct RegAllocContext {
     unique_ptr_t(DataFlowAnalysisO2) dfa_o2;
     unique_ptr_t(InferenceGraph) infer_graph;
     unique_ptr_t(InferenceGraph) sse_infer_graph;
-    vector_t(unique_ptr_t(AsmInstruction)) * p_instrs;
+    vector_t(unique_ptr_t(struct AsmInstruction)) * p_instrs;
     // Register coalescing
     bool is_with_coal;
 } RegAllocContext;
@@ -128,7 +128,7 @@ static unique_ptr_t(InferenceGraph) make_InferenceGraph(bool is_sse) {
 
 // Inference graph
 
-static bool is_bitshift_cl(AsmBinary* node) {
+static bool is_bitshift_cl(struct AsmBinary* node) {
     switch (node->binop.type) {
         case AST_AsmBitShiftLeft_t:
         case AST_AsmBitShiftRight_t:
@@ -159,7 +159,7 @@ static void infer_transfer_used_name(Ctx ctx, TIdentifier name, size_t next_inst
     }
 }
 
-static void infer_transfer_used_op(Ctx ctx, AsmOperand* node, size_t next_instr_idx) {
+static void infer_transfer_used_op(Ctx ctx, struct AsmOperand* node, size_t next_instr_idx) {
     switch (node->type) {
         case AST_AsmRegister_t: {
             REGISTER_KIND reg_kind = register_mask_kind(&node->get._AsmRegister.reg);
@@ -179,7 +179,7 @@ static void infer_transfer_used_op(Ctx ctx, AsmOperand* node, size_t next_instr_
             break;
         }
         case AST_AsmIndexed_t: {
-            AsmIndexed* p_node = &node->get._AsmIndexed;
+            struct AsmIndexed* p_node = &node->get._AsmIndexed;
             {
                 REGISTER_KIND reg_kind = register_mask_kind(&p_node->reg_base);
                 infer_transfer_used_reg(ctx, reg_kind, next_instr_idx);
@@ -195,7 +195,7 @@ static void infer_transfer_used_op(Ctx ctx, AsmOperand* node, size_t next_instr_
     }
 }
 
-static void infer_transfer_used_call(Ctx ctx, AsmCall* node, size_t next_instr_idx) {
+static void infer_transfer_used_call(Ctx ctx, struct AsmCall* node, size_t next_instr_idx) {
     struct FunType* fun_type = &map_get(ctx->frontend->symbol_table, node->name)->type_t->get._FunType;
     GET_DFA_INSTR_SET_MASK(next_instr_idx, 0) |= fun_type->param_reg_mask;
 }
@@ -211,7 +211,7 @@ static void infer_transfer_updated_name(Ctx ctx, TIdentifier name, size_t next_i
     }
 }
 
-static void infer_transfer_updated_op(Ctx ctx, AsmOperand* node, size_t next_instr_idx) {
+static void infer_transfer_updated_op(Ctx ctx, struct AsmOperand* node, size_t next_instr_idx) {
     switch (node->type) {
         case AST_AsmRegister_t: {
             REGISTER_KIND reg_kind = register_mask_kind(&node->get._AsmRegister.reg);
@@ -238,40 +238,40 @@ static void infer_transfer_updated_op(Ctx ctx, AsmOperand* node, size_t next_ins
 }
 
 static void infer_transfer_live_regs(Ctx ctx, size_t instr_idx, size_t next_instr_idx) {
-    AsmInstruction* node = GET_INSTR(instr_idx);
+    struct AsmInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_AsmMov_t: {
-            AsmMov* p_node = &node->get._AsmMov;
+            struct AsmMov* p_node = &node->get._AsmMov;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
         }
         case AST_AsmMovSx_t: {
-            AsmMovSx* p_node = &node->get._AsmMovSx;
+            struct AsmMovSx* p_node = &node->get._AsmMovSx;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
         }
         case AST_AsmMovZeroExtend_t: {
-            AsmMovZeroExtend* p_node = &node->get._AsmMovZeroExtend;
+            struct AsmMovZeroExtend* p_node = &node->get._AsmMovZeroExtend;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
         }
         case AST_AsmLea_t: {
-            AsmLea* p_node = &node->get._AsmLea;
+            struct AsmLea* p_node = &node->get._AsmLea;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
         }
         case AST_AsmCvttsd2si_t: {
-            AsmCvttsd2si* p_node = &node->get._AsmCvttsd2si;
+            struct AsmCvttsd2si* p_node = &node->get._AsmCvttsd2si;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
         }
         case AST_AsmCvtsi2sd_t: {
-            AsmCvtsi2sd* p_node = &node->get._AsmCvtsi2sd;
+            struct AsmCvtsi2sd* p_node = &node->get._AsmCvtsi2sd;
             infer_transfer_updated_op(ctx, p_node->dst, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             break;
@@ -280,7 +280,7 @@ static void infer_transfer_live_regs(Ctx ctx, size_t instr_idx, size_t next_inst
             infer_transfer_used_op(ctx, node->get._AsmUnary.dst, next_instr_idx);
             break;
         case AST_AsmBinary_t: {
-            AsmBinary* p_node = &node->get._AsmBinary;
+            struct AsmBinary* p_node = &node->get._AsmBinary;
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->dst, next_instr_idx);
             if (is_bitshift_cl(p_node)) {
@@ -289,7 +289,7 @@ static void infer_transfer_live_regs(Ctx ctx, size_t instr_idx, size_t next_inst
             break;
         }
         case AST_AsmCmp_t: {
-            AsmCmp* p_node = &node->get._AsmCmp;
+            struct AsmCmp* p_node = &node->get._AsmCmp;
             infer_transfer_used_op(ctx, p_node->src, next_instr_idx);
             infer_transfer_used_op(ctx, p_node->dst, next_instr_idx);
             break;
@@ -408,7 +408,7 @@ static void infer_init_used_name_edges(Ctx ctx, TIdentifier name) {
     }
 }
 
-static void infer_init_used_op_edges(Ctx ctx, AsmOperand* node) {
+static void infer_init_used_op_edges(Ctx ctx, struct AsmOperand* node) {
     if (node->type == AST_AsmPseudo_t) {
         infer_init_used_name_edges(ctx, node->get._AsmPseudo.name);
     }
@@ -420,7 +420,7 @@ static void infer_init_updated_regs_edges(
     size_t mov_mask_bit = ctx->dfa->set_size;
     bool is_mov = GET_INSTR(instr_idx)->type == AST_AsmMov_t;
     if (is_mov) {
-        AsmMov* mov = &GET_INSTR(instr_idx)->get._AsmMov;
+        struct AsmMov* mov = &GET_INSTR(instr_idx)->get._AsmMov;
         if (mov->src->type == AST_AsmPseudo_t) {
             TIdentifier src_name = mov->src->get._AsmPseudo.name;
             if (is_aliased_name(ctx, src_name)) {
@@ -484,7 +484,7 @@ static void infer_init_updated_name_edges(Ctx ctx, TIdentifier name, size_t inst
     size_t mov_mask_bit = ctx->dfa->set_size;
     bool is_mov = GET_INSTR(instr_idx)->type == AST_AsmMov_t;
     if (is_mov) {
-        AsmMov* mov = &GET_INSTR(instr_idx)->get._AsmMov;
+        struct AsmMov* mov = &GET_INSTR(instr_idx)->get._AsmMov;
         switch (mov->src->type) {
             case AST_AsmRegister_t: {
                 REGISTER_KIND src_reg_kind = register_mask_kind(&mov->src->get._AsmRegister.reg);
@@ -577,7 +577,7 @@ static void infer_init_updated_name_edges(Ctx ctx, TIdentifier name, size_t inst
     }
 }
 
-static void infer_init_updated_op_edges(Ctx ctx, AsmOperand* node, size_t instr_idx) {
+static void infer_init_updated_op_edges(Ctx ctx, struct AsmOperand* node, size_t instr_idx) {
     switch (node->type) {
         case AST_AsmRegister_t: {
             REGISTER_KIND reg_kinds[1] = {register_mask_kind(&node->get._AsmRegister.reg)};
@@ -596,7 +596,7 @@ static void infer_init_updated_op_edges(Ctx ctx, AsmOperand* node, size_t instr_
 }
 
 static void infer_init_edges(Ctx ctx, size_t instr_idx) {
-    AsmInstruction* node = GET_INSTR(instr_idx);
+    struct AsmInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_AsmMov_t:
             infer_init_updated_op_edges(ctx, node->get._AsmMov.dst, instr_idx);
@@ -620,7 +620,7 @@ static void infer_init_edges(Ctx ctx, size_t instr_idx) {
             infer_init_updated_op_edges(ctx, node->get._AsmUnary.dst, instr_idx);
             break;
         case AST_AsmBinary_t: {
-            AsmBinary* p_node = &node->get._AsmBinary;
+            struct AsmBinary* p_node = &node->get._AsmBinary;
             if (is_bitshift_cl(p_node)) {
                 REGISTER_KIND reg_kinds[1] = {REG_Cx};
                 infer_init_updated_regs_edges(ctx, reg_kinds, instr_idx, 1, false);
@@ -630,7 +630,7 @@ static void infer_init_edges(Ctx ctx, size_t instr_idx) {
             break;
         }
         case AST_AsmCmp_t: {
-            AsmCmp* p_node = &node->get._AsmCmp;
+            struct AsmCmp* p_node = &node->get._AsmCmp;
             infer_init_used_op_edges(ctx, p_node->src);
             infer_init_used_op_edges(ctx, p_node->dst);
             break;
@@ -937,7 +937,7 @@ static void alloc_color_reg_map(Ctx ctx) {
     }
 }
 
-static shared_ptr_t(AsmOperand) alloc_hard_reg(Ctx ctx, TIdentifier name) {
+static shared_ptr_t(struct AsmOperand) alloc_hard_reg(Ctx ctx, TIdentifier name) {
     if (is_aliased_name(ctx, name)) {
         return sptr_new();
     }
@@ -945,10 +945,10 @@ static shared_ptr_t(AsmOperand) alloc_hard_reg(Ctx ctx, TIdentifier name) {
     REGISTER_KIND color = map_get(ctx->p_infer_graph->pseudo_reg_map, name).color;
     if (color != REG_Sp) {
         REGISTER_KIND reg_kind = ctx->reg_color_map[register_mask_bit(color)];
-        shared_ptr_t(AsmOperand) hard_reg = gen_register(reg_kind);
+        shared_ptr_t(struct AsmOperand) hard_reg = gen_register(reg_kind);
         if (is_reg_callee_saved(reg_kind) && !register_mask_get(ctx->callee_saved_reg_mask, reg_kind)) {
             register_mask_set(&ctx->callee_saved_reg_mask, reg_kind, true);
-            shared_ptr_t(AsmOperand) callee_saved_reg = sptr_new();
+            shared_ptr_t(struct AsmOperand) callee_saved_reg = sptr_new();
             sptr_copy(AsmOperand, hard_reg, callee_saved_reg);
             vec_move_back(ctx->p_backend_fun->callee_saved_regs, callee_saved_reg);
         }
@@ -959,7 +959,7 @@ static shared_ptr_t(AsmOperand) alloc_hard_reg(Ctx ctx, TIdentifier name) {
     }
 }
 
-static REGISTER_KIND get_op_reg_kind(Ctx ctx, AsmOperand* node) {
+static REGISTER_KIND get_op_reg_kind(Ctx ctx, struct AsmOperand* node) {
     switch (node->type) {
         case AST_AsmRegister_t:
             return register_mask_kind(&node->get._AsmRegister.reg);
@@ -987,7 +987,7 @@ static REGISTER_KIND get_op_reg_kind(Ctx ctx, AsmOperand* node) {
     }
 }
 
-static void alloc_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx) {
+static void alloc_mov_instr(Ctx ctx, struct AsmMov* node, size_t instr_idx) {
     REGISTER_KIND src_reg_kind = get_op_reg_kind(ctx, node->src);
     REGISTER_KIND dst_reg_kind = get_op_reg_kind(ctx, node->dst);
     if (src_reg_kind != REG_Sp && src_reg_kind == dst_reg_kind) {
@@ -995,13 +995,13 @@ static void alloc_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx) {
     }
     else {
         if (node->src->type == AST_AsmPseudo_t) {
-            shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+            shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
             if (hard_reg) {
                 sptr_move(AsmOperand, hard_reg, node->src);
             }
         }
         if (node->dst->type == AST_AsmPseudo_t) {
-            shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+            shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
             if (hard_reg) {
                 sptr_move(AsmOperand, hard_reg, node->dst);
             }
@@ -1009,150 +1009,150 @@ static void alloc_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx) {
     }
 }
 
-static void alloc_mov_sx_instr(Ctx ctx, AsmMovSx* node) {
+static void alloc_mov_sx_instr(Ctx ctx, struct AsmMovSx* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_zero_extend_instr(Ctx ctx, AsmMovZeroExtend* node) {
+static void alloc_zero_extend_instr(Ctx ctx, struct AsmMovZeroExtend* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_lea_instr(Ctx ctx, AsmLea* node) {
+static void alloc_lea_instr(Ctx ctx, struct AsmLea* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_cvttsd2si_instr(Ctx ctx, AsmCvttsd2si* node) {
+static void alloc_cvttsd2si_instr(Ctx ctx, struct AsmCvttsd2si* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_cvtsi2sd_instr(Ctx ctx, AsmCvtsi2sd* node) {
+static void alloc_cvtsi2sd_instr(Ctx ctx, struct AsmCvtsi2sd* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_unary_instr(Ctx ctx, AsmUnary* node) {
+static void alloc_unary_instr(Ctx ctx, struct AsmUnary* node) {
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_binary_instr(Ctx ctx, AsmBinary* node) {
+static void alloc_binary_instr(Ctx ctx, struct AsmBinary* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_cmp_instr(Ctx ctx, AsmCmp* node) {
+static void alloc_cmp_instr(Ctx ctx, struct AsmCmp* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_idiv_instr(Ctx ctx, AsmIdiv* node) {
+static void alloc_idiv_instr(Ctx ctx, struct AsmIdiv* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
 }
 
-static void alloc_div_instr(Ctx ctx, AsmDiv* node) {
+static void alloc_div_instr(Ctx ctx, struct AsmDiv* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
     }
 }
 
-static void alloc_set_cc_instr(Ctx ctx, AsmSetCC* node) {
+static void alloc_set_cc_instr(Ctx ctx, struct AsmSetCC* node) {
     if (node->dst->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->dst->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->dst);
         }
     }
 }
 
-static void alloc_push_instr(Ctx ctx, AsmPush* node) {
+static void alloc_push_instr(Ctx ctx, struct AsmPush* node) {
     if (node->src->type == AST_AsmPseudo_t) {
-        shared_ptr_t(AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
+        shared_ptr_t(struct AsmOperand) hard_reg = alloc_hard_reg(ctx, node->src->get._AsmPseudo.name);
         if (hard_reg) {
             sptr_move(AsmOperand, hard_reg, node->src);
         }
@@ -1160,7 +1160,7 @@ static void alloc_push_instr(Ctx ctx, AsmPush* node) {
 }
 
 static void alloc_instr(Ctx ctx, size_t instr_idx) {
-    AsmInstruction* node = GET_INSTR(instr_idx);
+    struct AsmInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_AsmMov_t:
             alloc_mov_instr(ctx, &node->get._AsmMov, instr_idx);
@@ -1250,7 +1250,7 @@ static TInt get_type_size(struct Type* type) {
     }
 }
 
-static size_t get_coalesced_idx(Ctx ctx, AsmOperand* node) {
+static size_t get_coalesced_idx(Ctx ctx, struct AsmOperand* node) {
     size_t coalesced_idx = ctx->dfa->set_size;
     switch (node->type) {
         case AST_AsmRegister_t: {
@@ -1443,7 +1443,7 @@ static void coal_hard_infer_reg(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegist
     infer_rm_unpruned_pseudo_name(ctx, merge_name);
 }
 
-static bool coal_infer_regs(Ctx ctx, AsmMov* node) {
+static bool coal_infer_regs(Ctx ctx, struct AsmMov* node) {
     InferenceRegister* src_infer = NULL;
     InferenceRegister* dst_infer = NULL;
     size_t src_idx = get_coalesced_idx(ctx, node->src);
@@ -1470,7 +1470,7 @@ static bool coal_infer_regs(Ctx ctx, AsmMov* node) {
     }
 }
 
-static shared_ptr_t(AsmOperand) coal_op_reg(Ctx ctx, TIdentifier name, size_t coalesced_idx) {
+static shared_ptr_t(struct AsmOperand) coal_op_reg(Ctx ctx, TIdentifier name, size_t coalesced_idx) {
     if (coalesced_idx < ctx->dfa->set_size && coalesced_idx != map_get(ctx->cfg->identifier_id_map, name)) {
         if (coalesced_idx < REGISTER_MASK_SIZE) {
             REGISTER_KIND reg_kind = ctx->hard_regs[coalesced_idx].reg_kind;
@@ -1488,7 +1488,7 @@ static shared_ptr_t(AsmOperand) coal_op_reg(Ctx ctx, TIdentifier name, size_t co
     }
 }
 
-static void coal_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx, size_t block_id) {
+static void coal_mov_instr(Ctx ctx, struct AsmMov* node, size_t instr_idx, size_t block_id) {
     size_t src_idx = get_coalesced_idx(ctx, node->src);
     size_t dst_idx = get_coalesced_idx(ctx, node->dst);
     if (src_idx < ctx->dfa->set_size && src_idx == dst_idx) {
@@ -1496,13 +1496,13 @@ static void coal_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx, size_t block
     }
     else {
         if (node->src->type == AST_AsmPseudo_t) {
-            shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+            shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
             if (op_reg) {
                 sptr_move(AsmOperand, op_reg, node->src);
             }
         }
         if (node->dst->type == AST_AsmPseudo_t) {
-            shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+            shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
             if (op_reg) {
                 sptr_move(AsmOperand, op_reg, node->dst);
             }
@@ -1510,169 +1510,169 @@ static void coal_mov_instr(Ctx ctx, AsmMov* node, size_t instr_idx, size_t block
     }
 }
 
-static void coal_mov_sx_instr(Ctx ctx, AsmMovSx* node) {
+static void coal_mov_sx_instr(Ctx ctx, struct AsmMovSx* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_zero_extend_instr(Ctx ctx, AsmMovZeroExtend* node) {
+static void coal_zero_extend_instr(Ctx ctx, struct AsmMovZeroExtend* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_lea_instr(Ctx ctx, AsmLea* node) {
+static void coal_lea_instr(Ctx ctx, struct AsmLea* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_cvttsd2si_instr(Ctx ctx, AsmCvttsd2si* node) {
+static void coal_cvttsd2si_instr(Ctx ctx, struct AsmCvttsd2si* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_cvtsi2sd_instr(Ctx ctx, AsmCvtsi2sd* node) {
+static void coal_cvtsi2sd_instr(Ctx ctx, struct AsmCvtsi2sd* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_unary_instr(Ctx ctx, AsmUnary* node) {
+static void coal_unary_instr(Ctx ctx, struct AsmUnary* node) {
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_binary_instr(Ctx ctx, AsmBinary* node) {
+static void coal_binary_instr(Ctx ctx, struct AsmBinary* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_cmp_instr(Ctx ctx, AsmCmp* node) {
+static void coal_cmp_instr(Ctx ctx, struct AsmCmp* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_idiv_instr(Ctx ctx, AsmIdiv* node) {
+static void coal_idiv_instr(Ctx ctx, struct AsmIdiv* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
 }
 
-static void coal_div_instr(Ctx ctx, AsmDiv* node) {
+static void coal_div_instr(Ctx ctx, struct AsmDiv* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
     }
 }
 
-static void coal_set_cc_instr(Ctx ctx, AsmSetCC* node) {
+static void coal_set_cc_instr(Ctx ctx, struct AsmSetCC* node) {
     if (node->dst->type == AST_AsmPseudo_t) {
         size_t dst_idx = get_coalesced_idx(ctx, node->dst);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->dst->get._AsmPseudo.name, dst_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->dst);
         }
     }
 }
 
-static void coal_push_instr(Ctx ctx, AsmPush* node) {
+static void coal_push_instr(Ctx ctx, struct AsmPush* node) {
     if (node->src->type == AST_AsmPseudo_t) {
         size_t src_idx = get_coalesced_idx(ctx, node->src);
-        shared_ptr_t(AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
+        shared_ptr_t(struct AsmOperand) op_reg = coal_op_reg(ctx, node->src->get._AsmPseudo.name, src_idx);
         if (op_reg) {
             sptr_move(AsmOperand, op_reg, node->src);
         }
@@ -1680,7 +1680,7 @@ static void coal_push_instr(Ctx ctx, AsmPush* node) {
 }
 
 static void coal_instr(Ctx ctx, size_t instr_idx, size_t block_id) {
-    AsmInstruction* node = GET_INSTR(instr_idx);
+    struct AsmInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_AsmMov_t:
             coal_mov_instr(ctx, &node->get._AsmMov, instr_idx, block_id);
@@ -1768,7 +1768,7 @@ static bool coalesce_registers(Ctx ctx) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void alloc_fun_toplvl(Ctx ctx, AsmFunction* node) {
+static void alloc_fun_toplvl(Ctx ctx, struct AsmFunction* node) {
     ctx->p_instrs = &node->instructions;
     init_control_flow_graph(ctx);
 Ldowhile:
@@ -1792,7 +1792,7 @@ Lbreak:
     ctx->p_instrs = NULL;
 }
 
-static void alloc_toplvl(Ctx ctx, AsmTopLevel* node) {
+static void alloc_toplvl(Ctx ctx, struct AsmTopLevel* node) {
     switch (node->type) {
         case AST_AsmFunction_t:
             alloc_fun_toplvl(ctx, &node->get._AsmFunction);
@@ -1804,7 +1804,7 @@ static void alloc_toplvl(Ctx ctx, AsmTopLevel* node) {
     }
 }
 
-static void alloc_program(Ctx ctx, AsmProgram* node) {
+static void alloc_program(Ctx ctx, struct AsmProgram* node) {
     for (size_t i = 0; i < vec_size(node->top_levels); ++i) {
         alloc_toplvl(ctx, node->top_levels[i]);
     }
@@ -1812,7 +1812,7 @@ static void alloc_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void allocate_registers(AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
+void allocate_registers(struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
     RegAllocContext ctx;
     {
         ctx.backend = backend;

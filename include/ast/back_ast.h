@@ -13,14 +13,14 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct AsmReg AsmReg;
-typedef struct AsmCondCode AsmCondCode;
-typedef struct AsmOperand AsmOperand;
-typedef struct AsmBinaryOp AsmBinaryOp;
-typedef struct AsmUnaryOp AsmUnaryOp;
-typedef struct AsmInstruction AsmInstruction;
-typedef struct AsmTopLevel AsmTopLevel;
-typedef struct AsmProgram AsmProgram;
+struct AsmReg;
+struct AsmCondCode;
+struct AsmOperand;
+struct AsmBinaryOp;
+struct AsmUnaryOp;
+struct AsmInstruction;
+struct AsmTopLevel;
+struct AsmProgram;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -57,9 +57,9 @@ typedef struct AsmProgram AsmProgram;
 //     | XMM14
 //     | XMM15
 
-typedef struct AsmReg {
+struct AsmReg {
     tagged_def_impl(AST_T);
-} AsmReg;
+};
 
 #define init_AsmReg() tagged_def_init(AST, AsmReg, AsmReg)
 #define init_AsmAx() tagged_def_init(AST, AsmReg, AsmAx)
@@ -109,9 +109,9 @@ typedef struct AsmReg {
 //           | BE
 //           | P
 
-typedef struct AsmCondCode {
+struct AsmCondCode {
     tagged_def_impl(AST_T);
-} AsmCondCode;
+};
 
 #define init_AsmCondCode() tagged_def_init(AST, AsmCondCode, AsmCondCode)
 #define init_AsmE() tagged_def_init(AST, AsmCondCode, AsmE)
@@ -136,65 +136,65 @@ typedef struct AsmCondCode {
 //         | PseudoMem(identifier, int)
 //         | Indexed(int, reg, reg)
 
-typedef struct AsmImm {
+struct AsmImm {
     TULong value;
     bool is_byte;
     bool is_quad;
     bool is_neg;
-} AsmImm;
+};
 
-typedef struct AsmRegister {
-    AsmReg reg;
-} AsmRegister;
+struct AsmRegister {
+    struct AsmReg reg;
+};
 
-typedef struct AsmPseudo {
+struct AsmPseudo {
     TIdentifier name;
-} AsmPseudo;
+};
 
-typedef struct AsmMemory {
+struct AsmMemory {
     TLong value;
-    AsmReg reg;
-} AsmMemory;
+    struct AsmReg reg;
+};
 
-typedef struct AsmData {
+struct AsmData {
     TIdentifier name;
     TLong offset;
-} AsmData;
+};
 
-typedef struct AsmPseudoMem {
+struct AsmPseudoMem {
     TIdentifier name;
     TLong offset;
-} AsmPseudoMem;
+};
 
-typedef struct AsmIndexed {
+struct AsmIndexed {
     TLong scale;
-    AsmReg reg_base;
-    AsmReg reg_index;
-} AsmIndexed;
+    struct AsmReg reg_base;
+    struct AsmReg reg_index;
+};
 
-typedef struct AsmOperand {
+struct AsmOperand {
     shared_ptr_impl(AST_T);
 
     union {
-        AsmImm _AsmImm;
-        AsmRegister _AsmRegister;
-        AsmPseudo _AsmPseudo;
-        AsmMemory _AsmMemory;
-        AsmData _AsmData;
-        AsmPseudoMem _AsmPseudoMem;
-        AsmIndexed _AsmIndexed;
+        struct AsmImm _AsmImm;
+        struct AsmRegister _AsmRegister;
+        struct AsmPseudo _AsmPseudo;
+        struct AsmMemory _AsmMemory;
+        struct AsmData _AsmData;
+        struct AsmPseudoMem _AsmPseudoMem;
+        struct AsmIndexed _AsmIndexed;
     } get;
-} AsmOperand;
+};
 
-shared_ptr_t(AsmOperand) make_AsmOperand(void);
-shared_ptr_t(AsmOperand) make_AsmImm(TULong value, bool is_byte, bool is_quad, bool is_neg);
-shared_ptr_t(AsmOperand) make_AsmRegister(AsmReg* reg);
-shared_ptr_t(AsmOperand) make_AsmPseudo(TIdentifier name);
-shared_ptr_t(AsmOperand) make_AsmMemory(TLong value, AsmReg* reg);
-shared_ptr_t(AsmOperand) make_AsmData(TIdentifier name, TLong offset);
-shared_ptr_t(AsmOperand) make_AsmPseudoMem(TIdentifier name, TLong offset);
-shared_ptr_t(AsmOperand) make_AsmIndexed(TLong scale, AsmReg* reg_base, AsmReg* reg_index);
-void free_AsmOperand(shared_ptr_t(AsmOperand) * self);
+shared_ptr_t(struct AsmOperand) make_AsmOperand(void);
+shared_ptr_t(struct AsmOperand) make_AsmImm(TULong value, bool is_byte, bool is_quad, bool is_neg);
+shared_ptr_t(struct AsmOperand) make_AsmRegister(struct AsmReg* reg);
+shared_ptr_t(struct AsmOperand) make_AsmPseudo(TIdentifier name);
+shared_ptr_t(struct AsmOperand) make_AsmMemory(TLong value, struct AsmReg* reg);
+shared_ptr_t(struct AsmOperand) make_AsmData(TIdentifier name, TLong offset);
+shared_ptr_t(struct AsmOperand) make_AsmPseudoMem(TIdentifier name, TLong offset);
+shared_ptr_t(struct AsmOperand) make_AsmIndexed(TLong scale, struct AsmReg* reg_base, struct AsmReg* reg_index);
+void free_AsmOperand(shared_ptr_t(struct AsmOperand) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -209,9 +209,9 @@ void free_AsmOperand(shared_ptr_t(AsmOperand) * self);
 //                 | BitShiftRight
 //                 | BitShrArithmetic
 
-typedef struct AsmBinaryOp {
+struct AsmBinaryOp {
     tagged_def_impl(AST_T);
-} AsmBinaryOp;
+};
 
 #define init_AsmBinaryOp() tagged_def_init(AST, AsmBinaryOp, AsmBinaryOp)
 #define init_AsmAdd() tagged_def_init(AST, AsmBinaryOp, AsmAdd)
@@ -231,9 +231,9 @@ typedef struct AsmBinaryOp {
 //                | Neg
 //                | Shr
 
-typedef struct AsmUnaryOp {
+struct AsmUnaryOp {
     tagged_def_impl(AST_T);
-} AsmUnaryOp;
+};
 
 #define init_AsmUnaryOp() tagged_def_init(AST, AsmUnaryOp, AsmUnaryOp)
 #define init_AsmNot() tagged_def_init(AST, AsmUnaryOp, AsmNot)
@@ -263,167 +263,167 @@ typedef struct AsmUnaryOp {
 //             | Call(identifier)
 //             | Ret
 
-typedef struct AsmMov {
+struct AsmMov {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmMov;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmMovSx {
+struct AsmMovSx {
     shared_ptr_t(struct AssemblyType) asm_type_src;
     shared_ptr_t(struct AssemblyType) asm_type_dst;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmMovSx;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmMovZeroExtend {
+struct AsmMovZeroExtend {
     shared_ptr_t(struct AssemblyType) asm_type_src;
     shared_ptr_t(struct AssemblyType) asm_type_dst;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmMovZeroExtend;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmLea {
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmLea;
+struct AsmLea {
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmCvttsd2si {
+struct AsmCvttsd2si {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmCvttsd2si;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmCvtsi2sd {
+struct AsmCvtsi2sd {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmCvtsi2sd;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmUnary {
-    AsmUnaryOp unop;
+struct AsmUnary {
+    struct AsmUnaryOp unop;
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) dst;
-} AsmUnary;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmBinary {
-    AsmBinaryOp binop;
+struct AsmBinary {
+    struct AsmBinaryOp binop;
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmBinary;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmCmp {
+struct AsmCmp {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-    shared_ptr_t(AsmOperand) dst;
-} AsmCmp;
+    shared_ptr_t(struct AsmOperand) src;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmIdiv {
+struct AsmIdiv {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-} AsmIdiv;
+    shared_ptr_t(struct AsmOperand) src;
+};
 
-typedef struct AsmDiv {
+struct AsmDiv {
     shared_ptr_t(struct AssemblyType) asm_type;
-    shared_ptr_t(AsmOperand) src;
-} AsmDiv;
+    shared_ptr_t(struct AsmOperand) src;
+};
 
-typedef struct AsmCdq {
+struct AsmCdq {
     shared_ptr_t(struct AssemblyType) asm_type;
-} AsmCdq;
+};
 
-typedef struct AsmJmp {
+struct AsmJmp {
     TIdentifier target;
-} AsmJmp;
+};
 
-typedef struct AsmJmpCC {
+struct AsmJmpCC {
     TIdentifier target;
-    AsmCondCode cond_code;
-} AsmJmpCC;
+    struct AsmCondCode cond_code;
+};
 
-typedef struct AsmSetCC {
-    AsmCondCode cond_code;
-    shared_ptr_t(AsmOperand) dst;
-} AsmSetCC;
+struct AsmSetCC {
+    struct AsmCondCode cond_code;
+    shared_ptr_t(struct AsmOperand) dst;
+};
 
-typedef struct AsmLabel {
+struct AsmLabel {
     TIdentifier name;
-} AsmLabel;
+};
 
-typedef struct AsmPush {
-    shared_ptr_t(AsmOperand) src;
-} AsmPush;
+struct AsmPush {
+    shared_ptr_t(struct AsmOperand) src;
+};
 
-typedef struct AsmPop {
-    AsmReg reg;
-} AsmPop;
+struct AsmPop {
+    struct AsmReg reg;
+};
 
-typedef struct AsmCall {
+struct AsmCall {
     TIdentifier name;
-} AsmCall;
+};
 
-typedef struct AsmRet {
+struct AsmRet {
     char _empty;
-} AsmRet;
+};
 
-typedef struct AsmInstruction {
+struct AsmInstruction {
     unique_ptr_impl(AST_T);
 
     union {
-        AsmMov _AsmMov;
-        AsmMovSx _AsmMovSx;
-        AsmMovZeroExtend _AsmMovZeroExtend;
-        AsmLea _AsmLea;
-        AsmCvttsd2si _AsmCvttsd2si;
-        AsmCvtsi2sd _AsmCvtsi2sd;
-        AsmUnary _AsmUnary;
-        AsmBinary _AsmBinary;
-        AsmCmp _AsmCmp;
-        AsmIdiv _AsmIdiv;
-        AsmDiv _AsmDiv;
-        AsmCdq _AsmCdq;
-        AsmJmp _AsmJmp;
-        AsmJmpCC _AsmJmpCC;
-        AsmSetCC _AsmSetCC;
-        AsmLabel _AsmLabel;
-        AsmPush _AsmPush;
-        AsmPop _AsmPop;
-        AsmCall _AsmCall;
-        AsmRet _AsmRet;
+        struct AsmMov _AsmMov;
+        struct AsmMovSx _AsmMovSx;
+        struct AsmMovZeroExtend _AsmMovZeroExtend;
+        struct AsmLea _AsmLea;
+        struct AsmCvttsd2si _AsmCvttsd2si;
+        struct AsmCvtsi2sd _AsmCvtsi2sd;
+        struct AsmUnary _AsmUnary;
+        struct AsmBinary _AsmBinary;
+        struct AsmCmp _AsmCmp;
+        struct AsmIdiv _AsmIdiv;
+        struct AsmDiv _AsmDiv;
+        struct AsmCdq _AsmCdq;
+        struct AsmJmp _AsmJmp;
+        struct AsmJmpCC _AsmJmpCC;
+        struct AsmSetCC _AsmSetCC;
+        struct AsmLabel _AsmLabel;
+        struct AsmPush _AsmPush;
+        struct AsmPop _AsmPop;
+        struct AsmCall _AsmCall;
+        struct AsmRet _AsmRet;
     } get;
-} AsmInstruction;
+};
 
-unique_ptr_t(AsmInstruction) make_AsmInstruction(void);
-unique_ptr_t(AsmInstruction)
-    make_AsmMov(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmMovSx(shared_ptr_t(struct AssemblyType) * asm_type_src,
-    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmMovZeroExtend(shared_ptr_t(struct AssemblyType) * asm_type_src,
-    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmLea(shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmCvttsd2si(
-    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmCvtsi2sd(
-    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction)
-    make_AsmUnary(AsmUnaryOp* unop, shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmBinary(AsmBinaryOp* binop, shared_ptr_t(struct AssemblyType) * asm_type,
-    shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction)
-    make_AsmCmp(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmIdiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src);
-unique_ptr_t(AsmInstruction) make_AsmDiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src);
-unique_ptr_t(AsmInstruction) make_AsmCdq(shared_ptr_t(struct AssemblyType) * asm_type);
-unique_ptr_t(AsmInstruction) make_AsmJmp(TIdentifier target);
-unique_ptr_t(AsmInstruction) make_AsmJmpCC(TIdentifier target, AsmCondCode* cond_code);
-unique_ptr_t(AsmInstruction) make_AsmSetCC(AsmCondCode* cond_code, shared_ptr_t(AsmOperand) * dst);
-unique_ptr_t(AsmInstruction) make_AsmLabel(TIdentifier name);
-unique_ptr_t(AsmInstruction) make_AsmPush(shared_ptr_t(AsmOperand) * src);
-unique_ptr_t(AsmInstruction) make_AsmPop(AsmReg* reg);
-unique_ptr_t(AsmInstruction) make_AsmCall(TIdentifier name);
-unique_ptr_t(AsmInstruction) make_AsmRet(void);
-void free_AsmInstruction(unique_ptr_t(AsmInstruction) * self);
+unique_ptr_t(struct AsmInstruction) make_AsmInstruction(void);
+unique_ptr_t(struct AsmInstruction)
+    make_AsmMov(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmMovSx(shared_ptr_t(struct AssemblyType) * asm_type_src,
+    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmMovZeroExtend(shared_ptr_t(struct AssemblyType) * asm_type_src,
+    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmLea(shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmCvttsd2si(
+    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmCvtsi2sd(
+    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction)
+    make_AsmUnary(struct AsmUnaryOp* unop, shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmBinary(struct AsmBinaryOp* binop, shared_ptr_t(struct AssemblyType) * asm_type,
+    shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction)
+    make_AsmCmp(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmIdiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src);
+unique_ptr_t(struct AsmInstruction) make_AsmDiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(struct AsmOperand) * src);
+unique_ptr_t(struct AsmInstruction) make_AsmCdq(shared_ptr_t(struct AssemblyType) * asm_type);
+unique_ptr_t(struct AsmInstruction) make_AsmJmp(TIdentifier target);
+unique_ptr_t(struct AsmInstruction) make_AsmJmpCC(TIdentifier target, struct AsmCondCode* cond_code);
+unique_ptr_t(struct AsmInstruction) make_AsmSetCC(struct AsmCondCode* cond_code, shared_ptr_t(struct AsmOperand) * dst);
+unique_ptr_t(struct AsmInstruction) make_AsmLabel(TIdentifier name);
+unique_ptr_t(struct AsmInstruction) make_AsmPush(shared_ptr_t(struct AsmOperand) * src);
+unique_ptr_t(struct AsmInstruction) make_AsmPop(struct AsmReg* reg);
+unique_ptr_t(struct AsmInstruction) make_AsmCall(TIdentifier name);
+unique_ptr_t(struct AsmInstruction) make_AsmRet(void);
+void free_AsmInstruction(unique_ptr_t(struct AsmInstruction) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -431,57 +431,57 @@ void free_AsmInstruction(unique_ptr_t(AsmInstruction) * self);
 //           | StaticVariable(identifier, bool, int, static_init*)
 //           | StaticConstant(identifier, int, static_init)
 
-typedef struct AsmFunction {
+struct AsmFunction {
     TIdentifier name;
     bool is_glob;
     bool is_ret_memory;
-    vector_t(unique_ptr_t(AsmInstruction)) instructions;
-} AsmFunction;
+    vector_t(unique_ptr_t(struct AsmInstruction)) instructions;
+};
 
-typedef struct AsmStaticVariable {
+struct AsmStaticVariable {
     TIdentifier name;
     TInt alignment;
     bool is_glob;
     vector_t(shared_ptr_t(struct StaticInit)) static_inits;
-} AsmStaticVariable;
+};
 
-typedef struct AsmStaticConstant {
+struct AsmStaticConstant {
     TIdentifier name;
     TInt alignment;
     shared_ptr_t(struct StaticInit) static_init;
-} AsmStaticConstant;
+};
 
-typedef struct AsmTopLevel {
+struct AsmTopLevel {
     unique_ptr_impl(AST_T);
 
     union {
-        AsmFunction _AsmFunction;
-        AsmStaticVariable _AsmStaticVariable;
-        AsmStaticConstant _AsmStaticConstant;
+        struct AsmFunction _AsmFunction;
+        struct AsmStaticVariable _AsmStaticVariable;
+        struct AsmStaticConstant _AsmStaticConstant;
     } get;
-} AsmTopLevel;
+};
 
-unique_ptr_t(AsmTopLevel) make_AsmTopLevel(void);
-unique_ptr_t(AsmTopLevel) make_AsmFunction(
-    TIdentifier name, bool is_glob, bool is_ret_memory, vector_t(unique_ptr_t(AsmInstruction)) * instructions);
-unique_ptr_t(AsmTopLevel) make_AsmStaticVariable(
+unique_ptr_t(struct AsmTopLevel) make_AsmTopLevel(void);
+unique_ptr_t(struct AsmTopLevel) make_AsmFunction(
+    TIdentifier name, bool is_glob, bool is_ret_memory, vector_t(unique_ptr_t(struct AsmInstruction)) * instructions);
+unique_ptr_t(struct AsmTopLevel) make_AsmStaticVariable(
     TIdentifier name, TInt alignment, bool is_glob, vector_t(shared_ptr_t(struct StaticInit)) * static_inits);
-unique_ptr_t(AsmTopLevel)
+unique_ptr_t(struct AsmTopLevel)
     make_AsmStaticConstant(TIdentifier name, TInt alignment, shared_ptr_t(struct StaticInit) * static_init);
-void free_AsmTopLevel(unique_ptr_t(AsmTopLevel) * self);
+void free_AsmTopLevel(unique_ptr_t(struct AsmTopLevel) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // AST = Program(top_level*, top_level*)
 
-typedef struct AsmProgram {
+struct AsmProgram {
     unique_ptr_impl(AST_T);
-    vector_t(unique_ptr_t(AsmTopLevel)) static_const_toplvls;
-    vector_t(unique_ptr_t(AsmTopLevel)) top_levels;
-} AsmProgram;
+    vector_t(unique_ptr_t(struct AsmTopLevel)) static_const_toplvls;
+    vector_t(unique_ptr_t(struct AsmTopLevel)) top_levels;
+};
 
-unique_ptr_t(AsmProgram) make_AsmProgram(
-    vector_t(unique_ptr_t(AsmTopLevel)) * static_const_toplvls, vector_t(unique_ptr_t(AsmTopLevel)) * top_levels);
-void free_AsmProgram(unique_ptr_t(AsmProgram) * self);
+unique_ptr_t(struct AsmProgram) make_AsmProgram(
+    vector_t(unique_ptr_t(struct AsmTopLevel)) * static_const_toplvls, vector_t(unique_ptr_t(struct AsmTopLevel)) * top_levels);
+void free_AsmProgram(unique_ptr_t(struct AsmProgram) * self);
 
 #endif

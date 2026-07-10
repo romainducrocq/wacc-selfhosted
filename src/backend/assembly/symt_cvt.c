@@ -142,7 +142,7 @@ static void string_static_const(Ctx ctx, struct Array* arr_type) {
     cvt_backend_symbol(ctx, make_BackendObj(true, true, &asm_type));
 }
 
-static void cvt_static_const_toplvl(Ctx ctx, AsmStaticConstant* node) {
+static void cvt_static_const_toplvl(Ctx ctx, struct AsmStaticConstant* node) {
     ctx->symbol = node->name;
     switch (node->static_init->type) {
         case AST_DoubleInit_t:
@@ -156,7 +156,7 @@ static void cvt_static_const_toplvl(Ctx ctx, AsmStaticConstant* node) {
     }
 }
 
-static void cvt_toplvl(Ctx ctx, AsmTopLevel* node) {
+static void cvt_toplvl(Ctx ctx, struct AsmTopLevel* node) {
     if (node->type == AST_AsmStaticConstant_t) {
         cvt_static_const_toplvl(ctx, &node->get._AsmStaticConstant);
     }
@@ -185,7 +185,7 @@ static void cvt_obj_type(Ctx ctx, struct IdentifierAttr* node) {
     }
 }
 
-static void cvt_program(Ctx ctx, AsmProgram* node) {
+static void cvt_program(Ctx ctx, struct AsmProgram* node) {
     for (size_t i = 0; i < map_size(ctx->frontend->symbol_table); ++i) {
         pair_t(TIdentifier, UPtrSymbol)* symbol = &ctx->frontend->symbol_table[i];
         ctx->symbol = pair_first(*symbol);
@@ -204,7 +204,7 @@ static void cvt_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void convert_symbol_table(AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend) {
+void convert_symbol_table(struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend) {
     SymtCvtContext ctx;
     {
         ctx.backend = backend;

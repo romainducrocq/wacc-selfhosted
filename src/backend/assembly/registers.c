@@ -11,7 +11,7 @@
 
 // reg = AX | BX | CX | DX | DI | SI | R8 | R9 | R10 | R11 | R12 | R13 | R14 | R15 | SP | XMM0 | XMM1 | XMM2 | XMM3
 //     | XMM4 | XMM5 | XMM6 | XMM7 | XMM8 | XMM9 | XMM10 | XMM11 | XMM12 | XMM13 | XMM14 | XMM15
-static AsmReg gen_reg(REGISTER_KIND reg_kind) {
+static struct AsmReg gen_reg(REGISTER_KIND reg_kind) {
     switch (reg_kind) {
         case REG_Ax:
             return init_AsmAx();
@@ -82,23 +82,23 @@ static AsmReg gen_reg(REGISTER_KIND reg_kind) {
     }
 }
 
-shared_ptr_t(AsmOperand) gen_register(REGISTER_KIND reg_kind) {
-    AsmReg reg = gen_reg(reg_kind);
+shared_ptr_t(struct AsmOperand) gen_register(REGISTER_KIND reg_kind) {
+    struct AsmReg reg = gen_reg(reg_kind);
     return make_AsmRegister(&reg);
 }
 
-shared_ptr_t(AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value) {
-    AsmReg reg = gen_reg(reg_kind);
+shared_ptr_t(struct AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value) {
+    struct AsmReg reg = gen_reg(reg_kind);
     return make_AsmMemory(value, &reg);
 }
 
-shared_ptr_t(AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale) {
-    AsmReg reg_base = gen_reg(reg_kind_base);
-    AsmReg reg_index = gen_reg(reg_kind_idx);
+shared_ptr_t(struct AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale) {
+    struct AsmReg reg_base = gen_reg(reg_kind_base);
+    struct AsmReg reg_index = gen_reg(reg_kind_idx);
     return make_AsmIndexed(scale, &reg_base, &reg_index);
 }
 
-REGISTER_KIND register_mask_kind(AsmReg* node) {
+REGISTER_KIND register_mask_kind(struct AsmReg* node) {
     switch (node->type) {
         case AST_AsmAx_t:
             return REG_Ax;

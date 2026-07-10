@@ -68,7 +68,7 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     struct IdentifierContext identifiers;
     struct FrontEndContext frontend;
     struct BackEndContext backend;
-    vector_t(Token) tokens = vec_new();
+    vector_t(struct Token) tokens = vec_new();
     unique_ptr_t(CProgram) c_ast = uptr_new();
     unique_ptr_t(TacProgram) tac_ast = uptr_new();
     unique_ptr_t(AsmProgram) asm_ast = uptr_new();

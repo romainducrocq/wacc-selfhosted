@@ -10,7 +10,7 @@
 
 #include "intermediate/messages.h" // frontend
 
-typedef struct Token Token;
+struct Token;
 struct FunType;
 struct Pointer;
 struct Array;
@@ -55,7 +55,7 @@ struct IdentifierContext;
 #define MSG_failed_strtod 205
 
 char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
-char* get_tok_fmt(struct IdentifierContext* ctx, Token* token);
+char* get_tok_fmt(struct IdentifierContext* ctx, struct Token* token);
 char* get_const_fmt(struct CConst* node);
 char* get_storage_class_fmt(struct CStorageClass* node);
 char* get_unop_fmt(struct CUnaryOp* node);

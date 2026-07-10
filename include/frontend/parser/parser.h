@@ -4,7 +4,7 @@
 #include "util/c_std.h"
 #include "util/throw.h"
 
-typedef struct Token Token;
+struct Token;
 struct CProgram;
 struct ErrorsContext;
 struct IdentifierContext;
@@ -13,7 +13,7 @@ struct IdentifierContext;
 
 // Parser
 
-error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
+error_t parse_tokens(vector_t(struct Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
     unique_ptr_t(CProgram) * c_ast);
 
 #endif

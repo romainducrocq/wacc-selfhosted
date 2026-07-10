@@ -31,11 +31,11 @@ typedef struct ParserContext {
     struct IdentifierContext* identifiers;
     // Parser
     size_t pop_idx;
-    Token* next_tok;
-    Token* peek_tok;
-    Token* next_tok_i;
-    Token* peek_tok_i;
-    vector_t(Token) * p_toks;
+    struct Token* next_tok;
+    struct Token* peek_tok;
+    struct Token* next_tok_i;
+    struct Token* peek_tok_i;
+    vector_t(struct Token) * p_toks;
 } ParserContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ typedef struct ParserContext {
 
 typedef ParserContext* Ctx;
 
-static error_t expect_next(Ctx ctx, Token* next_tok, TOKEN_KIND expect_tok) {
+static error_t expect_next(Ctx ctx, struct Token* next_tok, TOKEN_KIND expect_tok) {
     CATCH_ENTER;
     if (next_tok->tok_kind != expect_tok) {
         THROW_AT_TOKEN(next_tok->info_at,
@@ -77,7 +77,7 @@ static error_t pop_next_i(Ctx ctx, size_t i) {
         THROW_AT_TOKEN(vec_back(*ctx->p_toks).info_at, GET_PARSER_MSG(0, MSG_reached_eof));
     }
     {
-        Token swap_token_i = (*ctx->p_toks)[ctx->pop_idx + i];
+        struct Token swap_token_i = (*ctx->p_toks)[ctx->pop_idx + i];
         for (size_t j = ctx->pop_idx + i; j-- > ctx->pop_idx;) {
             (*ctx->p_toks)[j + 1] = (*ctx->p_toks)[j];
         }
@@ -2429,7 +2429,7 @@ static error_t parse_program(Ctx ctx, unique_ptr_t(CProgram) * c_ast) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
+error_t parse_tokens(vector_t(struct Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
     unique_ptr_t(CProgram) * c_ast) {
     ParserContext ctx;
     {

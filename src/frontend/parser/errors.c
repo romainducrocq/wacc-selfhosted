@@ -193,7 +193,7 @@ char* get_tok_kind_fmt(TOKEN_KIND tok_kind) {
     }
 }
 
-char* get_tok_fmt(struct IdentifierContext* ctx, Token* token) {
+char* get_tok_fmt(struct IdentifierContext* ctx, struct Token* token) {
     switch (token->tok_kind) {
         case TOK_identifier:
         case TOK_string_literal:

@@ -25,7 +25,7 @@ typedef struct LexerContext {
     hashset_t(hash_t) includename_set;
     vector_t(char*) * p_includedirs;
     vector_t(char*) * p_stdlibdirs;
-    vector_t(Token) * p_toks;
+    vector_t(struct Token) * p_toks;
     size_t total_linenum;
 } LexerContext;
 
@@ -748,7 +748,7 @@ static error_t tokenize_file(Ctx ctx) {
             continue;
         Lpass:;
             size_t info_at = push_token_info(ctx);
-            Token token = {match_kind, match_tok, info_at};
+            struct Token token = {match_kind, match_tok, info_at};
             vec_push_back(*ctx->p_toks, token);
         }
     }
@@ -840,7 +840,7 @@ static error_t tokenize_include(Ctx ctx, size_t linenum) {
 
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
     struct ErrorsContext* errors, struct FileIoContext* fileio, struct IdentifierContext* identifiers,
-    vector_t(Token) * tokens) {
+    vector_t(struct Token) * tokens) {
     LexerContext ctx;
     {
         ctx.errors = errors;

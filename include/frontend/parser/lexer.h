@@ -16,14 +16,14 @@ struct IdentifierContext;
 
 // Lexer
 
-typedef struct Token {
+struct Token {
     TOKEN_KIND tok_kind;
     TIdentifier tok;
-    size_t info_at;
-} Token;
+    unsigned long info_at;
+};
 
 error_t lex_c_code(string_t filename, vector_t(char*) * includedirs, vector_t(char*) * stdlibdirs,
     struct ErrorsContext* errors, struct FileIoContext* fileio, struct IdentifierContext* identifiers,
-    vector_t(Token) * tokens);
+    vector_t(struct Token) * tokens);
 
 #endif

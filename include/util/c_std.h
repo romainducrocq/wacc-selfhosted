@@ -1,30 +1,10 @@
 #ifndef _UTIL_C_STD_H
 #define _UTIL_C_STD_H
 
+#include "c_lib.h"
+
 #include "sds/sds.h"
 #include "stb_ds/stb_ds.h"
-
-// TODO replace with c_lib.h
-#define bool int
-#define false 0
-#define true 1
-
-#ifdef __GCC_BOOTSTRAP__
-#include <stdint.h>
-#define char_t int8_t
-#define int_t int32_t
-#define long_t int64_t
-#define uchar_t uint8_t
-#define uint_t uint32_t
-#define ulong_t uint64_t
-#else
-#define char_t signed char
-#define int_t int
-#define long_t long
-#define uchar_t unsigned char
-#define uint_t unsigned int
-#define ulong_t unsigned long
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

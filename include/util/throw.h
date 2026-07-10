@@ -48,12 +48,12 @@ void panic_sigabrt(char* msg, int line, char* file);
 #define PANIC_FUNC(X, ...) panic_sigabrt(X, __VA_ARGS__)
 #define THROW_ABORT THROW_PANIC("abort")
 #define THROW_ALLOC(T) THROW_PANIC("alloc " #T)
-#ifdef __NDEBUG__ // TODO
-#define THROW_ABORT_IF(X)
-#else
+#if 0
 #define THROW_ABORT_IF(X) \
     if (X)                \
     THROW_ABORT
+#else
+#define THROW_ABORT_IF(X)
 #endif
 
 void raise_init_error(struct ErrorsContext* ctx);

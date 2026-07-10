@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -12,20 +12,20 @@
 
 PairKeyValue(TIdentifier, TLong);
 
-typedef struct StackFixContext {
+struct StackFixContext {
     struct BackEndContext* backend;
     // Pseudo register replacement
     TLong stack_bytes;
     hashmap_t(TIdentifier, TLong) pseudo_stack_map;
     // Instruction fix up
     vector_t(unique_ptr_t(AsmInstruction)) * p_fix_instrs;
-} StackFixContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Stack fix
 
-typedef StackFixContext* Ctx;
+#define Ctx struct StackFixContext*
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -465,7 +465,7 @@ static void fix_alloc_stack_bytes(Ctx ctx, TLong callee_saved_size) {
 }
 
 static void push_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs) {
-    for (size_t i = 0; i < vec_size(callee_saved_regs); ++i) {
+    for (unsigned long i = 0; i < vec_size(callee_saved_regs); ++i) {
         shared_ptr_t(AsmOperand) src = sptr_new();
         sptr_copy(AsmOperand, callee_saved_regs[i], src);
         push_fix_instr(ctx, make_AsmPush(&src));
@@ -473,7 +473,7 @@ static void push_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(AsmOperand)) c
 }
 
 static void pop_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs) {
-    for (size_t i = vec_size(callee_saved_regs); i-- > 0;) {
+    for (unsigned long i = vec_size(callee_saved_regs); i-- > 0;) {
         THROW_ABORT_IF(callee_saved_regs[i]->type != AST_AsmRegister_t);
         REGISTER_KIND reg_kind = register_mask_kind(&callee_saved_regs[i]->get._AsmRegister.reg);
         struct AsmReg reg = init_AsmReg();
@@ -1032,7 +1032,7 @@ static void fix_fun_toplvl(Ctx ctx, struct AsmFunction* node) {
 
     bool is_ret = false;
     push_callee_saved_regs(ctx, backend_fun->callee_saved_regs);
-    for (size_t i = 0; i < vec_size(instructions); ++i) {
+    for (unsigned long i = 0; i < vec_size(instructions); ++i) {
         if (instructions[i]) {
             if (instructions[i]->type == AST_AsmRet_t) {
                 pop_callee_saved_regs(ctx, backend_fun->callee_saved_regs);
@@ -1069,7 +1069,7 @@ static void fix_toplvl(Ctx ctx, struct AsmTopLevel* node) {
 }
 
 static void fix_program(Ctx ctx, struct AsmProgram* node) {
-    for (size_t i = 0; i < vec_size(node->top_levels); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->top_levels); ++i) {
         fix_toplvl(ctx, node->top_levels[i]);
     }
 }
@@ -1077,7 +1077,7 @@ static void fix_program(Ctx ctx, struct AsmProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void fix_stack(struct AsmProgram* node, struct BackEndContext* backend) {
-    StackFixContext ctx;
+    struct StackFixContext ctx;
     {
         ctx.backend = backend;
         ctx.stack_bytes = 0l;

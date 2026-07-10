@@ -21,7 +21,7 @@ PROJECT_DIR="$(dirname $(dirname $(readlink -f ${0})))"
 CC="${CC} -std=c17"
 CXX="${CXX} -std=c++17"
 CC_FLAGS="-Wall -Wextra -Wpedantic"
-CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__NDEBUG__ -D__GCC_BOOTSTRAP__"
+CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__NDEBUG__ -D__GCC_STDINT__"
 CC_FLAGS_DEBUG="-ggdb3 -O0"
 if [ ${BUILD_RELEASE} -eq 0 ]; then
     CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"

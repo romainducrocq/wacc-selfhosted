@@ -29,9 +29,9 @@ struct MainContext {
     struct ErrorsContext* errors;
     // Main
     bool is_verbose;
-    uchar_t debug_code;
-    uchar_t optim_1_mask;
-    uchar_t optim_2_code;
+    uint8_t debug_code;
+    uint8_t optim_1_mask;
+    uint8_t optim_2_code;
     string_t filename;
     vector_t(char*) includedirs;
     vector_t(char*) stdlibdirs;
@@ -201,9 +201,9 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     CATCH_EXIT;
 }
 
-static bool arg_parse_uint8(char* arg, uchar_t* value) {
+static bool arg_parse_uint8(char* arg, uint8_t* value) {
     char* end_ptr = NULL;
-    *value = (uchar_t)strtol(arg, &end_ptr, 10);
+    *value = (uint8_t)strtol(arg, &end_ptr, 10);
     return end_ptr == arg;
 }
 

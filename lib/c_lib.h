@@ -29,19 +29,13 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 /* stdint.h */
 #ifdef __GCC_STDINT__
 #include <stdint.h>
-#define char_t int8_t
-#define int_t int32_t
-#define long_t int64_t
-#define uchar_t uint8_t
-#define uint_t uint32_t
-#define ulong_t uint64_t
 #else
-#define char_t signed char
-#define int_t int
-#define long_t long
-#define uchar_t unsigned char
-#define uint_t unsigned int
-#define ulong_t unsigned long
+#define int8_t signed char
+#define int32_t int
+#define int64_t long
+#define uint8_t unsigned char
+#define uint32_t unsigned int
+#define uint64_t unsigned long
 #endif
 
 /* stdio.h */

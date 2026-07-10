@@ -2674,17 +2674,17 @@ static void optim_program(Ctx ctx, struct TacProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uchar_t optim_1_mask) {
+void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask) {
     struct OptimTacContext ctx;
     {
         ctx.frontend = frontend;
         ctx.is_fixed_point = true;
 
-        ctx.enabled_optims[CONSTANT_FOLDING] = (optim_1_mask & (((uchar_t)1u) << 0)) > 0;
-        ctx.enabled_optims[COPY_PROPAGATION] = (optim_1_mask & (((uchar_t)1u) << 1)) > 0;
-        ctx.enabled_optims[UNREACHABLE_CODE_ELIMINATION] = (optim_1_mask & (((uchar_t)1u) << 2)) > 0;
-        ctx.enabled_optims[DEAD_STORE_ELIMINATION] = (optim_1_mask & (((uchar_t)1u) << 3)) > 0;
-        ctx.enabled_optims[CONTROL_FLOW_GRAPH] = (optim_1_mask & ~(((uchar_t)1u) << 0)) > 0;
+        ctx.enabled_optims[CONSTANT_FOLDING] = (optim_1_mask & (((uint8_t)1u) << 0)) > 0;
+        ctx.enabled_optims[COPY_PROPAGATION] = (optim_1_mask & (((uint8_t)1u) << 1)) > 0;
+        ctx.enabled_optims[UNREACHABLE_CODE_ELIMINATION] = (optim_1_mask & (((uint8_t)1u) << 2)) > 0;
+        ctx.enabled_optims[DEAD_STORE_ELIMINATION] = (optim_1_mask & (((uint8_t)1u) << 3)) > 0;
+        ctx.enabled_optims[CONTROL_FLOW_GRAPH] = (optim_1_mask & ~(((uint8_t)1u) << 0)) > 0;
 
         ctx.cfg = uptr_new();
         ctx.dfa = uptr_new();

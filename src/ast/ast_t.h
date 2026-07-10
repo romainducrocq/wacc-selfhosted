@@ -7,13 +7,13 @@
 
 // Abstract syntax tree
 
-#define TIdentifier ulong_t
-#define TChar char_t
-#define TInt int_t
-#define TLong long_t
-#define TUChar uchar_t
-#define TUInt uint_t
-#define TULong ulong_t
+#define TIdentifier uint64_t
+#define TChar int8_t
+#define TInt int32_t
+#define TLong int64_t
+#define TUChar uint8_t
+#define TUInt uint32_t
+#define TULong uint64_t
 #define TDouble double
 
 #define AST_T int

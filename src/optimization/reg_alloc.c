@@ -1817,7 +1817,7 @@ static void alloc_program(Ctx ctx, struct AsmProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void allocate_registers(
-    struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uchar_t optim_2_code) {
+    struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
     struct RegAllocContext ctx;
     {
         ctx.backend = backend;

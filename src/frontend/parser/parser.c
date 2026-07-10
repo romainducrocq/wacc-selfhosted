@@ -141,7 +141,7 @@ static error_t parse_string_literal(Ctx ctx, shared_ptr_t(CStringLiteral) * lite
 
 // <int> ::= ? An int token ? => [0-9]+
 static shared_ptr_t(CConst) parse_int_const(long intmax) {
-    TInt value = (int_t)intmax;
+    TInt value = (int32_t)intmax;
     return make_CConstInt(value);
 }
 
@@ -153,7 +153,7 @@ static shared_ptr_t(CConst) parse_char_const(Ctx ctx) {
 
 // <long> ::= ? An int or long token ? => [0-9]+[lL]
 static shared_ptr_t(CConst) parse_long_const(long intmax) {
-    TLong value = (long_t)intmax;
+    TLong value = (int64_t)intmax;
     return make_CConstLong(value);
 }
 
@@ -171,13 +171,13 @@ static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
 
 // <uint> ::= ? An unsigned int token ? => [0-9]+[uU]
 static shared_ptr_t(CConst) parse_uint_const(unsigned long uintmax) {
-    TUInt value = (uint_t)uintmax;
+    TUInt value = (uint32_t)uintmax;
     return make_CConstUInt(value);
 }
 
 // <ulong> ::= ? An unsigned int or unsigned long token ? => [0-9]+([lL][uU]|[uU][lL])
 static shared_ptr_t(CConst) parse_ulong_const(unsigned long uintmax) {
-    TULong value = (ulong_t)uintmax;
+    TULong value = (uint64_t)uintmax;
     return make_CConstULong(value);
 }
 

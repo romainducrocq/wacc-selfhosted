@@ -19,7 +19,7 @@ struct SemanticContext {
     struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Type checking
-    hashmap_t(TIdentifier, ulong_t) extern_scope_map;
+    hashmap_t(TIdentifier, uint64_t) extern_scope_map;
     hashmap_t(TIdentifier, TIdentifier) goto_map;
     vector_t(hashmap_t(TIdentifier, TIdentifier)) scoped_identifier_maps;
     vector_t(hashmap_t(TIdentifier, StStructure)) scoped_struct_maps;

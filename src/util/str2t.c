@@ -8,13 +8,13 @@
 
 // String to type
 
-ulong_t dbl_to_binary(double decimal) {
-    ulong_t binary;
-    memcpy(&binary, &decimal, sizeof(ulong_t));
+uint64_t dbl_to_binary(double decimal) {
+    uint64_t binary;
+    memcpy(&binary, &decimal, sizeof(uint64_t));
     return binary;
 }
 
-void string_to_literal(string_t str_string, vector_t(char_t) * string_literal) {
+void string_to_literal(string_t str_string, vector_t(int8_t) * string_literal) {
     THROW_ABORT_IF(str_size(str_string) < 2);
     for (unsigned long byte = 1; byte < str_size(str_string) - 1; ++byte) {
         char str_char = (char)str_string[byte];
@@ -59,12 +59,12 @@ void string_to_literal(string_t str_string, vector_t(char_t) * string_literal) {
             }
         }
         else {
-            vec_push_back(*string_literal, (char_t)str_char);
+            vec_push_back(*string_literal, (int8_t)str_char);
         }
     }
 }
 
-int_t string_to_char_ascii(string_t str_char) {
+int32_t string_to_char_ascii(string_t str_char) {
     THROW_ABORT_IF(str_size(str_char) < 2 || str_size(str_char) > 4);
     char c_char = (char)str_char[1];
     if (c_char == '\\') {
@@ -97,7 +97,7 @@ int_t string_to_char_ascii(string_t str_char) {
         }
     }
     else {
-        return (int_t)c_char;
+        return (int32_t)c_char;
     }
 }
 
@@ -108,52 +108,52 @@ static long hex_string_to_long(char* str_hex) {
     return value;
 }
 
-static void string_literal_byte_to_hex(char_t value, string_t* str_hex) {
+static void string_literal_byte_to_hex(int8_t value, string_t* str_hex) {
     char byte_hex[3];
-    sprintf(byte_hex, "%.2x", (uchar_t)value);
+    sprintf(byte_hex, "%.2x", (uint8_t)value);
     str_append(*str_hex, byte_hex);
 }
 
-char_t string_bytes_to_int8(vector_t(char_t) string_literal, unsigned long byte_at) {
+int8_t string_bytes_to_int8(vector_t(int8_t) string_literal, unsigned long byte_at) {
     string_t str_hex = str_new("");
     for (unsigned long byte = byte_at + 1; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
             string_literal_byte_to_hex(string_literal[byte], &str_hex);
         }
     }
-    char_t hex_value = (char_t)hex_string_to_long(str_hex);
+    int8_t hex_value = (int8_t)hex_string_to_long(str_hex);
     str_delete(str_hex);
     return hex_value;
 }
 
-int_t string_bytes_to_int32(vector_t(char_t) string_literal, unsigned long byte_at) {
+int32_t string_bytes_to_int32(vector_t(int8_t) string_literal, unsigned long byte_at) {
     string_t str_hex = str_new("");
     for (unsigned long byte = byte_at + 4; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
             string_literal_byte_to_hex(string_literal[byte], &str_hex);
         }
     }
-    int_t hex_value = (int_t)hex_string_to_long(str_hex);
+    int32_t hex_value = (int32_t)hex_string_to_long(str_hex);
     str_delete(str_hex);
     return hex_value;
 }
 
-long_t string_bytes_to_int64(vector_t(char_t) string_literal, unsigned long byte_at) {
+int64_t string_bytes_to_int64(vector_t(int8_t) string_literal, unsigned long byte_at) {
     string_t str_hex = str_new("");
     for (unsigned long byte = byte_at + 8; byte-- > byte_at;) {
         if (byte < vec_size(string_literal)) {
             string_literal_byte_to_hex(string_literal[byte], &str_hex);
         }
     }
-    long_t hex_value = (long_t)hex_string_to_long(str_hex);
+    int64_t hex_value = (int64_t)hex_string_to_long(str_hex);
     str_delete(str_hex);
     return hex_value;
 }
 
-string_t string_literal_to_const(vector_t(char_t) string_literal) {
+string_t string_literal_to_const(vector_t(int8_t) string_literal) {
     string_t string_const = str_new("");
     for (unsigned long i = 0; i < vec_size(string_literal); ++i) {
-        char_t byte = string_literal[i];
+        int8_t byte = string_literal[i];
         switch (byte) {
             case 39:
                 str_append(string_const, "\\047");

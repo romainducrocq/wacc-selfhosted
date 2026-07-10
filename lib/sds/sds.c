@@ -40,20 +40,20 @@ struct sdshdr5 {
     // char buf[];
 };
 struct sdshdr8 {
-    unsigned char len;   /* used */
-    unsigned char alloc; /* excluding the header and null terminator */
+    uint8_t len;         /* used */
+    uint8_t alloc;       /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     // char buf[];
 };
 struct sdshdr32 {
-    unsigned int len;    /* used */
-    unsigned int alloc;  /* excluding the header and null terminator */
+    uint32_t len;        /* used */
+    uint32_t alloc;      /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     // char buf[];
 };
 struct sdshdr64 {
-    unsigned long len;   /* used */
-    unsigned long alloc; /* excluding the header and null terminator */
+    uint64_t len;        /* used */
+    uint64_t alloc;      /* excluding the header and null terminator */
     unsigned char flags; /* 3 lsb of type, 5 unused bits */
     // char buf[];
 };

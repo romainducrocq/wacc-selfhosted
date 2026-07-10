@@ -7,7 +7,7 @@
 
 typedef struct AsmInstruction AsmInstruction;
 typedef struct AsmProgram AsmProgram;
-typedef struct BackEndContext BackEndContext;
+struct BackEndContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,6 +19,6 @@ typedef struct BackEndContext BackEndContext;
 // Instruction fix up
 
 unique_ptr_t(AsmInstruction) alloc_stack_bytes(TLong byte);
-void fix_stack(AsmProgram* node, BackEndContext* backend);
+void fix_stack(AsmProgram* node, struct BackEndContext* backend);
 
 #endif

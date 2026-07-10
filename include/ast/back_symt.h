@@ -11,9 +11,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct AssemblyType AssemblyType;
-typedef struct BackendSymbol BackendSymbol;
-typedef struct AsmOperand AsmOperand;
+struct AssemblyType;
+struct BackendSymbol;
+struct AsmOperand;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -23,84 +23,84 @@ typedef struct AsmOperand AsmOperand;
 //               | BackendDouble
 //               | ByteArray(int, int)
 
-typedef struct Byte {
+struct Byte {
     char _empty;
-} Byte;
+};
 
-typedef struct LongWord {
+struct LongWord {
     char _empty;
-} LongWord;
+};
 
-typedef struct QuadWord {
+struct QuadWord {
     char _empty;
-} QuadWord;
+};
 
-typedef struct BackendDouble {
+struct BackendDouble {
     char _empty;
-} BackendDouble;
+};
 
-typedef struct ByteArray {
+struct ByteArray {
     TLong size;
     TInt alignment;
-} ByteArray;
+};
 
-typedef struct AssemblyType {
+struct AssemblyType {
     shared_ptr_impl(AST_T);
 
     union {
-        Byte _Byte;
-        LongWord _LongWord;
-        QuadWord _QuadWord;
-        BackendDouble _BackendDouble;
-        ByteArray _ByteArray;
+        struct Byte _Byte;
+        struct LongWord _LongWord;
+        struct QuadWord _QuadWord;
+        struct BackendDouble _BackendDouble;
+        struct ByteArray _ByteArray;
     } get;
-} AssemblyType;
+};
 
-shared_ptr_t(AssemblyType) make_AssemblyType(void);
-shared_ptr_t(AssemblyType) make_Byte(void);
-shared_ptr_t(AssemblyType) make_LongWord(void);
-shared_ptr_t(AssemblyType) make_QuadWord(void);
-shared_ptr_t(AssemblyType) make_BackendDouble(void);
-shared_ptr_t(AssemblyType) make_ByteArray(TLong size, TInt alignment);
-void free_AssemblyType(shared_ptr_t(AssemblyType) * self);
+shared_ptr_t(struct AssemblyType) make_AssemblyType(void);
+shared_ptr_t(struct AssemblyType) make_Byte(void);
+shared_ptr_t(struct AssemblyType) make_LongWord(void);
+shared_ptr_t(struct AssemblyType) make_QuadWord(void);
+shared_ptr_t(struct AssemblyType) make_BackendDouble(void);
+shared_ptr_t(struct AssemblyType) make_ByteArray(TLong size, TInt alignment);
+void free_AssemblyType(shared_ptr_t(struct AssemblyType) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // symbol = Obj(assembly_type, bool, bool)
 //        | Fun(bool, operand*)
 
-typedef struct BackendObj {
+struct BackendObj {
     bool is_static;
     bool is_const;
-    shared_ptr_t(AssemblyType) asm_type;
-} BackendObj;
+    shared_ptr_t(struct AssemblyType) asm_type;
+};
 
-typedef struct BackendFun {
+struct BackendFun {
     bool is_def;
-    vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs;
-} BackendFun;
+    vector_t(shared_ptr_t(struct AsmOperand)) callee_saved_regs;
+};
 
-typedef struct BackendSymbol {
+struct BackendSymbol {
     unique_ptr_impl(AST_T);
 
     union {
-        BackendObj _BackendObj;
-        BackendFun _BackendFun;
+        struct BackendObj _BackendObj;
+        struct BackendFun _BackendFun;
     } get;
-} BackendSymbol;
+};
 
-unique_ptr_t(BackendSymbol) make_BackendSymbol(void);
-unique_ptr_t(BackendSymbol) make_BackendObj(bool is_static, bool is_const, shared_ptr_t(AssemblyType) * asm_type);
-unique_ptr_t(BackendSymbol) make_BackendFun(bool is_def);
-void free_BackendSymbol(unique_ptr_t(BackendSymbol) * self);
+unique_ptr_t(struct BackendSymbol) make_BackendSymbol(void);
+unique_ptr_t(struct BackendSymbol) make_BackendObj(bool is_static, bool is_const, shared_ptr_t(struct AssemblyType) * asm_type);
+unique_ptr_t(struct BackendSymbol) make_BackendFun(bool is_def);
+void free_BackendSymbol(unique_ptr_t(struct BackendSymbol) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef unique_ptr_t(BackendSymbol) UPtrBackendSymbol;
+#define UPtrBackendSymbol unique_ptr_t(struct BackendSymbol)
 PairKeyValue(TIdentifier, UPtrBackendSymbol);
 
-typedef struct BackEndContext {
+struct BackEndContext {
     hashmap_t(TIdentifier, UPtrBackendSymbol) symbol_table;
-} BackEndContext;
+};
 
 #endif

@@ -12,7 +12,7 @@
 #include "backend/emitter/gas_code.h"
 
 typedef struct GasCodeContext {
-    BackEndContext* backend;
+    struct BackEndContext* backend;
     struct FileIoContext* fileio;
     struct IdentifierContext* identifiers;
     // Gnu assembler code emission
@@ -350,7 +350,7 @@ static char* get_cond_code(AsmCondCode* node) {
 // QuadWord  -> $ 8
 // Double    -> $ 8
 // ByteArray -> $ alignment
-static TInt type_align_bytes(AssemblyType* node) {
+static TInt type_align_bytes(struct AssemblyType* node) {
     switch (node->type) {
         case AST_Byte_t:
             return 1;
@@ -371,7 +371,7 @@ static TInt type_align_bytes(AssemblyType* node) {
 // QuadWord         -> $ q
 // Double if packed -> $ pd
 //             else -> $ sd
-static char* get_type_suffix(AssemblyType* node, bool is_packed) {
+static char* get_type_suffix(struct AssemblyType* node, bool is_packed) {
     switch (node->type) {
         case AST_Byte_t:
             return "b";
@@ -424,7 +424,7 @@ static void memory_op(Ctx ctx, AsmMemory* node) {
 static void data_op(Ctx ctx, AsmData* node) {
     ssize_t map_it = map_find(ctx->backend->symbol_table, node->name);
     if (map_it != map_end()) {
-        BackendSymbol* backend_obj_symbol = pair_second(ctx->backend->symbol_table[map_it]);
+        struct BackendSymbol* backend_obj_symbol = pair_second(ctx->backend->symbol_table[map_it]);
         if (backend_obj_symbol->type == AST_BackendObj_t && backend_obj_symbol->get._BackendObj.is_const) {
             emit(ctx, LBL);
         }
@@ -741,7 +741,7 @@ static void call_instr(Ctx ctx, AsmCall* node) {
     emit(ctx, TAB TAB "call ");
     emit_identifier(ctx, node->name);
 #ifndef __APPLE__
-    BackendSymbol* backend_fun_symbol = map_get(ctx->backend->symbol_table, node->name);
+    struct BackendSymbol* backend_fun_symbol = map_get(ctx->backend->symbol_table, node->name);
     THROW_ABORT_IF(backend_fun_symbol->type != AST_BackendFun_t);
     if (!backend_fun_symbol->get._BackendFun.is_def) {
         emit(ctx, "@PLT");
@@ -1058,7 +1058,7 @@ static void emit_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, BackEndContext* backend, struct FileIoContext* fileio,
+void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, struct BackEndContext* backend, struct FileIoContext* fileio,
     struct IdentifierContext* identifiers) {
     GasCodeContext ctx;
     {

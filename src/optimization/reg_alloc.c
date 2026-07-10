@@ -40,11 +40,11 @@ typedef struct InferenceGraph {
 } InferenceGraph;
 
 typedef struct RegAllocContext {
-    BackEndContext* backend;
+    struct BackEndContext* backend;
     struct FrontEndContext* frontend;
     // Register allocation
     mask_t callee_saved_reg_mask;
-    BackendFun* p_backend_fun;
+    struct BackendFun* p_backend_fun;
     InferenceGraph* p_infer_graph;
     REGISTER_KIND reg_color_map[26];
     InferenceRegister hard_regs[26];
@@ -1781,7 +1781,7 @@ Ldowhile:
             goto Ldowhile;
         }
         {
-            BackendFun* backend_fun = &map_get(ctx->backend->symbol_table, node->name)->get._BackendFun;
+            struct BackendFun* backend_fun = &map_get(ctx->backend->symbol_table, node->name)->get._BackendFun;
             ctx->p_backend_fun = backend_fun;
         }
         reallocate_registers(ctx);
@@ -1812,7 +1812,7 @@ static void alloc_program(Ctx ctx, AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void allocate_registers(AsmProgram* node, BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
+void allocate_registers(AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
     RegAllocContext ctx;
     {
         ctx.backend = backend;

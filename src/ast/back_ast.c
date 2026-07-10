@@ -110,7 +110,7 @@ unique_ptr_t(AsmInstruction) make_AsmInstruction(void) {
 }
 
 unique_ptr_t(AsmInstruction)
-    make_AsmMov(shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+    make_AsmMov(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmMov_t;
     self->get._AsmMov.asm_type = sptr_new();
@@ -122,8 +122,8 @@ unique_ptr_t(AsmInstruction)
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmMovSx(shared_ptr_t(AssemblyType) * asm_type_src,
-    shared_ptr_t(AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+unique_ptr_t(AsmInstruction) make_AsmMovSx(shared_ptr_t(struct AssemblyType) * asm_type_src,
+    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmMovSx_t;
     self->get._AsmMovSx.asm_type_src = sptr_new();
@@ -137,8 +137,8 @@ unique_ptr_t(AsmInstruction) make_AsmMovSx(shared_ptr_t(AssemblyType) * asm_type
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmMovZeroExtend(shared_ptr_t(AssemblyType) * asm_type_src,
-    shared_ptr_t(AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+unique_ptr_t(AsmInstruction) make_AsmMovZeroExtend(shared_ptr_t(struct AssemblyType) * asm_type_src,
+    shared_ptr_t(struct AssemblyType) * asm_type_dst, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmMovZeroExtend_t;
     self->get._AsmMovZeroExtend.asm_type_src = sptr_new();
@@ -163,7 +163,7 @@ unique_ptr_t(AsmInstruction) make_AsmLea(shared_ptr_t(AsmOperand) * src, shared_
 }
 
 unique_ptr_t(AsmInstruction) make_AsmCvttsd2si(
-    shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmCvttsd2si_t;
     self->get._AsmCvttsd2si.asm_type = sptr_new();
@@ -176,7 +176,7 @@ unique_ptr_t(AsmInstruction) make_AsmCvttsd2si(
 }
 
 unique_ptr_t(AsmInstruction) make_AsmCvtsi2sd(
-    shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+    shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmCvtsi2sd_t;
     self->get._AsmCvtsi2sd.asm_type = sptr_new();
@@ -189,7 +189,7 @@ unique_ptr_t(AsmInstruction) make_AsmCvtsi2sd(
 }
 
 unique_ptr_t(AsmInstruction)
-    make_AsmUnary(AsmUnaryOp* unop, shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * dst) {
+    make_AsmUnary(AsmUnaryOp* unop, shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmUnary_t;
     self->get._AsmUnary.unop = *unop;
@@ -200,7 +200,7 @@ unique_ptr_t(AsmInstruction)
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmBinary(AsmBinaryOp* binop, shared_ptr_t(AssemblyType) * asm_type,
+unique_ptr_t(AsmInstruction) make_AsmBinary(AsmBinaryOp* binop, shared_ptr_t(struct AssemblyType) * asm_type,
     shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmBinary_t;
@@ -215,7 +215,7 @@ unique_ptr_t(AsmInstruction) make_AsmBinary(AsmBinaryOp* binop, shared_ptr_t(Ass
 }
 
 unique_ptr_t(AsmInstruction)
-    make_AsmCmp(shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
+    make_AsmCmp(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src, shared_ptr_t(AsmOperand) * dst) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmCmp_t;
     self->get._AsmCmp.asm_type = sptr_new();
@@ -227,7 +227,7 @@ unique_ptr_t(AsmInstruction)
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmIdiv(shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src) {
+unique_ptr_t(AsmInstruction) make_AsmIdiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmIdiv_t;
     self->get._AsmIdiv.asm_type = sptr_new();
@@ -237,7 +237,7 @@ unique_ptr_t(AsmInstruction) make_AsmIdiv(shared_ptr_t(AssemblyType) * asm_type,
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmDiv(shared_ptr_t(AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src) {
+unique_ptr_t(AsmInstruction) make_AsmDiv(shared_ptr_t(struct AssemblyType) * asm_type, shared_ptr_t(AsmOperand) * src) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmDiv_t;
     self->get._AsmDiv.asm_type = sptr_new();
@@ -247,7 +247,7 @@ unique_ptr_t(AsmInstruction) make_AsmDiv(shared_ptr_t(AssemblyType) * asm_type, 
     return self;
 }
 
-unique_ptr_t(AsmInstruction) make_AsmCdq(shared_ptr_t(AssemblyType) * asm_type) {
+unique_ptr_t(AsmInstruction) make_AsmCdq(shared_ptr_t(struct AssemblyType) * asm_type) {
     unique_ptr_t(AsmInstruction) self = make_AsmInstruction();
     self->type = AST_AsmCdq_t;
     self->get._AsmCdq.asm_type = sptr_new();

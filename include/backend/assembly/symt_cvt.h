@@ -6,9 +6,9 @@
 #include "ast_t.h" // ast
 
 struct Type;
-typedef struct AssemblyType AssemblyType;
+struct AssemblyType;
 typedef struct AsmProgram AsmProgram;
-typedef struct BackEndContext BackEndContext;
+struct BackEndContext;
 struct FrontEndContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,7 @@ struct FrontEndContext;
 // Symbol table conversion
 
 TInt gen_type_alignment(struct FrontEndContext* ctx, struct Type* type);
-shared_ptr_t(AssemblyType) cvt_backend_asm_type(struct FrontEndContext* ctx, TIdentifier name);
-void convert_symbol_table(AsmProgram* node, BackEndContext* backend, struct FrontEndContext* frontend);
+shared_ptr_t(struct AssemblyType) cvt_backend_asm_type(struct FrontEndContext* ctx, TIdentifier name);
+void convert_symbol_table(AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend);
 
 #endif

@@ -12,7 +12,7 @@
 
 // TODO remove
 int snprintf2(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4) {
-    snprintf(s, n, format, arg1, arg2, arg3, arg4);
+    return snprintf(s, n, format, arg1, arg2, arg3, arg4);
 }
 //
 
@@ -478,8 +478,8 @@ char* get_type_fmt(struct IdentifierContext* ctx, struct Type* type, string_t* t
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define EM_CSTR(X) "\033[1m‘" X "’\033[0m"
-#define EM_VARG "\033[1m‘%s’\033[0m"
+#define EM_CSTR(X) "‘" X "’"
+#define EM_VARG "‘%s’"
 #define PAD_ERR_0 "%s%s%s"
 #define PAD_ERR_1 "%s%s"
 #define PAD_ERR_2 "%s"

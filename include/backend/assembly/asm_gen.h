@@ -12,7 +12,7 @@ struct IdentifierContext;
 
 // Assembly generation
 
-unique_ptr_t(struct AsmProgram)
-    generate_assembly(unique_ptr_t(struct TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
+unique_ptr_t(AsmProgram) generate_assembly(
+    unique_ptr_t(TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

@@ -17,12 +17,12 @@
 #include "frontend/intermediate/idents.h"
 
 typedef struct AbstractDeclarator {
-    shared_ptr_t(struct Type) derived_type;
+    shared_ptr_t(Type) derived_type;
 } AbstractDeclarator;
 
 typedef struct Declarator {
     TIdentifier name;
-    shared_ptr_t(struct Type) derived_type;
+    shared_ptr_t(Type) derived_type;
     vector_t(TIdentifier) params;
 } Declarator;
 
@@ -127,7 +127,7 @@ static error_t parse_identifier(Ctx ctx, size_t i, TIdentifier* identifier) {
 
 // <string> ::= ? A string token ? => "([^"\\\n]|\\['"\\?abfnrtv])*"
 // string = StringLiteral(int*)
-static error_t parse_string_literal(Ctx ctx, shared_ptr_t(struct CStringLiteral) * literal) {
+static error_t parse_string_literal(Ctx ctx, shared_ptr_t(CStringLiteral) * literal) {
     vector_t(TChar) value = vec_new();
     CATCH_ENTER;
     string_to_literal(map_get(ctx->identifiers->hash_table, ctx->next_tok->tok), &value);
@@ -144,26 +144,26 @@ static error_t parse_string_literal(Ctx ctx, shared_ptr_t(struct CStringLiteral)
 }
 
 // <int> ::= ? An int token ? => [0-9]+
-static shared_ptr_t(struct CConst) parse_int_const(long intmax) {
+static shared_ptr_t(CConst) parse_int_const(long intmax) {
     TInt value = (int_t)intmax;
     return make_CConstInt(value);
 }
 
 // <char> ::= ? A char token ? => '([^'\\\n]|\\['"?\\abfnrtv])'
-static shared_ptr_t(struct CConst) parse_char_const(Ctx ctx) {
+static shared_ptr_t(CConst) parse_char_const(Ctx ctx) {
     TInt value = string_to_char_ascii(map_get(ctx->identifiers->hash_table, ctx->next_tok->tok));
     return make_CConstInt(value);
 }
 
 // <long> ::= ? An int or long token ? => [0-9]+[lL]
-static shared_ptr_t(struct CConst) parse_long_const(long intmax) {
+static shared_ptr_t(CConst) parse_long_const(long intmax) {
     TLong value = (long_t)intmax;
     return make_CConstLong(value);
 }
 
 // <double> ::= ? A floating-point constant token ?
 //            => (([0-9]*\.[0-9]+|[0-9]+\.?)[Ee][+\-]?[0-9]+|[0-9]*\.[0-9]+|[0-9]+\.)
-static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
+static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     CATCH_ENTER;
     TDouble value;
     TRY(string_to_dbl(
@@ -174,20 +174,20 @@ static error_t parse_dbl_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) 
 }
 
 // <uint> ::= ? An unsigned int token ? => [0-9]+[uU]
-static shared_ptr_t(struct CConst) parse_uint_const(unsigned long uintmax) {
+static shared_ptr_t(CConst) parse_uint_const(unsigned long uintmax) {
     TUInt value = (uint_t)uintmax;
     return make_CConstUInt(value);
 }
 
 // <ulong> ::= ? An unsigned int or unsigned long token ? => [0-9]+([lL][uU]|[uU][lL])
-static shared_ptr_t(struct CConst) parse_ulong_const(unsigned long uintmax) {
+static shared_ptr_t(CConst) parse_ulong_const(unsigned long uintmax) {
     TULong value = (ulong_t)uintmax;
     return make_CConstULong(value);
 }
 
 // (signed) <const> ::= <int> | <long> | <double> | <char>
 // (signed) const = ConstInt(int) | ConstLong(long) | ConstDouble(double) | ConstChar(int)
-static error_t parse_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
+static error_t parse_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     CATCH_ENTER;
     long value;
     char* strto_value;
@@ -221,7 +221,7 @@ static error_t parse_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
 
 // (unsigned) <const> ::= <uint> | <ulong>
 // (unsigned) const = ConstUInt(uint) | ConstULong(ulong) | ConstUChar(int)
-static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(struct CConst) * constant) {
+static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(CConst) * constant) {
     CATCH_ENTER;
     unsigned long value;
     char* strto_value;
@@ -243,7 +243,7 @@ static error_t parse_unsigned_const(Ctx ctx, shared_ptr_t(struct CConst) * const
 }
 
 static error_t parse_arr_size(Ctx ctx, TLong* size) {
-    shared_ptr_t(struct CConst) constant = sptr_new();
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -414,27 +414,27 @@ static error_t parse_binop(Ctx ctx, struct CBinaryOp* binop) {
 }
 
 static void proc_abstract_decltor(
-    struct CAbstractDeclarator* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor);
+    struct CAbstractDeclarator* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor);
 
 static void proc_ptr_abstract_decltor(
-    struct CAbstractPointer* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
-    shared_ptr_t(struct Type) derived_type = make_Pointer(base_type);
+    struct CAbstractPointer* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    shared_ptr_t(Type) derived_type = make_Pointer(base_type);
     proc_abstract_decltor(node->abstract_decltor, &derived_type, abstract_decltor);
 }
 
 static void proc_arr_abstract_decltor(
-    struct CAbstractArray* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    struct CAbstractArray* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
     TLong size = node->size;
-    shared_ptr_t(struct Type) derived_type = make_Array(size, base_type);
+    shared_ptr_t(Type) derived_type = make_Array(size, base_type);
     proc_abstract_decltor(node->abstract_decltor, &derived_type, abstract_decltor);
 }
 
-static void proc_base_abstract_decltor(shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
+static void proc_base_abstract_decltor(shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
     sptr_move(Type, *base_type, abstract_decltor->derived_type);
 }
 
 static void proc_abstract_decltor(
-    struct CAbstractDeclarator* node, shared_ptr_t(struct Type) * base_type, AbstractDeclarator* abstract_decltor) {
+    struct CAbstractDeclarator* node, shared_ptr_t(Type) * base_type, AbstractDeclarator* abstract_decltor) {
     switch (node->type) {
         case AST_CAbstractPointer_t:
             proc_ptr_abstract_decltor(&node->get._CAbstractPointer, base_type, abstract_decltor);
@@ -450,10 +450,10 @@ static void proc_abstract_decltor(
     }
 }
 
-static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor);
+static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator) * abstract_decltor);
 
 // (array) <direct-abstract-declarator> ::= { "[" <const> "]" }+
-static error_t parse_arr_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor) {
+static error_t parse_arr_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator) * abstract_decltor) {
     CATCH_ENTER;
     *abstract_decltor = make_CAbstractBase();
     do {
@@ -468,7 +468,7 @@ static error_t parse_arr_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstract
 }
 
 // (direct) <direct-abstract-declarator> ::= "(" <abstract-declarator> ")" { "[" <const> "]" }
-static error_t parse_direct_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor) {
+static error_t parse_direct_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator) * abstract_decltor) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(parse_abstract_decltor(ctx, abstract_decltor));
@@ -485,7 +485,7 @@ static error_t parse_direct_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstr
     CATCH_EXIT;
 }
 
-static error_t parse_ptr_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor) {
+static error_t parse_ptr_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator) * abstract_decltor) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -502,7 +502,7 @@ static error_t parse_ptr_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstract
 
 // <abstract-declarator> ::= "*" [ <abstract-declarator> ] | <direct-abstract-declarator>
 // abstract_declarator = AbstractPointer(abstract_declarator) | AbstractArray(int, abstract_declarator) | AbstractBase
-static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor) {
+static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(CAbstractDeclarator) * abstract_decltor) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -523,15 +523,15 @@ static error_t parse_abstract_decltor(Ctx ctx, unique_ptr_t(struct CAbstractDecl
     CATCH_EXIT;
 }
 
-static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(struct Type) * type_specifier);
+static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(Type) * type_specifier);
 
-static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp);
-static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp);
-static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(struct CExp) * exp);
+static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp);
+static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp);
+static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(CExp) * exp);
 
-static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(struct Type) * target_type) {
+static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(Type) * target_type) {
     AbstractDeclarator abstract_decltor = {sptr_new()};
-    unique_ptr_t(struct CAbstractDeclarator) abstract_decltor_1 = uptr_new();
+    unique_ptr_t(CAbstractDeclarator) abstract_decltor_1 = uptr_new();
     CATCH_ENTER;
     TRY(parse_abstract_decltor(ctx, &abstract_decltor_1));
     proc_abstract_decltor(abstract_decltor_1, target_type, &abstract_decltor);
@@ -543,7 +543,7 @@ static error_t parse_decltor_cast_factor(Ctx ctx, shared_ptr_t(struct Type) * ta
 }
 
 // <type-name> ::= { <type-specifier> }+ [ <abstract-declarator> ]
-static error_t parse_type_name(Ctx ctx, shared_ptr_t(struct Type) * target_type) {
+static error_t parse_type_name(Ctx ctx, shared_ptr_t(Type) * target_type) {
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, target_type));
     TRY(peek_next(ctx));
@@ -561,8 +561,8 @@ static error_t parse_type_name(Ctx ctx, shared_ptr_t(struct Type) * target_type)
 }
 
 // <argument-list> ::= <exp> { "," <exp> }
-static error_t parse_arg_list(Ctx ctx, vector_t(unique_ptr_t(struct CExp)) * args) {
-    unique_ptr_t(struct CExp) arg = uptr_new();
+static error_t parse_arg_list(Ctx ctx, vector_t(unique_ptr_t(CExp)) * args) {
+    unique_ptr_t(CExp) arg = uptr_new();
     CATCH_ENTER;
     TRY(parse_exp(ctx, 0, &arg));
     vec_move_back(*args, arg);
@@ -578,8 +578,8 @@ static error_t parse_arg_list(Ctx ctx, vector_t(unique_ptr_t(struct CExp)) * arg
     CATCH_EXIT;
 }
 
-static error_t parse_const_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    shared_ptr_t(struct CConst) constant = sptr_new();
+static error_t parse_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(parse_const(ctx, &constant));
@@ -589,8 +589,8 @@ static error_t parse_const_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_unsigned_const_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    shared_ptr_t(struct CConst) constant = sptr_new();
+static error_t parse_unsigned_const_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(parse_unsigned_const(ctx, &constant));
@@ -600,8 +600,8 @@ static error_t parse_unsigned_const_factor(Ctx ctx, unique_ptr_t(struct CExp) * 
     CATCH_EXIT;
 }
 
-static error_t parse_string_literal_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    shared_ptr_t(struct CStringLiteral) literal = sptr_new();
+static error_t parse_string_literal_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    shared_ptr_t(CStringLiteral) literal = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -612,7 +612,7 @@ static error_t parse_string_literal_factor(Ctx ctx, unique_ptr_t(struct CExp) * 
     CATCH_EXIT;
 }
 
-static error_t parse_var_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_var_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TIdentifier name;
@@ -622,8 +622,8 @@ static error_t parse_var_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_call_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    vector_t(unique_ptr_t(struct CExp)) args = vec_new();
+static error_t parse_call_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    vector_t(unique_ptr_t(CExp)) args = vec_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TIdentifier name;
@@ -644,7 +644,7 @@ static error_t parse_call_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_inner_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_inner_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(parse_exp(ctx, 0, exp));
@@ -654,8 +654,8 @@ static error_t parse_inner_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) 
     CATCH_EXIT;
 }
 
-static error_t parse_subscript_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) subscript_exp = uptr_new();
+static error_t parse_subscript_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) subscript_exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -668,7 +668,7 @@ static error_t parse_subscript_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) 
     CATCH_EXIT;
 }
 
-static error_t parse_dot_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_dot_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -681,7 +681,7 @@ static error_t parse_dot_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_arrow_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_arrow_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -694,12 +694,12 @@ static error_t parse_arrow_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_postfix_incr_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
-    unique_ptr_t(struct CExp) exp_right_1 = uptr_new();
-    shared_ptr_t(struct CConst) constant = sptr_new();
+static error_t parse_postfix_incr_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) exp_right = uptr_new();
+    unique_ptr_t(CExp) exp_right_1 = uptr_new();
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
-    unique_ptr_t(struct CExp) exp_null = uptr_new();
+    unique_ptr_t(CExp) exp_null = uptr_new();
     size_t info_at = ctx->peek_tok->info_at;
     struct CUnaryOp unop = init_CPostfix();
     struct CBinaryOp binop = init_CBinaryOp();
@@ -715,8 +715,8 @@ static error_t parse_postfix_incr_factor(Ctx ctx, unique_ptr_t(struct CExp) * ex
     CATCH_EXIT;
 }
 
-static error_t parse_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) cast_exp = uptr_new();
+static error_t parse_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) cast_exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     struct CUnaryOp unop = init_CUnaryOp();
@@ -728,12 +728,12 @@ static error_t parse_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_incr_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) exp_left = uptr_new();
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
-    unique_ptr_t(struct CExp) exp_left_1 = uptr_new();
-    unique_ptr_t(struct CExp) exp_right_1 = uptr_new();
-    shared_ptr_t(struct CConst) constant = sptr_new();
+static error_t parse_incr_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) exp_left = uptr_new();
+    unique_ptr_t(CExp) exp_right = uptr_new();
+    unique_ptr_t(CExp) exp_left_1 = uptr_new();
+    unique_ptr_t(CExp) exp_right_1 = uptr_new();
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     struct CUnaryOp unop = init_CPrefix();
@@ -753,8 +753,8 @@ static error_t parse_incr_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp)
     CATCH_EXIT;
 }
 
-static error_t parse_deref_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) cast_exp = uptr_new();
+static error_t parse_deref_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) cast_exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->next_tok->info_at;
     TRY(parse_cast_exp_factor(ctx, &cast_exp));
@@ -764,8 +764,8 @@ static error_t parse_deref_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_addrof_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) cast_exp = uptr_new();
+static error_t parse_addrof_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) cast_exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->next_tok->info_at;
     TRY(parse_cast_exp_factor(ctx, &cast_exp));
@@ -775,7 +775,7 @@ static error_t parse_addrof_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_ptr_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_ptr_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     switch (ctx->next_tok->tok_kind) {
@@ -793,8 +793,8 @@ static error_t parse_ptr_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) 
     CATCH_EXIT;
 }
 
-static error_t parse_sizeoft_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    shared_ptr_t(struct Type) target_type = sptr_new();
+static error_t parse_sizeoft_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    shared_ptr_t(Type) target_type = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -807,8 +807,8 @@ static error_t parse_sizeoft_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_sizeof_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) unary_exp = uptr_new();
+static error_t parse_sizeof_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) unary_exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(parse_unary_exp_factor(ctx, &unary_exp));
@@ -818,7 +818,7 @@ static error_t parse_sizeof_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_sizeof_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_sizeof_unary_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -845,9 +845,9 @@ static error_t parse_sizeof_unary_factor(Ctx ctx, unique_ptr_t(struct CExp) * ex
     CATCH_EXIT;
 }
 
-static error_t parse_cast_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
-    unique_ptr_t(struct CExp) cast_exp = uptr_new();
-    shared_ptr_t(struct Type) target_type = sptr_new();
+static error_t parse_cast_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
+    unique_ptr_t(CExp) cast_exp = uptr_new();
+    shared_ptr_t(Type) target_type = sptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -863,7 +863,7 @@ static error_t parse_cast_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
 }
 
 // <primary-exp> ::= <const> | <identifier> | "(" <exp> ")" | { <string> }+ | <identifier> "(" [ <argument-list> ] ")"
-static error_t parse_primary_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_primary_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -902,7 +902,7 @@ static error_t parse_primary_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp
 }
 
 // <postfix-op> ::= "[" <exp> "]" | "." <identifier> | "->" <identifier> | "++" | "--"
-static error_t parse_postfix_op_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_postfix_op_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -928,7 +928,7 @@ static error_t parse_postfix_op_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * 
 }
 
 // <postfix-exp> ::= <primary-exp> { <postfix-op> }
-static error_t parse_postfix_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_postfix_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(parse_primary_exp_factor(ctx, exp));
     TRY(peek_next(ctx));
@@ -948,7 +948,7 @@ static error_t parse_postfix_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp
 }
 
 // <unary-exp> ::= <unop> <cast-exp> | "sizeof" <unary-exp> | "sizeof" "(" <type-name> ")" | <postfix-exp>
-static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -977,7 +977,7 @@ static error_t parse_unary_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) 
 }
 
 // <cast-exp> ::= "(" <type-name> ")" <cast-exp> | <unary-exp>
-static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     if (ctx->peek_tok->tok_kind == TOK_open_paren) {
@@ -1003,8 +1003,8 @@ static error_t parse_cast_exp_factor(Ctx ctx, unique_ptr_t(struct CExp) * exp) {
     CATCH_EXIT;
 }
 
-static error_t parse_assign_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct CExp) * exp_left) {
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
+static error_t parse_assign_exp(Ctx ctx, int32_t precedence, unique_ptr_t(CExp) * exp_left) {
+    unique_ptr_t(CExp) exp_right = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     struct CUnaryOp unop = init_CUnaryOp();
@@ -1016,11 +1016,11 @@ static error_t parse_assign_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct
     CATCH_EXIT;
 }
 
-static error_t parse_assign_compound_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct CExp) * exp_left) {
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
-    unique_ptr_t(struct CExp) exp_right_1 = uptr_new();
+static error_t parse_assign_compound_exp(Ctx ctx, int32_t precedence, unique_ptr_t(CExp) * exp_left) {
+    unique_ptr_t(CExp) exp_right = uptr_new();
+    unique_ptr_t(CExp) exp_right_1 = uptr_new();
     CATCH_ENTER;
-    unique_ptr_t(struct CExp) exp_null = uptr_new();
+    unique_ptr_t(CExp) exp_null = uptr_new();
     size_t info_at = ctx->peek_tok->info_at;
     struct CUnaryOp unop = init_CUnaryOp();
     struct CBinaryOp binop = init_CBinaryOp();
@@ -1034,8 +1034,8 @@ static error_t parse_assign_compound_exp(Ctx ctx, int32_t precedence, unique_ptr
     CATCH_EXIT;
 }
 
-static error_t parse_binary_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct CExp) * exp_left) {
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
+static error_t parse_binary_exp(Ctx ctx, int32_t precedence, unique_ptr_t(CExp) * exp_left) {
+    unique_ptr_t(CExp) exp_right = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     struct CBinaryOp binop = init_CBinaryOp();
@@ -1047,9 +1047,9 @@ static error_t parse_binary_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct
     CATCH_EXIT;
 }
 
-static error_t parse_ternary_exp(Ctx ctx, int32_t precedence, unique_ptr_t(struct CExp) * exp_left) {
-    unique_ptr_t(struct CExp) exp_middle = uptr_new();
-    unique_ptr_t(struct CExp) exp_right = uptr_new();
+static error_t parse_ternary_exp(Ctx ctx, int32_t precedence, unique_ptr_t(CExp) * exp_left) {
+    unique_ptr_t(CExp) exp_middle = uptr_new();
+    unique_ptr_t(CExp) exp_right = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1120,7 +1120,7 @@ static int32_t get_tok_precedence(TOKEN_KIND tok_kind) {
 //     | FunctionCall(identifier, exp*, type) | Dereference(exp, type) | AddrOf(exp, type)
 //     | Subscript(exp, exp, type) | SizeOf(exp, type) | SizeOfT(type, type) | Dot(exp, identifier, type)
 //     | Arrow(exp, identifier, type)
-static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(struct CExp) * exp) {
+static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(CExp) * exp) {
     CATCH_ENTER;
     TRY(parse_cast_exp_factor(ctx, exp));
     while (true) {
@@ -1176,12 +1176,12 @@ static error_t parse_exp(Ctx ctx, int32_t min_precedence, unique_ptr_t(struct CE
     CATCH_EXIT;
 }
 
-static error_t parse_for_init(Ctx ctx, unique_ptr_t(struct CForInit) * for_init);
-static error_t parse_block(Ctx ctx, unique_ptr_t(struct CBlock) * block);
-static error_t parse_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement);
+static error_t parse_for_init(Ctx ctx, unique_ptr_t(CForInit) * for_init);
+static error_t parse_block(Ctx ctx, unique_ptr_t(CBlock) * block);
+static error_t parse_statement(Ctx ctx, unique_ptr_t(CStatement) * statement);
 
-static error_t parse_ret_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) exp = uptr_new();
+static error_t parse_ret_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) exp = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1197,8 +1197,8 @@ static error_t parse_ret_statement(Ctx ctx, unique_ptr_t(struct CStatement) * st
     CATCH_EXIT;
 }
 
-static error_t parse_exp_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) exp = uptr_new();
+static error_t parse_exp_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) exp = uptr_new();
     CATCH_ENTER;
     TRY(parse_exp(ctx, 0, &exp));
     TRY(pop_next(ctx));
@@ -1209,10 +1209,10 @@ static error_t parse_exp_statement(Ctx ctx, unique_ptr_t(struct CStatement) * st
     CATCH_EXIT;
 }
 
-static error_t parse_if_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) condition = uptr_new();
-    unique_ptr_t(struct CStatement) then = uptr_new();
-    unique_ptr_t(struct CStatement) else_fi = uptr_new();
+static error_t parse_if_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) condition = uptr_new();
+    unique_ptr_t(CStatement) then = uptr_new();
+    unique_ptr_t(CStatement) else_fi = uptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(pop_next(ctx));
@@ -1236,7 +1236,7 @@ static error_t parse_if_statement(Ctx ctx, unique_ptr_t(struct CStatement) * sta
     CATCH_EXIT;
 }
 
-static error_t parse_goto_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
+static error_t parse_goto_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1251,8 +1251,8 @@ static error_t parse_goto_statement(Ctx ctx, unique_ptr_t(struct CStatement) * s
     CATCH_EXIT;
 }
 
-static error_t parse_label_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CStatement) jump_to = uptr_new();
+static error_t parse_label_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CStatement) jump_to = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TIdentifier target;
@@ -1266,8 +1266,8 @@ static error_t parse_label_statement(Ctx ctx, unique_ptr_t(struct CStatement) * 
     CATCH_EXIT;
 }
 
-static error_t parse_compound_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CBlock) block = uptr_new();
+static error_t parse_compound_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CBlock) block = uptr_new();
     CATCH_ENTER;
     TRY(parse_block(ctx, &block));
     *statement = make_CCompound(&block);
@@ -1276,9 +1276,9 @@ static error_t parse_compound_statement(Ctx ctx, unique_ptr_t(struct CStatement)
     CATCH_EXIT;
 }
 
-static error_t parse_while_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) condition = uptr_new();
-    unique_ptr_t(struct CStatement) body = uptr_new();
+static error_t parse_while_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) condition = uptr_new();
+    unique_ptr_t(CStatement) body = uptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(pop_next(ctx));
@@ -1295,9 +1295,9 @@ static error_t parse_while_statement(Ctx ctx, unique_ptr_t(struct CStatement) * 
     CATCH_EXIT;
 }
 
-static error_t parse_do_while_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CStatement) body = uptr_new();
-    unique_ptr_t(struct CExp) condition = uptr_new();
+static error_t parse_do_while_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CStatement) body = uptr_new();
+    unique_ptr_t(CExp) condition = uptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -1318,11 +1318,11 @@ static error_t parse_do_while_statement(Ctx ctx, unique_ptr_t(struct CStatement)
     CATCH_EXIT;
 }
 
-static error_t parse_for_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CForInit) for_init = uptr_new();
-    unique_ptr_t(struct CExp) condition = uptr_new();
-    unique_ptr_t(struct CExp) post = uptr_new();
-    unique_ptr_t(struct CStatement) body = uptr_new();
+static error_t parse_for_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CForInit) for_init = uptr_new();
+    unique_ptr_t(CExp) condition = uptr_new();
+    unique_ptr_t(CExp) post = uptr_new();
+    unique_ptr_t(CStatement) body = uptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(pop_next(ctx));
@@ -1351,9 +1351,9 @@ static error_t parse_for_statement(Ctx ctx, unique_ptr_t(struct CStatement) * st
     CATCH_EXIT;
 }
 
-static error_t parse_switch_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) match = uptr_new();
-    unique_ptr_t(struct CStatement) body = uptr_new();
+static error_t parse_switch_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) match = uptr_new();
+    unique_ptr_t(CStatement) body = uptr_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(pop_next(ctx));
@@ -1370,10 +1370,10 @@ static error_t parse_switch_statement(Ctx ctx, unique_ptr_t(struct CStatement) *
     CATCH_EXIT;
 }
 
-static error_t parse_case_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CExp) value = uptr_new();
-    unique_ptr_t(struct CStatement) jump_to = uptr_new();
-    shared_ptr_t(struct CConst) constant = sptr_new();
+static error_t parse_case_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CExp) value = uptr_new();
+    unique_ptr_t(CStatement) jump_to = uptr_new();
+    shared_ptr_t(CConst) constant = sptr_new();
     CATCH_ENTER;
     size_t info_at;
     TRY(pop_next(ctx));
@@ -1406,8 +1406,8 @@ static error_t parse_case_statement(Ctx ctx, unique_ptr_t(struct CStatement) * s
     CATCH_EXIT;
 }
 
-static error_t parse_default_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
-    unique_ptr_t(struct CStatement) jump_to = uptr_new();
+static error_t parse_default_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
+    unique_ptr_t(CStatement) jump_to = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1421,7 +1421,7 @@ static error_t parse_default_statement(Ctx ctx, unique_ptr_t(struct CStatement) 
     CATCH_EXIT;
 }
 
-static error_t parse_break_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
+static error_t parse_break_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1432,7 +1432,7 @@ static error_t parse_break_statement(Ctx ctx, unique_ptr_t(struct CStatement) * 
     CATCH_EXIT;
 }
 
-static error_t parse_continue_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
+static error_t parse_continue_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     CATCH_ENTER;
     size_t info_at = ctx->peek_tok->info_at;
     TRY(pop_next(ctx));
@@ -1443,7 +1443,7 @@ static error_t parse_continue_statement(Ctx ctx, unique_ptr_t(struct CStatement)
     CATCH_EXIT;
 }
 
-static error_t parse_null_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
+static error_t parse_null_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     *statement = make_CNull();
@@ -1462,7 +1462,7 @@ static error_t parse_null_statement(Ctx ctx, unique_ptr_t(struct CStatement) * s
 //           | DoWhile(statement, exp, identifier) | For(for_init, exp?, exp?, statement, identifier)
 //           | Switch(identifier, bool, exp, statement, exp*) | Case(identifier, exp, statement)
 //           | Default(identifier, statement) | Break(identifier) | Continue(identifier) | Null
-static error_t parse_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statement) {
+static error_t parse_statement(Ctx ctx, unique_ptr_t(CStatement) * statement) {
     CATCH_ENTER;
     switch (ctx->peek_tok->tok_kind) {
         case TOK_key_return:
@@ -1522,11 +1522,11 @@ static error_t parse_statement(Ctx ctx, unique_ptr_t(struct CStatement) * statem
 
 static error_t parse_decltor_decl(Ctx ctx, Declarator* decltor, struct CStorageClass* storage_class);
 static error_t parse_var_declaration(
-    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(struct CVariableDeclaration) * var_decl);
+    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(CVariableDeclaration) * var_decl);
 
-static error_t parse_for_init_decl(Ctx ctx, unique_ptr_t(struct CForInit) * for_init) {
+static error_t parse_for_init_decl(Ctx ctx, unique_ptr_t(CForInit) * for_init) {
     Declarator decltor = {0, sptr_new(), vec_new()};
-    unique_ptr_t(struct CVariableDeclaration) var_decl = uptr_new();
+    unique_ptr_t(CVariableDeclaration) var_decl = uptr_new();
     CATCH_ENTER;
     struct CStorageClass storage_class = init_CStorageClass();
     TRY(parse_decltor_decl(ctx, &decltor, &storage_class));
@@ -1543,8 +1543,8 @@ static error_t parse_for_init_decl(Ctx ctx, unique_ptr_t(struct CForInit) * for_
     CATCH_EXIT;
 }
 
-static error_t parse_for_init_exp(Ctx ctx, unique_ptr_t(struct CForInit) * for_init) {
-    unique_ptr_t(struct CExp) init = uptr_new();
+static error_t parse_for_init_exp(Ctx ctx, unique_ptr_t(CForInit) * for_init) {
+    unique_ptr_t(CExp) init = uptr_new();
     CATCH_ENTER;
     TRY(peek_next(ctx));
     if (ctx->peek_tok->tok_kind != TOK_semicolon) {
@@ -1560,7 +1560,7 @@ static error_t parse_for_init_exp(Ctx ctx, unique_ptr_t(struct CForInit) * for_i
 
 // <for-init> ::= <variable-declaration> | [ <exp> ] ";"
 // for_init = InitDecl(variable_declaration) | InitExp(exp?)
-static error_t parse_for_init(Ctx ctx, unique_ptr_t(struct CForInit) * for_init) {
+static error_t parse_for_init(Ctx ctx, unique_ptr_t(CForInit) * for_init) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -1585,10 +1585,10 @@ static error_t parse_for_init(Ctx ctx, unique_ptr_t(struct CForInit) * for_init)
     CATCH_EXIT;
 }
 
-static error_t parse_declaration(Ctx ctx, unique_ptr_t(struct CDeclaration) * declaration);
+static error_t parse_declaration(Ctx ctx, unique_ptr_t(CDeclaration) * declaration);
 
-static error_t parse_s_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * block_item) {
-    unique_ptr_t(struct CStatement) statement = uptr_new();
+static error_t parse_s_block_item(Ctx ctx, unique_ptr_t(CBlockItem) * block_item) {
+    unique_ptr_t(CStatement) statement = uptr_new();
     CATCH_ENTER;
     TRY(parse_statement(ctx, &statement));
     *block_item = make_CS(&statement);
@@ -1597,8 +1597,8 @@ static error_t parse_s_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * blo
     CATCH_EXIT;
 }
 
-static error_t parse_d_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * block_item) {
-    unique_ptr_t(struct CDeclaration) declaration = uptr_new();
+static error_t parse_d_block_item(Ctx ctx, unique_ptr_t(CBlockItem) * block_item) {
+    unique_ptr_t(CDeclaration) declaration = uptr_new();
     CATCH_ENTER;
     TRY(parse_declaration(ctx, &declaration));
     *block_item = make_CD(&declaration);
@@ -1609,7 +1609,7 @@ static error_t parse_d_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * blo
 
 // <block-item> ::= <statement> | <declaration>
 // block_item = S(statement) | D(declaration)
-static error_t parse_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * block_item) {
+static error_t parse_block_item(Ctx ctx, unique_ptr_t(CBlockItem) * block_item) {
     CATCH_ENTER;
     switch (ctx->peek_tok->tok_kind) {
         case TOK_key_char:
@@ -1633,9 +1633,9 @@ static error_t parse_block_item(Ctx ctx, unique_ptr_t(struct CBlockItem) * block
     CATCH_EXIT;
 }
 
-static error_t parse_b_block(Ctx ctx, unique_ptr_t(struct CBlock) * block) {
-    unique_ptr_t(struct CBlockItem) block_item = uptr_new();
-    vector_t(unique_ptr_t(struct CBlockItem)) block_items = vec_new();
+static error_t parse_b_block(Ctx ctx, unique_ptr_t(CBlock) * block) {
+    unique_ptr_t(CBlockItem) block_item = uptr_new();
+    vector_t(unique_ptr_t(CBlockItem)) block_items = vec_new();
     CATCH_ENTER;
     TRY(peek_next(ctx));
     while (ctx->peek_tok->tok_kind != TOK_close_brace) {
@@ -1655,7 +1655,7 @@ static error_t parse_b_block(Ctx ctx, unique_ptr_t(struct CBlock) * block) {
 
 // <block> ::= "{" { <block-item> } "}"
 // block = B(block_item*)
-static error_t parse_block(Ctx ctx, unique_ptr_t(struct CBlock) * block) {
+static error_t parse_block(Ctx ctx, unique_ptr_t(CBlock) * block) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(parse_b_block(ctx, block));
@@ -1667,7 +1667,7 @@ static error_t parse_block(Ctx ctx, unique_ptr_t(struct CBlock) * block) {
 
 // <type-specifier> ::= "int" | "long" | "unsigned" | "signed" | "double" | "char" | "void"
 //                    | ( "struct" | "union" ) <identifier>
-static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(struct Type) * type_specifier) {
+static error_t parse_type_specifier(Ctx ctx, shared_ptr_t(Type) * type_specifier) {
     size_t type_tok_kinds_size = 0;
     string_t type_tok_kinds_fmt = str_new(NULL);
     TOKEN_KIND type_tok_kinds[4] = {TOK_error, TOK_error, TOK_error, TOK_error};
@@ -1867,10 +1867,10 @@ static error_t parse_storage_class(Ctx ctx, struct CStorageClass* storage_class)
     CATCH_EXIT;
 }
 
-static error_t parse_initializer(Ctx ctx, unique_ptr_t(struct CInitializer) * initializer);
+static error_t parse_initializer(Ctx ctx, unique_ptr_t(CInitializer) * initializer);
 
-static error_t parse_single_init(Ctx ctx, unique_ptr_t(struct CInitializer) * initializer) {
-    unique_ptr_t(struct CExp) exp = uptr_new();
+static error_t parse_single_init(Ctx ctx, unique_ptr_t(CInitializer) * initializer) {
+    unique_ptr_t(CExp) exp = uptr_new();
     CATCH_ENTER;
     TRY(parse_exp(ctx, 0, &exp));
     *initializer = make_CSingleInit(&exp);
@@ -1879,8 +1879,8 @@ static error_t parse_single_init(Ctx ctx, unique_ptr_t(struct CInitializer) * in
     CATCH_EXIT;
 }
 
-static error_t parse_compound_init(Ctx ctx, unique_ptr_t(struct CInitializer) * initializer) {
-    vector_t(unique_ptr_t(struct CInitializer)) initializers = vec_new();
+static error_t parse_compound_init(Ctx ctx, unique_ptr_t(CInitializer) * initializer) {
+    vector_t(unique_ptr_t(CInitializer)) initializers = vec_new();
     CATCH_ENTER;
     TRY(pop_next(ctx));
     while (true) {
@@ -1912,7 +1912,7 @@ static error_t parse_compound_init(Ctx ctx, unique_ptr_t(struct CInitializer) * 
 
 // <initializer> ::= <exp> | "{" <initializer> { "," <initializer> } [ "," ] "}"
 // initializer = SingleInit(exp) | CompoundInit(initializer*)
-static error_t parse_initializer(Ctx ctx, unique_ptr_t(struct CInitializer) * initializer) {
+static error_t parse_initializer(Ctx ctx, unique_ptr_t(CInitializer) * initializer) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     if (ctx->peek_tok->tok_kind == TOK_open_brace) {
@@ -1925,17 +1925,17 @@ static error_t parse_initializer(Ctx ctx, unique_ptr_t(struct CInitializer) * in
     CATCH_EXIT;
 }
 
-static error_t parse_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor);
-static error_t proc_decltor(Ctx ctx, struct CDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor);
+static error_t parse_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor);
+static error_t proc_decltor(Ctx ctx, struct CDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor);
 
-static void proc_ident_decltor(struct CIdent* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
+static void proc_ident_decltor(struct CIdent* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
     decltor->name = node->name;
     sptr_move(Type, *base_type, decltor->derived_type);
 }
 
 static error_t proc_ptr_decltor(
-    Ctx ctx, struct CPointerDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(struct Type) derived_type = sptr_new();
+    Ctx ctx, struct CPointerDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(Type) derived_type = sptr_new();
     CATCH_ENTER;
     derived_type = make_Pointer(base_type);
     TRY(proc_decltor(ctx, node->decltor, &derived_type, decltor));
@@ -1944,8 +1944,9 @@ static error_t proc_ptr_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_arr_decltor(Ctx ctx, struct CArrayDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(struct Type) derived_type = sptr_new();
+static error_t proc_arr_decltor(
+    Ctx ctx, struct CArrayDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(Type) derived_type = sptr_new();
     CATCH_ENTER;
     TLong size = node->size;
     derived_type = make_Array(size, base_type);
@@ -1956,9 +1957,9 @@ static error_t proc_arr_decltor(Ctx ctx, struct CArrayDeclarator* node, shared_p
 }
 
 static error_t proc_param_decltor(
-    Ctx ctx, struct CParam* node, vector_t(TIdentifier) * params, vector_t(shared_ptr_t(struct Type)) * param_types) {
+    Ctx ctx, struct CParam* node, vector_t(TIdentifier) * params, vector_t(shared_ptr_t(Type)) * param_types) {
     Declarator decltor = {0, sptr_new(), vec_new()};
-    shared_ptr_t(struct Type) param_type = sptr_new();
+    shared_ptr_t(Type) param_type = sptr_new();
     CATCH_ENTER;
     sptr_copy(Type, node->param_type, param_type);
     TRY(proc_decltor(ctx, node->decltor, &param_type, &decltor));
@@ -1972,10 +1973,11 @@ static error_t proc_param_decltor(
     CATCH_EXIT;
 }
 
-static error_t proc_fun_decltor(Ctx ctx, struct CFunDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
-    shared_ptr_t(struct Type) derived_type = sptr_new();
+static error_t proc_fun_decltor(
+    Ctx ctx, struct CFunDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
+    shared_ptr_t(Type) derived_type = sptr_new();
     vector_t(TIdentifier) params = vec_new();
-    vector_t(shared_ptr_t(struct Type)) param_types = vec_new();
+    vector_t(shared_ptr_t(Type)) param_types = vec_new();
     CATCH_ENTER;
     if (node->decltor->type != AST_CIdent_t) {
         THROW_AT_TOKEN(ctx->next_tok->info_at, GET_PARSER_MSG(0, MSG_derived_fun_decl));
@@ -2002,7 +2004,7 @@ static error_t proc_fun_decltor(Ctx ctx, struct CFunDeclarator* node, shared_ptr
     CATCH_EXIT;
 }
 
-static error_t proc_decltor(Ctx ctx, struct CDeclarator* node, shared_ptr_t(struct Type) * base_type, Declarator* decltor) {
+static error_t proc_decltor(Ctx ctx, struct CDeclarator* node, shared_ptr_t(Type) * base_type, Declarator* decltor) {
     CATCH_ENTER;
     switch (node->type) {
         case AST_CIdent_t:
@@ -2024,7 +2026,7 @@ static error_t proc_decltor(Ctx ctx, struct CDeclarator* node, shared_ptr_t(stru
     CATCH_EXIT;
 }
 
-static error_t parse_ident_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_ident_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TIdentifier name;
     TRY(parse_identifier(ctx, 0, &name));
@@ -2033,7 +2035,7 @@ static error_t parse_ident_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * d
     CATCH_EXIT;
 }
 
-static error_t parse_simple_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_simple_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(parse_decltor(ctx, decltor));
@@ -2044,7 +2046,7 @@ static error_t parse_simple_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * 
 }
 
 // <simple-declarator> ::= <identifier> | "(" <declarator> ")"
-static error_t parse_simple_decltor_decl(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_simple_decltor_decl(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     switch (ctx->peek_tok->tok_kind) {
@@ -2064,9 +2066,9 @@ static error_t parse_simple_decltor_decl(Ctx ctx, unique_ptr_t(struct CDeclarato
 
 // <param> ::= { <type-specifier> }+ <declarator>
 // param_info = Param(type, declarator)
-static error_t parse_param(Ctx ctx, unique_ptr_t(struct CParam) * param) {
-    unique_ptr_t(struct CDeclarator) decltor = uptr_new();
-    shared_ptr_t(struct Type) param_type = sptr_new();
+static error_t parse_param(Ctx ctx, unique_ptr_t(CParam) * param) {
+    unique_ptr_t(CDeclarator) decltor = uptr_new();
+    shared_ptr_t(Type) param_type = sptr_new();
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, &param_type));
     TRY(parse_decltor(ctx, &decltor));
@@ -2084,8 +2086,8 @@ static error_t parse_empty_param_list(Ctx ctx) {
     CATCH_EXIT;
 }
 
-static error_t parse_non_empty_param_list(Ctx ctx, vector_t(unique_ptr_t(struct CParam)) * param_list) {
-    unique_ptr_t(struct CParam) param = uptr_new();
+static error_t parse_non_empty_param_list(Ctx ctx, vector_t(unique_ptr_t(CParam)) * param_list) {
+    unique_ptr_t(CParam) param = uptr_new();
     CATCH_ENTER;
     TRY(parse_param(ctx, &param));
     vec_move_back(*param_list, param);
@@ -2102,7 +2104,7 @@ static error_t parse_non_empty_param_list(Ctx ctx, vector_t(unique_ptr_t(struct 
 }
 
 // <param-list> ::= "(" "void" ")" | "(" <param> { "," <param> } ")"
-static error_t parse_param_list(Ctx ctx, vector_t(unique_ptr_t(struct CParam)) * param_list) {
+static error_t parse_param_list(Ctx ctx, vector_t(unique_ptr_t(CParam)) * param_list) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(peek_next(ctx));
@@ -2138,8 +2140,8 @@ static error_t parse_param_list(Ctx ctx, vector_t(unique_ptr_t(struct CParam)) *
 }
 
 // (function) <declarator-suffix> ::= <param-list>
-static error_t parse_fun_decltor_suffix(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
-    vector_t(unique_ptr_t(struct CParam)) param_list = vec_new();
+static error_t parse_fun_decltor_suffix(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
+    vector_t(unique_ptr_t(CParam)) param_list = vec_new();
     CATCH_ENTER;
     TRY(parse_param_list(ctx, &param_list));
     *decltor = make_CFunDeclarator(&param_list, decltor);
@@ -2152,7 +2154,7 @@ static error_t parse_fun_decltor_suffix(Ctx ctx, unique_ptr_t(struct CDeclarator
 }
 
 // (array) <declarator-suffix> ::= { "[" <const> "]" }+
-static error_t parse_arr_decltor_suffix(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_arr_decltor_suffix(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     do {
         TLong size;
@@ -2166,7 +2168,7 @@ static error_t parse_arr_decltor_suffix(Ctx ctx, unique_ptr_t(struct CDeclarator
 }
 
 // <direct-declarator> ::= <simple-declarator> [ <declarator-suffix> ]
-static error_t parse_direct_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_direct_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TRY(parse_simple_decltor_decl(ctx, decltor));
     TRY(peek_next(ctx));
@@ -2184,7 +2186,7 @@ static error_t parse_direct_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * 
     CATCH_EXIT;
 }
 
-static error_t parse_ptr_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_ptr_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TRY(pop_next(ctx));
     TRY(parse_decltor(ctx, decltor));
@@ -2196,7 +2198,7 @@ static error_t parse_ptr_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * dec
 // <declarator> ::= "*" <declarator> | <direct-declarator>
 // declarator = Ident(identifier) | PointerDeclarator(declarator) | ArrayDeclarator(int, declarator)
 //            | FunDeclarator(param_info*, declarator)
-static error_t parse_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor) {
+static error_t parse_decltor(Ctx ctx, unique_ptr_t(CDeclarator) * decltor) {
     CATCH_ENTER;
     TRY(peek_next(ctx));
     if (ctx->peek_tok->tok_kind == TOK_binop_multiply) {
@@ -2212,8 +2214,8 @@ static error_t parse_decltor(Ctx ctx, unique_ptr_t(struct CDeclarator) * decltor
 // <function-declaration> ::= { <specifier> }+ <declarator> ( <block> | ";" )
 // function_declaration = FunctionDeclaration(identifier, identifier*, block?, type, storage_class?)
 static error_t parse_fun_declaration(
-    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(struct CFunctionDeclaration) * fun_decl) {
-    unique_ptr_t(struct CBlock) body = uptr_new();
+    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(CFunctionDeclaration) * fun_decl) {
+    unique_ptr_t(CBlock) body = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->next_tok->info_at;
     TRY(peek_next(ctx));
@@ -2234,8 +2236,8 @@ static error_t parse_fun_declaration(
 // <variable-declaration> ::= { <specifier> }+ <declarator> [ "=" <initializer> ] ";"
 // variable_declaration = VariableDeclaration(identifier, initializer?, type, storage_class?)
 static error_t parse_var_declaration(
-    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(struct CVariableDeclaration) * var_decl) {
-    unique_ptr_t(struct CInitializer) initializer = uptr_new();
+    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(CVariableDeclaration) * var_decl) {
+    unique_ptr_t(CInitializer) initializer = uptr_new();
     CATCH_ENTER;
     size_t info_at = ctx->next_tok->info_at;
     TRY(peek_next(ctx));
@@ -2253,7 +2255,7 @@ static error_t parse_var_declaration(
 
 // <member-declaration> ::= { <type-specifier> }+ <declarator> ";"
 // member_declaration = MemberDeclaration(identifier, type)
-static error_t parse_member_declaration(Ctx ctx, unique_ptr_t(struct CMemberDeclaration) * member_decl) {
+static error_t parse_member_declaration(Ctx ctx, unique_ptr_t(CMemberDeclaration) * member_decl) {
     Declarator decltor = {0, sptr_new(), vec_new()};
     CATCH_ENTER;
     size_t info_at;
@@ -2280,9 +2282,9 @@ static error_t parse_member_declaration(Ctx ctx, unique_ptr_t(struct CMemberDecl
 
 // <struct-declaration> ::= ( "struct" | "union" ) <identifier> [ "{" { <member-declaration> }+ "}" ] ";"
 // struct_declaration = StructDeclaration(identifier, bool, member_declaration*)
-static error_t parse_struct_declaration(Ctx ctx, unique_ptr_t(struct CStructDeclaration) * struct_decl) {
-    unique_ptr_t(struct CMemberDeclaration) member = uptr_new();
-    vector_t(unique_ptr_t(struct CMemberDeclaration)) members = vec_new();
+static error_t parse_struct_declaration(Ctx ctx, unique_ptr_t(CStructDeclaration) * struct_decl) {
+    unique_ptr_t(CMemberDeclaration) member = uptr_new();
+    vector_t(unique_ptr_t(CMemberDeclaration)) members = vec_new();
     CATCH_ENTER;
     bool is_union;
     size_t info_at = ctx->peek_tok->info_at;
@@ -2315,8 +2317,8 @@ static error_t parse_struct_declaration(Ctx ctx, unique_ptr_t(struct CStructDecl
 }
 
 static error_t parse_fun_decl(
-    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(struct CDeclaration) * declaration) {
-    unique_ptr_t(struct CFunctionDeclaration) fun_decl = uptr_new();
+    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(CDeclaration) * declaration) {
+    unique_ptr_t(CFunctionDeclaration) fun_decl = uptr_new();
     CATCH_ENTER;
     TRY(parse_fun_declaration(ctx, storage_class, decltor, &fun_decl));
     *declaration = make_CFunDecl(&fun_decl);
@@ -2326,8 +2328,8 @@ static error_t parse_fun_decl(
 }
 
 static error_t parse_var_decl(
-    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(struct CDeclaration) * declaration) {
-    unique_ptr_t(struct CVariableDeclaration) var_decl = uptr_new();
+    Ctx ctx, struct CStorageClass* storage_class, Declarator* decltor, unique_ptr_t(CDeclaration) * declaration) {
+    unique_ptr_t(CVariableDeclaration) var_decl = uptr_new();
     CATCH_ENTER;
     TRY(parse_var_declaration(ctx, storage_class, decltor, &var_decl));
     *declaration = make_CVarDecl(&var_decl);
@@ -2336,8 +2338,8 @@ static error_t parse_var_decl(
     CATCH_EXIT;
 }
 
-static error_t parse_struct_decl(Ctx ctx, unique_ptr_t(struct CDeclaration) * declaration) {
-    unique_ptr_t(struct CStructDeclaration) struct_decl = uptr_new();
+static error_t parse_struct_decl(Ctx ctx, unique_ptr_t(CDeclaration) * declaration) {
+    unique_ptr_t(CStructDeclaration) struct_decl = uptr_new();
     CATCH_ENTER;
     TRY(parse_struct_declaration(ctx, &struct_decl));
     *declaration = make_CStructDecl(&struct_decl);
@@ -2347,8 +2349,8 @@ static error_t parse_struct_decl(Ctx ctx, unique_ptr_t(struct CDeclaration) * de
 }
 
 static error_t parse_decltor_decl(Ctx ctx, Declarator* decltor, struct CStorageClass* storage_class) {
-    unique_ptr_t(struct CDeclarator) decltor_1 = uptr_new();
-    shared_ptr_t(struct Type) type_specifier = sptr_new();
+    unique_ptr_t(CDeclarator) decltor_1 = uptr_new();
+    shared_ptr_t(Type) type_specifier = sptr_new();
     CATCH_ENTER;
     TRY(parse_type_specifier(ctx, &type_specifier));
     TRY(peek_next(ctx));
@@ -2371,7 +2373,7 @@ static error_t parse_decltor_decl(Ctx ctx, Declarator* decltor, struct CStorageC
 
 // <declaration> ::= <variable-declaration> | <function-declaration> | <struct-declaration>
 // declaration = FunDecl(function_declaration) | VarDecl(variable_declaration) | StructDecl(struct_declaration)
-static error_t parse_declaration(Ctx ctx, unique_ptr_t(struct CDeclaration) * declaration) {
+static error_t parse_declaration(Ctx ctx, unique_ptr_t(CDeclaration) * declaration) {
     Declarator decltor = {0, sptr_new(), vec_new()};
     CATCH_ENTER;
     struct CStorageClass storage_class = init_CStorageClass();
@@ -2407,9 +2409,9 @@ static error_t parse_declaration(Ctx ctx, unique_ptr_t(struct CDeclaration) * de
 
 // <program> ::= { <declaration> }
 // AST = Program(declaration*)
-static error_t parse_program(Ctx ctx, unique_ptr_t(struct CProgram) * c_ast) {
-    unique_ptr_t(struct CDeclaration) declaration = uptr_new();
-    vector_t(unique_ptr_t(struct CDeclaration)) declarations = vec_new();
+static error_t parse_program(Ctx ctx, unique_ptr_t(CProgram) * c_ast) {
+    unique_ptr_t(CDeclaration) declaration = uptr_new();
+    vector_t(unique_ptr_t(CDeclaration)) declarations = vec_new();
     CATCH_ENTER;
     while (ctx->pop_idx < vec_size(*ctx->p_toks)) {
         TRY(parse_declaration(ctx, &declaration));
@@ -2428,7 +2430,7 @@ static error_t parse_program(Ctx ctx, unique_ptr_t(struct CProgram) * c_ast) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 error_t parse_tokens(vector_t(Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
-    unique_ptr_t(struct CProgram) * c_ast) {
+    unique_ptr_t(CProgram) * c_ast) {
     ParserContext ctx;
     {
         ctx.errors = errors;

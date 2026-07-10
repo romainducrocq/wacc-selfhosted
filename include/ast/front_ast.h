@@ -104,12 +104,12 @@ struct CBinaryOp {
 //                     | AbstractBase
 
 struct CAbstractPointer {
-    unique_ptr_t(struct CAbstractDeclarator) abstract_decltor;
+    unique_ptr_t(CAbstractDeclarator) abstract_decltor;
 };
 
 struct CAbstractArray {
     TLong size;
-    unique_ptr_t(struct CAbstractDeclarator) abstract_decltor;
+    unique_ptr_t(CAbstractDeclarator) abstract_decltor;
 };
 
 struct CAbstractBase {
@@ -126,11 +126,11 @@ struct CAbstractDeclarator {
     } get;
 };
 
-unique_ptr_t(struct CAbstractDeclarator) make_CAbstractDeclarator(void);
-unique_ptr_t(struct CAbstractDeclarator) make_CAbstractPointer(unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor);
-unique_ptr_t(struct CAbstractDeclarator) make_CAbstractArray(TLong size, unique_ptr_t(struct CAbstractDeclarator) * abstract_decltor);
-unique_ptr_t(struct CAbstractDeclarator) make_CAbstractBase(void);
-void free_CAbstractDeclarator(unique_ptr_t(struct CAbstractDeclarator) * self);
+unique_ptr_t(CAbstractDeclarator) make_CAbstractDeclarator(void);
+unique_ptr_t(CAbstractDeclarator) make_CAbstractPointer(unique_ptr_t(CAbstractDeclarator) * abstract_decltor);
+unique_ptr_t(CAbstractDeclarator) make_CAbstractArray(TLong size, unique_ptr_t(CAbstractDeclarator) * abstract_decltor);
+unique_ptr_t(CAbstractDeclarator) make_CAbstractBase(void);
+void free_CAbstractDeclarator(unique_ptr_t(CAbstractDeclarator) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -138,12 +138,12 @@ void free_CAbstractDeclarator(unique_ptr_t(struct CAbstractDeclarator) * self);
 
 struct CParam {
     unique_ptr_impl(AST_T);
-    unique_ptr_t(struct CDeclarator) decltor;
-    shared_ptr_t(struct Type) param_type;
+    unique_ptr_t(CDeclarator) decltor;
+    shared_ptr_t(Type) param_type;
 };
 
-unique_ptr_t(struct CParam) make_CParam(unique_ptr_t(struct CDeclarator) * decltor, shared_ptr_t(struct Type) * param_type);
-void free_CParam(unique_ptr_t(struct CParam) * self);
+unique_ptr_t(CParam) make_CParam(unique_ptr_t(CDeclarator) * decltor, shared_ptr_t(Type) * param_type);
+void free_CParam(unique_ptr_t(CParam) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -157,17 +157,17 @@ struct CIdent {
 };
 
 struct CPointerDeclarator {
-    unique_ptr_t(struct CDeclarator) decltor;
+    unique_ptr_t(CDeclarator) decltor;
 };
 
 struct CArrayDeclarator {
     TLong size;
-    unique_ptr_t(struct CDeclarator) decltor;
+    unique_ptr_t(CDeclarator) decltor;
 };
 
 struct CFunDeclarator {
-    vector_t(unique_ptr_t(struct CParam)) param_list;
-    unique_ptr_t(struct CDeclarator) decltor;
+    vector_t(unique_ptr_t(CParam)) param_list;
+    unique_ptr_t(CDeclarator) decltor;
 };
 
 struct CDeclarator {
@@ -181,13 +181,13 @@ struct CDeclarator {
     } get;
 };
 
-unique_ptr_t(struct CDeclarator) make_CDeclarator(void);
-unique_ptr_t(struct CDeclarator) make_CIdent(TIdentifier name);
-unique_ptr_t(struct CDeclarator) make_CPointerDeclarator(unique_ptr_t(struct CDeclarator) * decltor);
-unique_ptr_t(struct CDeclarator) make_CArrayDeclarator(TLong size, unique_ptr_t(struct CDeclarator) * decltor);
-unique_ptr_t(struct CDeclarator)
-    make_CFunDeclarator(vector_t(unique_ptr_t(struct CParam)) * param_list, unique_ptr_t(struct CDeclarator) * decltor);
-void free_CDeclarator(unique_ptr_t(struct CDeclarator) * self);
+unique_ptr_t(CDeclarator) make_CDeclarator(void);
+unique_ptr_t(CDeclarator) make_CIdent(TIdentifier name);
+unique_ptr_t(CDeclarator) make_CPointerDeclarator(unique_ptr_t(CDeclarator) * decltor);
+unique_ptr_t(CDeclarator) make_CArrayDeclarator(TLong size, unique_ptr_t(CDeclarator) * decltor);
+unique_ptr_t(CDeclarator)
+    make_CFunDeclarator(vector_t(unique_ptr_t(CParam)) * param_list, unique_ptr_t(CDeclarator) * decltor);
+void free_CDeclarator(unique_ptr_t(CDeclarator) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -209,12 +209,12 @@ void free_CDeclarator(unique_ptr_t(struct CDeclarator) * self);
 //     | Arrow(exp, identifier, type)
 
 struct CConstant {
-    shared_ptr_t(struct CConst) constant;
+    shared_ptr_t(CConst) constant;
     struct CExp* _base;
 };
 
 struct CString {
-    shared_ptr_t(struct CStringLiteral) literal;
+    shared_ptr_t(CStringLiteral) literal;
     struct CExp* _base;
 };
 
@@ -224,85 +224,85 @@ struct CVar {
 };
 
 struct CCast {
-    unique_ptr_t(struct CExp) exp;
-    shared_ptr_t(struct Type) target_type;
+    unique_ptr_t(CExp) exp;
+    shared_ptr_t(Type) target_type;
     struct CExp* _base;
 };
 
 struct CUnary {
     struct CUnaryOp unop;
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     struct CExp* _base;
 };
 
 struct CBinary {
     struct CBinaryOp binop;
-    unique_ptr_t(struct CExp) exp_left;
-    unique_ptr_t(struct CExp) exp_right;
+    unique_ptr_t(CExp) exp_left;
+    unique_ptr_t(CExp) exp_right;
     struct CExp* _base;
 };
 
 struct CAssignment {
     struct CUnaryOp unop;
-    unique_ptr_t(struct CExp) exp_left;
-    unique_ptr_t(struct CExp) exp_right;
+    unique_ptr_t(CExp) exp_left;
+    unique_ptr_t(CExp) exp_right;
     struct CExp* _base;
 };
 
 struct CConditional {
-    unique_ptr_t(struct CExp) condition;
-    unique_ptr_t(struct CExp) exp_middle;
-    unique_ptr_t(struct CExp) exp_right;
+    unique_ptr_t(CExp) condition;
+    unique_ptr_t(CExp) exp_middle;
+    unique_ptr_t(CExp) exp_right;
     struct CExp* _base;
 };
 
 struct CFunctionCall {
     TIdentifier name;
-    vector_t(unique_ptr_t(struct CExp)) args;
+    vector_t(unique_ptr_t(CExp)) args;
     struct CExp* _base;
 };
 
 struct CDereference {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     struct CExp* _base;
 };
 
 struct CAddrOf {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     struct CExp* _base;
 };
 
 struct CSubscript {
-    unique_ptr_t(struct CExp) primary_exp;
-    unique_ptr_t(struct CExp) subscript_exp;
+    unique_ptr_t(CExp) primary_exp;
+    unique_ptr_t(CExp) subscript_exp;
     struct CExp* _base;
 };
 
 struct CSizeOf {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     struct CExp* _base;
 };
 
 struct CSizeOfT {
-    shared_ptr_t(struct Type) target_type;
+    shared_ptr_t(Type) target_type;
     struct CExp* _base;
 };
 
 struct CDot {
     TIdentifier member;
-    unique_ptr_t(struct CExp) structure;
+    unique_ptr_t(CExp) structure;
     struct CExp* _base;
 };
 
 struct CArrow {
     TIdentifier member;
-    unique_ptr_t(struct CExp) pointer;
+    unique_ptr_t(CExp) pointer;
     struct CExp* _base;
 };
 
 struct CExp {
     unique_ptr_impl(AST_T);
-    shared_ptr_t(struct Type) exp_type;
+    shared_ptr_t(Type) exp_type;
     unsigned long info_at;
 
     union {
@@ -325,28 +325,28 @@ struct CExp {
     } get;
 };
 
-unique_ptr_t(struct CExp) make_CExp(unsigned long info_at);
-unique_ptr_t(struct CExp) make_CConstant(shared_ptr_t(struct CConst) * constant, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CString(shared_ptr_t(struct CStringLiteral) * literal, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CVar(TIdentifier name, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CCast(unique_ptr_t(struct CExp) * exp, shared_ptr_t(struct Type) * target_type, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CUnary(struct CUnaryOp* unop, unique_ptr_t(struct CExp) * exp, unsigned long info_at);
-unique_ptr_t(struct CExp)
-    make_CBinary(struct CBinaryOp* binop, unique_ptr_t(struct CExp) * exp_left, unique_ptr_t(struct CExp) * exp_right, unsigned long info_at);
-unique_ptr_t(struct CExp)
-    make_CAssignment(struct CUnaryOp* unop, unique_ptr_t(struct CExp) * exp_left, unique_ptr_t(struct CExp) * exp_right, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CConditional(
-    unique_ptr_t(struct CExp) * condition, unique_ptr_t(struct CExp) * exp_middle, unique_ptr_t(struct CExp) * exp_right, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CFunctionCall(TIdentifier name, vector_t(unique_ptr_t(struct CExp)) * args, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CDereference(unique_ptr_t(struct CExp) * exp, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CAddrOf(unique_ptr_t(struct CExp) * exp, unsigned long info_at);
-unique_ptr_t(struct CExp)
-    make_CSubscript(unique_ptr_t(struct CExp) * primary_exp, unique_ptr_t(struct CExp) * subscript_exp, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CSizeOf(unique_ptr_t(struct CExp) * exp, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CSizeOfT(shared_ptr_t(struct Type) * target_type, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CDot(TIdentifier member, unique_ptr_t(struct CExp) * structure, unsigned long info_at);
-unique_ptr_t(struct CExp) make_CArrow(TIdentifier member, unique_ptr_t(struct CExp) * pointer, unsigned long info_at);
-void free_CExp(unique_ptr_t(struct CExp) * self);
+unique_ptr_t(CExp) make_CExp(unsigned long info_at);
+unique_ptr_t(CExp) make_CConstant(shared_ptr_t(CConst) * constant, unsigned long info_at);
+unique_ptr_t(CExp) make_CString(shared_ptr_t(CStringLiteral) * literal, unsigned long info_at);
+unique_ptr_t(CExp) make_CVar(TIdentifier name, unsigned long info_at);
+unique_ptr_t(CExp) make_CCast(unique_ptr_t(CExp) * exp, shared_ptr_t(Type) * target_type, unsigned long info_at);
+unique_ptr_t(CExp) make_CUnary(struct CUnaryOp* unop, unique_ptr_t(CExp) * exp, unsigned long info_at);
+unique_ptr_t(CExp) make_CBinary(
+    struct CBinaryOp* binop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, unsigned long info_at);
+unique_ptr_t(CExp) make_CAssignment(
+    struct CUnaryOp* unop, unique_ptr_t(CExp) * exp_left, unique_ptr_t(CExp) * exp_right, unsigned long info_at);
+unique_ptr_t(CExp) make_CConditional(unique_ptr_t(CExp) * condition, unique_ptr_t(CExp) * exp_middle,
+    unique_ptr_t(CExp) * exp_right, unsigned long info_at);
+unique_ptr_t(CExp) make_CFunctionCall(TIdentifier name, vector_t(unique_ptr_t(CExp)) * args, unsigned long info_at);
+unique_ptr_t(CExp) make_CDereference(unique_ptr_t(CExp) * exp, unsigned long info_at);
+unique_ptr_t(CExp) make_CAddrOf(unique_ptr_t(CExp) * exp, unsigned long info_at);
+unique_ptr_t(CExp)
+    make_CSubscript(unique_ptr_t(CExp) * primary_exp, unique_ptr_t(CExp) * subscript_exp, unsigned long info_at);
+unique_ptr_t(CExp) make_CSizeOf(unique_ptr_t(CExp) * exp, unsigned long info_at);
+unique_ptr_t(CExp) make_CSizeOfT(shared_ptr_t(Type) * target_type, unsigned long info_at);
+unique_ptr_t(CExp) make_CDot(TIdentifier member, unique_ptr_t(CExp) * structure, unsigned long info_at);
+unique_ptr_t(CExp) make_CArrow(TIdentifier member, unique_ptr_t(CExp) * pointer, unsigned long info_at);
+void free_CExp(unique_ptr_t(CExp) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -367,18 +367,18 @@ void free_CExp(unique_ptr_t(struct CExp) * self);
 //           | Null
 
 struct CReturn {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     unsigned long info_at;
 };
 
 struct CExpression {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
 };
 
 struct CIf {
-    unique_ptr_t(struct CExp) condition;
-    unique_ptr_t(struct CStatement) then;
-    unique_ptr_t(struct CStatement) else_fi;
+    unique_ptr_t(CExp) condition;
+    unique_ptr_t(CStatement) then;
+    unique_ptr_t(CStatement) else_fi;
 };
 
 struct CGoto {
@@ -388,51 +388,51 @@ struct CGoto {
 
 struct CLabel {
     TIdentifier target;
-    unique_ptr_t(struct CStatement) jump_to;
+    unique_ptr_t(CStatement) jump_to;
     unsigned long info_at;
 };
 
 struct CCompound {
-    unique_ptr_t(struct CBlock) block;
+    unique_ptr_t(CBlock) block;
 };
 
 struct CWhile {
     TIdentifier target;
-    unique_ptr_t(struct CExp) condition;
-    unique_ptr_t(struct CStatement) body;
+    unique_ptr_t(CExp) condition;
+    unique_ptr_t(CStatement) body;
 };
 
 struct CDoWhile {
     TIdentifier target;
-    unique_ptr_t(struct CExp) condition;
-    unique_ptr_t(struct CStatement) body;
+    unique_ptr_t(CExp) condition;
+    unique_ptr_t(CStatement) body;
 };
 
 struct CFor {
     TIdentifier target;
-    unique_ptr_t(struct CForInit) init;
-    unique_ptr_t(struct CExp) condition;
-    unique_ptr_t(struct CExp) post;
-    unique_ptr_t(struct CStatement) body;
+    unique_ptr_t(CForInit) init;
+    unique_ptr_t(CExp) condition;
+    unique_ptr_t(CExp) post;
+    unique_ptr_t(CStatement) body;
 };
 
 struct CSwitch {
     TIdentifier target;
     bool is_default;
-    unique_ptr_t(struct CExp) match;
-    unique_ptr_t(struct CStatement) body;
-    vector_t(unique_ptr_t(struct CExp)) cases;
+    unique_ptr_t(CExp) match;
+    unique_ptr_t(CStatement) body;
+    vector_t(unique_ptr_t(CExp)) cases;
 };
 
 struct CCase {
     TIdentifier target;
-    unique_ptr_t(struct CExp) value;
-    unique_ptr_t(struct CStatement) jump_to;
+    unique_ptr_t(CExp) value;
+    unique_ptr_t(CStatement) jump_to;
 };
 
 struct CDefault {
     TIdentifier target;
-    unique_ptr_t(struct CStatement) jump_to;
+    unique_ptr_t(CStatement) jump_to;
     unsigned long info_at;
 };
 
@@ -472,25 +472,25 @@ struct CStatement {
     } get;
 };
 
-unique_ptr_t(struct CStatement) make_CStatement(void);
-unique_ptr_t(struct CStatement) make_CReturn(unique_ptr_t(struct CExp) * exp, unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CExpression(unique_ptr_t(struct CExp) * exp);
-unique_ptr_t(struct CStatement)
-    make_CIf(unique_ptr_t(struct CExp) * condition, unique_ptr_t(struct CStatement) * then, unique_ptr_t(struct CStatement) * else_fi);
-unique_ptr_t(struct CStatement) make_CGoto(TIdentifier target, unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CLabel(TIdentifier target, unique_ptr_t(struct CStatement) * jump_to, unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CCompound(unique_ptr_t(struct CBlock) * block);
-unique_ptr_t(struct CStatement) make_CWhile(unique_ptr_t(struct CExp) * condition, unique_ptr_t(struct CStatement) * body);
-unique_ptr_t(struct CStatement) make_CDoWhile(unique_ptr_t(struct CExp) * condition, unique_ptr_t(struct CStatement) * body);
-unique_ptr_t(struct CStatement) make_CFor(unique_ptr_t(struct CForInit) * init, unique_ptr_t(struct CExp) * condition,
-    unique_ptr_t(struct CExp) * post, unique_ptr_t(struct CStatement) * body);
-unique_ptr_t(struct CStatement) make_CSwitch(unique_ptr_t(struct CExp) * match, unique_ptr_t(struct CStatement) * body);
-unique_ptr_t(struct CStatement) make_CCase(unique_ptr_t(struct CExp) * value, unique_ptr_t(struct CStatement) * jump_to);
-unique_ptr_t(struct CStatement) make_CDefault(unique_ptr_t(struct CStatement) * jump_to, unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CBreak(unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CContinue(unsigned long info_at);
-unique_ptr_t(struct CStatement) make_CNull(void);
-void free_CStatement(unique_ptr_t(struct CStatement) * self);
+unique_ptr_t(CStatement) make_CStatement(void);
+unique_ptr_t(CStatement) make_CReturn(unique_ptr_t(CExp) * exp, unsigned long info_at);
+unique_ptr_t(CStatement) make_CExpression(unique_ptr_t(CExp) * exp);
+unique_ptr_t(CStatement)
+    make_CIf(unique_ptr_t(CExp) * condition, unique_ptr_t(CStatement) * then, unique_ptr_t(CStatement) * else_fi);
+unique_ptr_t(CStatement) make_CGoto(TIdentifier target, unsigned long info_at);
+unique_ptr_t(CStatement) make_CLabel(TIdentifier target, unique_ptr_t(CStatement) * jump_to, unsigned long info_at);
+unique_ptr_t(CStatement) make_CCompound(unique_ptr_t(CBlock) * block);
+unique_ptr_t(CStatement) make_CWhile(unique_ptr_t(CExp) * condition, unique_ptr_t(CStatement) * body);
+unique_ptr_t(CStatement) make_CDoWhile(unique_ptr_t(CExp) * condition, unique_ptr_t(CStatement) * body);
+unique_ptr_t(CStatement) make_CFor(unique_ptr_t(CForInit) * init, unique_ptr_t(CExp) * condition,
+    unique_ptr_t(CExp) * post, unique_ptr_t(CStatement) * body);
+unique_ptr_t(CStatement) make_CSwitch(unique_ptr_t(CExp) * match, unique_ptr_t(CStatement) * body);
+unique_ptr_t(CStatement) make_CCase(unique_ptr_t(CExp) * value, unique_ptr_t(CStatement) * jump_to);
+unique_ptr_t(CStatement) make_CDefault(unique_ptr_t(CStatement) * jump_to, unsigned long info_at);
+unique_ptr_t(CStatement) make_CBreak(unsigned long info_at);
+unique_ptr_t(CStatement) make_CContinue(unsigned long info_at);
+unique_ptr_t(CStatement) make_CNull(void);
+void free_CStatement(unique_ptr_t(CStatement) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -498,11 +498,11 @@ void free_CStatement(unique_ptr_t(struct CStatement) * self);
 //          | InitExp(exp?)
 
 struct CInitDecl {
-    unique_ptr_t(struct CVariableDeclaration) init;
+    unique_ptr_t(CVariableDeclaration) init;
 };
 
 struct CInitExp {
-    unique_ptr_t(struct CExp) init;
+    unique_ptr_t(CExp) init;
 };
 
 struct CForInit {
@@ -514,17 +514,17 @@ struct CForInit {
     } get;
 };
 
-unique_ptr_t(struct CForInit) make_CForInit(void);
-unique_ptr_t(struct CForInit) make_CInitDecl(unique_ptr_t(struct CVariableDeclaration) * init);
-unique_ptr_t(struct CForInit) make_CInitExp(unique_ptr_t(struct CExp) * init);
-void free_CForInit(unique_ptr_t(struct CForInit) * self);
+unique_ptr_t(CForInit) make_CForInit(void);
+unique_ptr_t(CForInit) make_CInitDecl(unique_ptr_t(CVariableDeclaration) * init);
+unique_ptr_t(CForInit) make_CInitExp(unique_ptr_t(CExp) * init);
+void free_CForInit(unique_ptr_t(CForInit) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // block = B(block_item*)
 
 struct CB {
-    vector_t(unique_ptr_t(struct CBlockItem)) block_items;
+    vector_t(unique_ptr_t(CBlockItem)) block_items;
 };
 
 struct CBlock {
@@ -535,9 +535,9 @@ struct CBlock {
     } get;
 };
 
-unique_ptr_t(struct CBlock) make_CBlock(void);
-unique_ptr_t(struct CBlock) make_CB(vector_t(unique_ptr_t(struct CBlockItem)) * block_items);
-void free_CBlock(unique_ptr_t(struct CBlock) * self);
+unique_ptr_t(CBlock) make_CBlock(void);
+unique_ptr_t(CBlock) make_CB(vector_t(unique_ptr_t(CBlockItem)) * block_items);
+void free_CBlock(unique_ptr_t(CBlock) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -545,11 +545,11 @@ void free_CBlock(unique_ptr_t(struct CBlock) * self);
 //            | D(declaration)
 
 struct CS {
-    unique_ptr_t(struct CStatement) statement;
+    unique_ptr_t(CStatement) statement;
 };
 
 struct CD {
-    unique_ptr_t(struct CDeclaration) declaration;
+    unique_ptr_t(CDeclaration) declaration;
 };
 
 struct CBlockItem {
@@ -561,10 +561,10 @@ struct CBlockItem {
     } get;
 };
 
-unique_ptr_t(struct CBlockItem) make_CBlockItem(void);
-unique_ptr_t(struct CBlockItem) make_CS(unique_ptr_t(struct CStatement) * statement);
-unique_ptr_t(struct CBlockItem) make_CD(unique_ptr_t(struct CDeclaration) * declaration);
-void free_CBlockItem(unique_ptr_t(struct CBlockItem) * self);
+unique_ptr_t(CBlockItem) make_CBlockItem(void);
+unique_ptr_t(CBlockItem) make_CS(unique_ptr_t(CStatement) * statement);
+unique_ptr_t(CBlockItem) make_CD(unique_ptr_t(CDeclaration) * declaration);
+void free_CBlockItem(unique_ptr_t(CBlockItem) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -585,18 +585,18 @@ struct CStorageClass {
 //             | CompoundInit(initializer*)
 
 struct CSingleInit {
-    unique_ptr_t(struct CExp) exp;
+    unique_ptr_t(CExp) exp;
     struct CInitializer* _base;
 };
 
 struct CCompoundInit {
-    vector_t(unique_ptr_t(struct CInitializer)) initializers;
+    vector_t(unique_ptr_t(CInitializer)) initializers;
     struct CInitializer* _base;
 };
 
 struct CInitializer {
     unique_ptr_impl(AST_T);
-    shared_ptr_t(struct Type) init_type;
+    shared_ptr_t(Type) init_type;
 
     union {
         struct CSingleInit _CSingleInit;
@@ -604,10 +604,10 @@ struct CInitializer {
     } get;
 };
 
-unique_ptr_t(struct CInitializer) make_CInitializer(void);
-unique_ptr_t(struct CInitializer) make_CSingleInit(unique_ptr_t(struct CExp) * exp);
-unique_ptr_t(struct CInitializer) make_CCompoundInit(vector_t(unique_ptr_t(struct CInitializer)) * initializers);
-void free_CInitializer(unique_ptr_t(struct CInitializer) * self);
+unique_ptr_t(CInitializer) make_CInitializer(void);
+unique_ptr_t(CInitializer) make_CSingleInit(unique_ptr_t(CExp) * exp);
+unique_ptr_t(CInitializer) make_CCompoundInit(vector_t(unique_ptr_t(CInitializer)) * initializers);
+void free_CInitializer(unique_ptr_t(CInitializer) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -616,13 +616,13 @@ void free_CInitializer(unique_ptr_t(struct CInitializer) * self);
 struct CMemberDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier member_name;
-    shared_ptr_t(struct Type) member_type;
+    shared_ptr_t(Type) member_type;
     unsigned long info_at;
 };
 
-unique_ptr_t(struct CMemberDeclaration)
-    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(struct Type) * member_type, unsigned long info_at);
-void free_CMemberDeclaration(unique_ptr_t(struct CMemberDeclaration) * self);
+unique_ptr_t(CMemberDeclaration)
+    make_CMemberDeclaration(TIdentifier member_name, shared_ptr_t(Type) * member_type, unsigned long info_at);
+void free_CMemberDeclaration(unique_ptr_t(CMemberDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -632,13 +632,13 @@ struct CStructDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier tag;
     bool is_union;
-    vector_t(unique_ptr_t(struct CMemberDeclaration)) members;
+    vector_t(unique_ptr_t(CMemberDeclaration)) members;
     unsigned long info_at;
 };
 
-unique_ptr_t(struct CStructDeclaration) make_CStructDeclaration(
-    TIdentifier tag, bool is_union, vector_t(unique_ptr_t(struct CMemberDeclaration)) * members, unsigned long info_at);
-void free_CStructDeclaration(unique_ptr_t(struct CStructDeclaration) * self);
+unique_ptr_t(CStructDeclaration) make_CStructDeclaration(
+    TIdentifier tag, bool is_union, vector_t(unique_ptr_t(CMemberDeclaration)) * members, unsigned long info_at);
+void free_CStructDeclaration(unique_ptr_t(CStructDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -648,15 +648,16 @@ struct CFunctionDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier name;
     vector_t(TIdentifier) params;
-    unique_ptr_t(struct CBlock) body;
-    shared_ptr_t(struct Type) fun_type;
+    unique_ptr_t(CBlock) body;
+    shared_ptr_t(Type) fun_type;
     struct CStorageClass storage_class;
     unsigned long info_at;
 };
 
-unique_ptr_t(struct CFunctionDeclaration) make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params,
-    unique_ptr_t(struct CBlock) * body, shared_ptr_t(struct Type) * fun_type, struct CStorageClass* storage_class, unsigned long info_at);
-void free_CFunctionDeclaration(unique_ptr_t(struct CFunctionDeclaration) * self);
+unique_ptr_t(CFunctionDeclaration)
+    make_CFunctionDeclaration(TIdentifier name, vector_t(TIdentifier) * params, unique_ptr_t(CBlock) * body,
+        shared_ptr_t(Type) * fun_type, struct CStorageClass* storage_class, unsigned long info_at);
+void free_CFunctionDeclaration(unique_ptr_t(CFunctionDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -665,15 +666,15 @@ void free_CFunctionDeclaration(unique_ptr_t(struct CFunctionDeclaration) * self)
 struct CVariableDeclaration {
     unique_ptr_impl(AST_T);
     TIdentifier name;
-    unique_ptr_t(struct CInitializer) init;
-    shared_ptr_t(struct Type) var_type;
+    unique_ptr_t(CInitializer) init;
+    shared_ptr_t(Type) var_type;
     struct CStorageClass storage_class;
     unsigned long info_at;
 };
 
-unique_ptr_t(struct CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(struct CInitializer) * init,
-    shared_ptr_t(struct Type) * var_type, struct CStorageClass* storage_class, unsigned long info_at);
-void free_CVariableDeclaration(unique_ptr_t(struct CVariableDeclaration) * self);
+unique_ptr_t(CVariableDeclaration) make_CVariableDeclaration(TIdentifier name, unique_ptr_t(CInitializer) * init,
+    shared_ptr_t(Type) * var_type, struct CStorageClass* storage_class, unsigned long info_at);
+void free_CVariableDeclaration(unique_ptr_t(CVariableDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -682,15 +683,15 @@ void free_CVariableDeclaration(unique_ptr_t(struct CVariableDeclaration) * self)
 //             | StructDecl(struct_declaration)
 
 struct CFunDecl {
-    unique_ptr_t(struct CFunctionDeclaration) fun_decl;
+    unique_ptr_t(CFunctionDeclaration) fun_decl;
 };
 
 struct CVarDecl {
-    unique_ptr_t(struct CVariableDeclaration) var_decl;
+    unique_ptr_t(CVariableDeclaration) var_decl;
 };
 
 struct CStructDecl {
-    unique_ptr_t(struct CStructDeclaration) struct_decl;
+    unique_ptr_t(CStructDeclaration) struct_decl;
 };
 
 struct CDeclaration {
@@ -703,11 +704,11 @@ struct CDeclaration {
     } get;
 };
 
-unique_ptr_t(struct CDeclaration) make_CDeclaration(void);
-unique_ptr_t(struct CDeclaration) make_CFunDecl(unique_ptr_t(struct CFunctionDeclaration) * fun_decl);
-unique_ptr_t(struct CDeclaration) make_CVarDecl(unique_ptr_t(struct CVariableDeclaration) * var_decl);
-unique_ptr_t(struct CDeclaration) make_CStructDecl(unique_ptr_t(struct CStructDeclaration) * struct_decl);
-void free_CDeclaration(unique_ptr_t(struct CDeclaration) * self);
+unique_ptr_t(CDeclaration) make_CDeclaration(void);
+unique_ptr_t(CDeclaration) make_CFunDecl(unique_ptr_t(CFunctionDeclaration) * fun_decl);
+unique_ptr_t(CDeclaration) make_CVarDecl(unique_ptr_t(CVariableDeclaration) * var_decl);
+unique_ptr_t(CDeclaration) make_CStructDecl(unique_ptr_t(CStructDeclaration) * struct_decl);
+void free_CDeclaration(unique_ptr_t(CDeclaration) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -715,10 +716,10 @@ void free_CDeclaration(unique_ptr_t(struct CDeclaration) * self);
 
 struct CProgram {
     unique_ptr_impl(AST_T);
-    vector_t(unique_ptr_t(struct CDeclaration)) declarations;
+    vector_t(unique_ptr_t(CDeclaration)) declarations;
 };
 
-unique_ptr_t(struct CProgram) make_CProgram(vector_t(unique_ptr_t(struct CDeclaration)) * declarations);
-void free_CProgram(unique_ptr_t(struct CProgram) * self);
+unique_ptr_t(CProgram) make_CProgram(vector_t(unique_ptr_t(CDeclaration)) * declarations);
+void free_CProgram(unique_ptr_t(CProgram) * self);
 
 #endif

@@ -84,7 +84,7 @@ struct TacBinaryOp {
 //     | Var(identifier)
 
 struct TacConstant {
-    shared_ptr_t(struct CConst) constant;
+    shared_ptr_t(CConst) constant;
 };
 
 struct TacVariable {
@@ -100,10 +100,10 @@ struct TacValue {
     } get;
 };
 
-shared_ptr_t(struct TacValue) make_TacValue(void);
-shared_ptr_t(struct TacValue) make_TacConstant(shared_ptr_t(struct CConst) * constant);
-shared_ptr_t(struct TacValue) make_TacVariable(TIdentifier name);
-void free_TacValue(shared_ptr_t(struct TacValue) * self);
+shared_ptr_t(TacValue) make_TacValue(void);
+shared_ptr_t(TacValue) make_TacConstant(shared_ptr_t(CConst) * constant);
+shared_ptr_t(TacValue) make_TacVariable(TIdentifier name);
+void free_TacValue(shared_ptr_t(TacValue) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -112,11 +112,11 @@ void free_TacValue(shared_ptr_t(struct TacValue) * self);
 //            | SubObject(identifier, int)
 
 struct TacPlainOperand {
-    shared_ptr_t(struct TacValue) val;
+    shared_ptr_t(TacValue) val;
 };
 
 struct TacDereferencedPointer {
-    shared_ptr_t(struct TacValue) val;
+    shared_ptr_t(TacValue) val;
 };
 
 struct TacSubObject {
@@ -134,11 +134,11 @@ struct TacExpResult {
     } get;
 };
 
-unique_ptr_t(struct TacExpResult) make_TacExpResult(void);
-unique_ptr_t(struct TacExpResult) make_TacPlainOperand(shared_ptr_t(struct TacValue) * val);
-unique_ptr_t(struct TacExpResult) make_TacDereferencedPointer(shared_ptr_t(struct TacValue) * val);
-unique_ptr_t(struct TacExpResult) make_TacSubObject(TIdentifier base_name, TLong offset);
-void free_TacExpResult(unique_ptr_t(struct TacExpResult) * self);
+unique_ptr_t(TacExpResult) make_TacExpResult(void);
+unique_ptr_t(TacExpResult) make_TacPlainOperand(shared_ptr_t(TacValue) * val);
+unique_ptr_t(TacExpResult) make_TacDereferencedPointer(shared_ptr_t(TacValue) * val);
+unique_ptr_t(TacExpResult) make_TacSubObject(TIdentifier base_name, TLong offset);
+void free_TacExpResult(unique_ptr_t(TacExpResult) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -166,100 +166,100 @@ void free_TacExpResult(unique_ptr_t(struct TacExpResult) * self);
 //             | Label(identifier)
 
 struct TacReturn {
-    shared_ptr_t(struct TacValue) val;
+    shared_ptr_t(TacValue) val;
 };
 
 struct TacSignExtend {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacTruncate {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacZeroExtend {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacDoubleToInt {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacDoubleToUInt {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacIntToDouble {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacUIntToDouble {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacFunCall {
     TIdentifier name;
-    vector_t(shared_ptr_t(struct TacValue)) args;
-    shared_ptr_t(struct TacValue) dst;
+    vector_t(shared_ptr_t(TacValue)) args;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacUnary {
     struct TacUnaryOp unop;
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacBinary {
     struct TacBinaryOp binop;
-    shared_ptr_t(struct TacValue) src1;
-    shared_ptr_t(struct TacValue) src2;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src1;
+    shared_ptr_t(TacValue) src2;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacCopy {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacGetAddress {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacLoad {
-    shared_ptr_t(struct TacValue) src_ptr;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src_ptr;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacStore {
-    shared_ptr_t(struct TacValue) src;
-    shared_ptr_t(struct TacValue) dst_ptr;
+    shared_ptr_t(TacValue) src;
+    shared_ptr_t(TacValue) dst_ptr;
 };
 
 struct TacAddPtr {
     TLong scale;
-    shared_ptr_t(struct TacValue) src_ptr;
-    shared_ptr_t(struct TacValue) idx;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) src_ptr;
+    shared_ptr_t(TacValue) idx;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacCopyToOffset {
     TIdentifier dst_name;
     TLong offset;
-    shared_ptr_t(struct TacValue) src;
+    shared_ptr_t(TacValue) src;
 };
 
 struct TacCopyFromOffset {
     TIdentifier src_name;
     TLong offset;
-    shared_ptr_t(struct TacValue) dst;
+    shared_ptr_t(TacValue) dst;
 };
 
 struct TacJump {
@@ -268,12 +268,12 @@ struct TacJump {
 
 struct TacJumpIfZero {
     TIdentifier target;
-    shared_ptr_t(struct TacValue) condition;
+    shared_ptr_t(TacValue) condition;
 };
 
 struct TacJumpIfNotZero {
     TIdentifier target;
-    shared_ptr_t(struct TacValue) condition;
+    shared_ptr_t(TacValue) condition;
 };
 
 struct TacLabel {
@@ -309,34 +309,34 @@ struct TacInstruction {
     } get;
 };
 
-unique_ptr_t(struct TacInstruction) make_TacInstruction(void);
-unique_ptr_t(struct TacInstruction) make_TacReturn(shared_ptr_t(struct TacValue) * val);
-unique_ptr_t(struct TacInstruction) make_TacSignExtend(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacTruncate(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacZeroExtend(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacDoubleToInt(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacDoubleToUInt(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacIntToDouble(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacUIntToDouble(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction)
-    make_TacFunCall(TIdentifier name, vector_t(shared_ptr_t(struct TacValue)) * args, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction)
-    make_TacUnary(struct TacUnaryOp* unop, shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacBinary(
-    struct TacBinaryOp* binop, shared_ptr_t(struct TacValue) * src1, shared_ptr_t(struct TacValue) * src2, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacCopy(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacGetAddress(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacLoad(shared_ptr_t(struct TacValue) * src_ptr, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacStore(shared_ptr_t(struct TacValue) * src, shared_ptr_t(struct TacValue) * dst_ptr);
-unique_ptr_t(struct TacInstruction) make_TacAddPtr(
-    TLong scale, shared_ptr_t(struct TacValue) * src_ptr, shared_ptr_t(struct TacValue) * idx, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacCopyToOffset(TIdentifier dst_name, TLong offset, shared_ptr_t(struct TacValue) * src);
-unique_ptr_t(struct TacInstruction) make_TacCopyFromOffset(TIdentifier src_name, TLong offset, shared_ptr_t(struct TacValue) * dst);
-unique_ptr_t(struct TacInstruction) make_TacJump(TIdentifier target);
-unique_ptr_t(struct TacInstruction) make_TacJumpIfZero(TIdentifier target, shared_ptr_t(struct TacValue) * condition);
-unique_ptr_t(struct TacInstruction) make_TacJumpIfNotZero(TIdentifier target, shared_ptr_t(struct TacValue) * condition);
-unique_ptr_t(struct TacInstruction) make_TacLabel(TIdentifier name);
-void free_TacInstruction(unique_ptr_t(struct TacInstruction) * self);
+unique_ptr_t(TacInstruction) make_TacInstruction(void);
+unique_ptr_t(TacInstruction) make_TacReturn(shared_ptr_t(TacValue) * val);
+unique_ptr_t(TacInstruction) make_TacSignExtend(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacTruncate(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacZeroExtend(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacDoubleToInt(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacDoubleToUInt(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacIntToDouble(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacUIntToDouble(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction)
+    make_TacFunCall(TIdentifier name, vector_t(shared_ptr_t(TacValue)) * args, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction)
+    make_TacUnary(struct TacUnaryOp* unop, shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacBinary(struct TacBinaryOp* binop, shared_ptr_t(TacValue) * src1,
+    shared_ptr_t(TacValue) * src2, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacCopy(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacGetAddress(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacLoad(shared_ptr_t(TacValue) * src_ptr, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacStore(shared_ptr_t(TacValue) * src, shared_ptr_t(TacValue) * dst_ptr);
+unique_ptr_t(TacInstruction) make_TacAddPtr(
+    TLong scale, shared_ptr_t(TacValue) * src_ptr, shared_ptr_t(TacValue) * idx, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacCopyToOffset(TIdentifier dst_name, TLong offset, shared_ptr_t(TacValue) * src);
+unique_ptr_t(TacInstruction) make_TacCopyFromOffset(TIdentifier src_name, TLong offset, shared_ptr_t(TacValue) * dst);
+unique_ptr_t(TacInstruction) make_TacJump(TIdentifier target);
+unique_ptr_t(TacInstruction) make_TacJumpIfZero(TIdentifier target, shared_ptr_t(TacValue) * condition);
+unique_ptr_t(TacInstruction) make_TacJumpIfNotZero(TIdentifier target, shared_ptr_t(TacValue) * condition);
+unique_ptr_t(TacInstruction) make_TacLabel(TIdentifier name);
+void free_TacInstruction(unique_ptr_t(TacInstruction) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -348,20 +348,20 @@ struct TacFunction {
     TIdentifier name;
     bool is_glob;
     vector_t(TIdentifier) params;
-    vector_t(unique_ptr_t(struct TacInstruction)) body;
+    vector_t(unique_ptr_t(TacInstruction)) body;
 };
 
 struct TacStaticVariable {
     TIdentifier name;
     bool is_glob;
-    shared_ptr_t(struct Type) static_init_type;
-    vector_t(shared_ptr_t(struct StaticInit)) static_inits;
+    shared_ptr_t(Type) static_init_type;
+    vector_t(shared_ptr_t(StaticInit)) static_inits;
 };
 
 struct TacStaticConstant {
     TIdentifier name;
-    shared_ptr_t(struct Type) static_init_type;
-    shared_ptr_t(struct StaticInit) static_init;
+    shared_ptr_t(Type) static_init_type;
+    shared_ptr_t(StaticInit) static_init;
 };
 
 struct TacTopLevel {
@@ -374,14 +374,14 @@ struct TacTopLevel {
     } get;
 };
 
-unique_ptr_t(struct TacTopLevel) make_TacTopLevel(void);
-unique_ptr_t(struct TacTopLevel) make_TacFunction(
-    TIdentifier name, bool is_glob, vector_t(TIdentifier) * params, vector_t(unique_ptr_t(struct TacInstruction)) * body);
-unique_ptr_t(struct TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(struct Type) * static_init_type,
-    vector_t(shared_ptr_t(struct StaticInit)) * static_inits);
-unique_ptr_t(struct TacTopLevel) make_TacStaticConstant(
-    TIdentifier name, shared_ptr_t(struct Type) * static_init_type, shared_ptr_t(struct StaticInit) * static_init);
-void free_TacTopLevel(unique_ptr_t(struct TacTopLevel) * self);
+unique_ptr_t(TacTopLevel) make_TacTopLevel(void);
+unique_ptr_t(TacTopLevel) make_TacFunction(
+    TIdentifier name, bool is_glob, vector_t(TIdentifier) * params, vector_t(unique_ptr_t(TacInstruction)) * body);
+unique_ptr_t(TacTopLevel) make_TacStaticVariable(TIdentifier name, bool is_glob, shared_ptr_t(Type) * static_init_type,
+    vector_t(shared_ptr_t(StaticInit)) * static_inits);
+unique_ptr_t(TacTopLevel) make_TacStaticConstant(
+    TIdentifier name, shared_ptr_t(Type) * static_init_type, shared_ptr_t(StaticInit) * static_init);
+void free_TacTopLevel(unique_ptr_t(TacTopLevel) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -389,13 +389,13 @@ void free_TacTopLevel(unique_ptr_t(struct TacTopLevel) * self);
 
 struct TacProgram {
     unique_ptr_impl(AST_T);
-    vector_t(unique_ptr_t(struct TacTopLevel)) static_const_toplvls;
-    vector_t(unique_ptr_t(struct TacTopLevel)) static_var_toplvls;
-    vector_t(unique_ptr_t(struct TacTopLevel)) fun_toplvls;
+    vector_t(unique_ptr_t(TacTopLevel)) static_const_toplvls;
+    vector_t(unique_ptr_t(TacTopLevel)) static_var_toplvls;
+    vector_t(unique_ptr_t(TacTopLevel)) fun_toplvls;
 };
 
-unique_ptr_t(struct TacProgram) make_TacProgram(vector_t(unique_ptr_t(struct TacTopLevel)) * static_const_toplvls,
-    vector_t(unique_ptr_t(struct TacTopLevel)) * static_var_toplvls, vector_t(unique_ptr_t(struct TacTopLevel)) * fun_toplvls);
-void free_TacProgram(unique_ptr_t(struct TacProgram) * self);
+unique_ptr_t(TacProgram) make_TacProgram(vector_t(unique_ptr_t(TacTopLevel)) * static_const_toplvls,
+    vector_t(unique_ptr_t(TacTopLevel)) * static_var_toplvls, vector_t(unique_ptr_t(TacTopLevel)) * fun_toplvls);
+void free_TacProgram(unique_ptr_t(TacProgram) * self);
 
 #endif

@@ -66,15 +66,15 @@ struct CConst {
     } get;
 };
 
-shared_ptr_t(struct CConst) make_CConst(void);
-shared_ptr_t(struct CConst) make_CConstInt(TInt value);
-shared_ptr_t(struct CConst) make_CConstLong(TLong value);
-shared_ptr_t(struct CConst) make_CConstUInt(TUInt value);
-shared_ptr_t(struct CConst) make_CConstULong(TULong value);
-shared_ptr_t(struct CConst) make_CConstDouble(TDouble value);
-shared_ptr_t(struct CConst) make_CConstChar(TChar value);
-shared_ptr_t(struct CConst) make_CConstUChar(TUChar value);
-void free_CConst(shared_ptr_t(struct CConst) * self);
+shared_ptr_t(CConst) make_CConst(void);
+shared_ptr_t(CConst) make_CConstInt(TInt value);
+shared_ptr_t(CConst) make_CConstLong(TLong value);
+shared_ptr_t(CConst) make_CConstUInt(TUInt value);
+shared_ptr_t(CConst) make_CConstULong(TULong value);
+shared_ptr_t(CConst) make_CConstDouble(TDouble value);
+shared_ptr_t(CConst) make_CConstChar(TChar value);
+shared_ptr_t(CConst) make_CConstUChar(TUChar value);
+void free_CConst(shared_ptr_t(CConst) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -85,8 +85,8 @@ struct CStringLiteral {
     vector_t(TChar) value;
 };
 
-shared_ptr_t(struct CStringLiteral) make_CStringLiteral(vector_t(TChar) * value);
-void free_CStringLiteral(shared_ptr_t(struct CStringLiteral) * self);
+shared_ptr_t(CStringLiteral) make_CStringLiteral(vector_t(TChar) * value);
+void free_CStringLiteral(shared_ptr_t(CStringLiteral) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

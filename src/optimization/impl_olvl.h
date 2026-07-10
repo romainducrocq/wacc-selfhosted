@@ -9,12 +9,12 @@
 
 #if __OPTIM_LEVEL__ == 1
 #define mask_t TULong
-#define AstInstruction struct TacInstruction
+#define AstInstruction TacInstruction
 #define Ctx struct OptimTacContext*
 #define free_AstInstruction(X) free_TacInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(TacInstruction, X, Y)
 #elif __OPTIM_LEVEL__ == 2
-#define AstInstruction struct AsmInstruction
+#define AstInstruction AsmInstruction
 #define Ctx struct RegAllocContext*
 #define free_AstInstruction(X) free_AsmInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(AsmInstruction, X, Y)
@@ -53,7 +53,7 @@ struct DataFlowAnalysis {
 struct DataFlowAnalysisO1 {
     // Copy propagation
     vector_t(size_t) data_idx_map;
-    vector_t(unique_ptr_t(struct TacInstruction)) bak_instrs;
+    vector_t(unique_ptr_t(TacInstruction)) bak_instrs;
     // Dead store elimination
     size_t addressed_idx;
 };
@@ -64,7 +64,7 @@ struct DataFlowAnalysisO2 {
 };
 #endif
 
-static void free_ControlFlowGraph(unique_ptr_t(struct ControlFlowGraph) * self) {
+static void free_ControlFlowGraph(unique_ptr_t(ControlFlowGraph) * self) {
     uptr_delete(*self);
     vec_delete((*self)->entry_succ_ids);
     vec_delete((*self)->exit_pred_ids);
@@ -78,8 +78,8 @@ static void free_ControlFlowGraph(unique_ptr_t(struct ControlFlowGraph) * self) 
     uptr_free(*self);
 }
 
-static unique_ptr_t(struct ControlFlowGraph) make_ControlFlowGraph(void) {
-    unique_ptr_t(struct ControlFlowGraph) self = uptr_new();
+static unique_ptr_t(ControlFlowGraph) make_ControlFlowGraph(void) {
+    unique_ptr_t(ControlFlowGraph) self = uptr_new();
     uptr_alloc(ControlFlowGraph, self);
     self->entry_id = 0;
     self->exit_id = 0;
@@ -91,7 +91,7 @@ static unique_ptr_t(struct ControlFlowGraph) make_ControlFlowGraph(void) {
     return self;
 }
 
-static void free_DataFlowAnalysis(unique_ptr_t(struct DataFlowAnalysis) * self) {
+static void free_DataFlowAnalysis(unique_ptr_t(DataFlowAnalysis) * self) {
     uptr_delete(*self);
     vec_delete((*self)->open_data_map);
     vec_delete((*self)->instr_idx_map);
@@ -100,8 +100,8 @@ static void free_DataFlowAnalysis(unique_ptr_t(struct DataFlowAnalysis) * self) 
     uptr_free(*self);
 }
 
-static unique_ptr_t(struct DataFlowAnalysis) make_DataFlowAnalysis(void) {
-    unique_ptr_t(struct DataFlowAnalysis) self = uptr_new();
+static unique_ptr_t(DataFlowAnalysis) make_DataFlowAnalysis(void) {
+    unique_ptr_t(DataFlowAnalysis) self = uptr_new();
     uptr_alloc(DataFlowAnalysis, self);
     self->set_size = 0;
     self->mask_size = 0;
@@ -115,7 +115,7 @@ static unique_ptr_t(struct DataFlowAnalysis) make_DataFlowAnalysis(void) {
 }
 
 #if __OPTIM_LEVEL__ == 1
-static void free_DataFlowAnalysisO1(unique_ptr_t(struct DataFlowAnalysisO1) * self) {
+static void free_DataFlowAnalysisO1(unique_ptr_t(DataFlowAnalysisO1) * self) {
     uptr_delete(*self);
     vec_delete((*self)->data_idx_map);
     for (size_t i = 0; i < vec_size((*self)->bak_instrs); ++i) {
@@ -125,8 +125,8 @@ static void free_DataFlowAnalysisO1(unique_ptr_t(struct DataFlowAnalysisO1) * se
     uptr_free(*self);
 }
 
-static unique_ptr_t(struct DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
-    unique_ptr_t(struct DataFlowAnalysisO1) self = uptr_new();
+static unique_ptr_t(DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
+    unique_ptr_t(DataFlowAnalysisO1) self = uptr_new();
     uptr_alloc(DataFlowAnalysisO1, self);
     self->addressed_idx = 0;
     self->data_idx_map = vec_new();
@@ -134,14 +134,14 @@ static unique_ptr_t(struct DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
     return self;
 }
 #elif __OPTIM_LEVEL__ == 2
-static void free_DataFlowAnalysisO2(unique_ptr_t(struct DataFlowAnalysisO2) * self) {
+static void free_DataFlowAnalysisO2(unique_ptr_t(DataFlowAnalysisO2) * self) {
     uptr_delete(*self);
     vec_delete((*self)->data_name_map);
     uptr_free(*self);
 }
 
-static unique_ptr_t(struct DataFlowAnalysisO2) make_DataFlowAnalysisO2(void) {
-    unique_ptr_t(struct DataFlowAnalysisO2) self = uptr_new();
+static unique_ptr_t(DataFlowAnalysisO2) make_DataFlowAnalysisO2(void) {
+    unique_ptr_t(DataFlowAnalysisO2) self = uptr_new();
     uptr_alloc(DataFlowAnalysisO2, self);
     self->data_name_map = vec_new();
     return self;
@@ -313,7 +313,7 @@ static void cfg_init_label_block(Ctx ctx, struct AsmLabel* node) {
 #endif
 
 static void cfg_init_block(Ctx ctx, size_t instr_idx, size_t* instrs_back_idx) {
-    AstInstruction* node = GET_INSTR(instr_idx);
+    struct AstInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
 #if __OPTIM_LEVEL__ == 1
         case AST_TacLabel_t:
@@ -382,7 +382,7 @@ static void cfg_init_jmp_cc_edges(Ctx ctx, struct AsmJmpCC* node, size_t block_i
 #endif
 
 static void cfg_init_edges(Ctx ctx, size_t block_id) {
-    AstInstruction* node = GET_INSTR(GET_CFG_BLOCK(block_id).instrs_back_idx);
+    struct AstInstruction* node = GET_INSTR(GET_CFG_BLOCK(block_id).instrs_back_idx);
     switch (node->type) {
 #if __OPTIM_LEVEL__ == 1
         case AST_TacReturn_t:
@@ -982,7 +982,7 @@ static bool init_data_flow_analysis(Ctx ctx,
             for (size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
                  instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx; ++instr_idx) {
                 if (GET_INSTR(instr_idx)) {
-                    AstInstruction* node = GET_INSTR(instr_idx);
+                    struct AstInstruction* node = GET_INSTR(instr_idx);
                     switch (node->type) {
 #if __OPTIM_LEVEL__ == 1
                         case AST_TacReturn_t: {

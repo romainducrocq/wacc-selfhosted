@@ -82,17 +82,17 @@ static struct AsmReg gen_reg(REGISTER_KIND reg_kind) {
     }
 }
 
-shared_ptr_t(struct AsmOperand) gen_register(REGISTER_KIND reg_kind) {
+shared_ptr_t(AsmOperand) gen_register(REGISTER_KIND reg_kind) {
     struct AsmReg reg = gen_reg(reg_kind);
     return make_AsmRegister(&reg);
 }
 
-shared_ptr_t(struct AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value) {
+shared_ptr_t(AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value) {
     struct AsmReg reg = gen_reg(reg_kind);
     return make_AsmMemory(value, &reg);
 }
 
-shared_ptr_t(struct AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale) {
+shared_ptr_t(AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale) {
     struct AsmReg reg_base = gen_reg(reg_kind_base);
     struct AsmReg reg_index = gen_reg(reg_kind_idx);
     return make_AsmIndexed(scale, &reg_base, &reg_index);

@@ -56,13 +56,13 @@ struct AssemblyType {
     } get;
 };
 
-shared_ptr_t(struct AssemblyType) make_AssemblyType(void);
-shared_ptr_t(struct AssemblyType) make_Byte(void);
-shared_ptr_t(struct AssemblyType) make_LongWord(void);
-shared_ptr_t(struct AssemblyType) make_QuadWord(void);
-shared_ptr_t(struct AssemblyType) make_BackendDouble(void);
-shared_ptr_t(struct AssemblyType) make_ByteArray(TLong size, TInt alignment);
-void free_AssemblyType(shared_ptr_t(struct AssemblyType) * self);
+shared_ptr_t(AssemblyType) make_AssemblyType(void);
+shared_ptr_t(AssemblyType) make_Byte(void);
+shared_ptr_t(AssemblyType) make_LongWord(void);
+shared_ptr_t(AssemblyType) make_QuadWord(void);
+shared_ptr_t(AssemblyType) make_BackendDouble(void);
+shared_ptr_t(AssemblyType) make_ByteArray(TLong size, TInt alignment);
+void free_AssemblyType(shared_ptr_t(AssemblyType) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -72,12 +72,12 @@ void free_AssemblyType(shared_ptr_t(struct AssemblyType) * self);
 struct BackendObj {
     bool is_static;
     bool is_const;
-    shared_ptr_t(struct AssemblyType) asm_type;
+    shared_ptr_t(AssemblyType) asm_type;
 };
 
 struct BackendFun {
     bool is_def;
-    vector_t(shared_ptr_t(struct AsmOperand)) callee_saved_regs;
+    vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs;
 };
 
 struct BackendSymbol {
@@ -89,14 +89,14 @@ struct BackendSymbol {
     } get;
 };
 
-unique_ptr_t(struct BackendSymbol) make_BackendSymbol(void);
-unique_ptr_t(struct BackendSymbol) make_BackendObj(bool is_static, bool is_const, shared_ptr_t(struct AssemblyType) * asm_type);
-unique_ptr_t(struct BackendSymbol) make_BackendFun(bool is_def);
-void free_BackendSymbol(unique_ptr_t(struct BackendSymbol) * self);
+unique_ptr_t(BackendSymbol) make_BackendSymbol(void);
+unique_ptr_t(BackendSymbol) make_BackendObj(bool is_static, bool is_const, shared_ptr_t(AssemblyType) * asm_type);
+unique_ptr_t(BackendSymbol) make_BackendFun(bool is_def);
+void free_BackendSymbol(unique_ptr_t(BackendSymbol) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define UPtrBackendSymbol unique_ptr_t(struct BackendSymbol)
+#define UPtrBackendSymbol unique_ptr_t(BackendSymbol)
 PairKeyValue(TIdentifier, UPtrBackendSymbol);
 
 struct BackEndContext {

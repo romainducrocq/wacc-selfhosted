@@ -18,7 +18,7 @@ struct IdentifierContext;
 // Loop labeling
 // Identifier resolution
 
-error_t analyze_semantic(
-    struct CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
+error_t analyze_semantic(struct CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend,
+    struct IdentifierContext* identifiers);
 
 #endif

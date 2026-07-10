@@ -24,10 +24,10 @@ struct OptimTacContext {
     // Dead store elimination
     bool is_fixed_point;
     bool enabled_optims[5];
-    unique_ptr_t(struct ControlFlowGraph) cfg;
-    unique_ptr_t(struct DataFlowAnalysis) dfa;
-    unique_ptr_t(struct DataFlowAnalysisO1) dfa_o1;
-    vector_t(unique_ptr_t(struct TacInstruction)) * p_instrs;
+    unique_ptr_t(ControlFlowGraph) cfg;
+    unique_ptr_t(DataFlowAnalysis) dfa;
+    unique_ptr_t(DataFlowAnalysisO1) dfa_o1;
+    vector_t(unique_ptr_t(TacInstruction)) * p_instrs;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,8 @@ struct OptimTacContext {
 
 // Constant folding
 
-static shared_ptr_t(struct CConst) fold_sign_extend_char_const(Ctx ctx, struct TacVariable* node, struct CConstChar* constant) {
+static shared_ptr_t(CConst)
+    fold_sign_extend_char_const(Ctx ctx, struct TacVariable* node, struct CConstChar* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Int_t: {
             TInt value = (TInt)constant->value;
@@ -69,7 +70,7 @@ static shared_ptr_t(struct CConst) fold_sign_extend_char_const(Ctx ctx, struct T
     }
 }
 
-static shared_ptr_t(struct CConst) fold_sign_extend_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
+static shared_ptr_t(CConst) fold_sign_extend_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Long_t:
         case AST_Pointer_t: {
@@ -85,8 +86,8 @@ static shared_ptr_t(struct CConst) fold_sign_extend_int_const(Ctx ctx, struct Ta
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_sign_extend_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_sign_extend_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstChar_t: {
             fold_constant = fold_sign_extend_char_const(ctx, node, &constant->get._CConstChar);
@@ -105,15 +106,15 @@ static shared_ptr_t(struct TacValue) fold_sign_extend_const(Ctx ctx, struct TacV
 static void fold_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_sign_extend_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct CConst) fold_truncate_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
+static shared_ptr_t(CConst) fold_truncate_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Char_t:
         case AST_SChar_t: {
@@ -129,47 +130,7 @@ static shared_ptr_t(struct CConst) fold_truncate_int_const(Ctx ctx, struct TacVa
     }
 }
 
-static shared_ptr_t(struct CConst) fold_truncate_long_const(Ctx ctx, struct TacVariable* node, struct CConstLong* constant) {
-    switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
-        case AST_Char_t:
-        case AST_SChar_t: {
-            TChar value = (TChar)constant->value;
-            return make_CConstChar(value);
-        }
-        case AST_Int_t: {
-            TInt value = (TInt)constant->value;
-            return make_CConstInt(value);
-        }
-        case AST_UChar_t: {
-            TUChar value = (TUChar)constant->value;
-            return make_CConstUChar(value);
-        }
-        case AST_UInt_t: {
-            TUInt value = (TUInt)constant->value;
-            return make_CConstUInt(value);
-        }
-        default:
-            THROW_ABORT;
-    }
-}
-
-static shared_ptr_t(struct CConst) fold_truncate_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
-    switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
-        case AST_Char_t:
-        case AST_SChar_t: {
-            TChar value = (TChar)constant->value;
-            return make_CConstChar(value);
-        }
-        case AST_UChar_t: {
-            TUChar value = (TUChar)constant->value;
-            return make_CConstUChar(value);
-        }
-        default:
-            THROW_ABORT;
-    }
-}
-
-static shared_ptr_t(struct CConst) fold_truncate_ulong_const(Ctx ctx, struct TacVariable* node, struct CConstULong* constant) {
+static shared_ptr_t(CConst) fold_truncate_long_const(Ctx ctx, struct TacVariable* node, struct CConstLong* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Char_t:
         case AST_SChar_t: {
@@ -193,8 +154,48 @@ static shared_ptr_t(struct CConst) fold_truncate_ulong_const(Ctx ctx, struct Tac
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_truncate_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(CConst) fold_truncate_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
+    switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
+        case AST_Char_t:
+        case AST_SChar_t: {
+            TChar value = (TChar)constant->value;
+            return make_CConstChar(value);
+        }
+        case AST_UChar_t: {
+            TUChar value = (TUChar)constant->value;
+            return make_CConstUChar(value);
+        }
+        default:
+            THROW_ABORT;
+    }
+}
+
+static shared_ptr_t(CConst) fold_truncate_ulong_const(Ctx ctx, struct TacVariable* node, struct CConstULong* constant) {
+    switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
+        case AST_Char_t:
+        case AST_SChar_t: {
+            TChar value = (TChar)constant->value;
+            return make_CConstChar(value);
+        }
+        case AST_Int_t: {
+            TInt value = (TInt)constant->value;
+            return make_CConstInt(value);
+        }
+        case AST_UChar_t: {
+            TUChar value = (TUChar)constant->value;
+            return make_CConstUChar(value);
+        }
+        case AST_UInt_t: {
+            TUInt value = (TUInt)constant->value;
+            return make_CConstUInt(value);
+        }
+        default:
+            THROW_ABORT;
+    }
+}
+
+static shared_ptr_t(TacValue) fold_truncate_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstInt_t: {
             fold_constant = fold_truncate_int_const(ctx, node, &constant->get._CConstInt);
@@ -221,15 +222,16 @@ static shared_ptr_t(struct TacValue) fold_truncate_const(Ctx ctx, struct TacVari
 static void fold_truncate_instr(Ctx ctx, struct TacTruncate* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_truncate_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct CConst) fold_zero_extend_uchar_const(Ctx ctx, struct TacVariable* node, struct CConstUChar* constant) {
+static shared_ptr_t(CConst)
+    fold_zero_extend_uchar_const(Ctx ctx, struct TacVariable* node, struct CConstUChar* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Int_t: {
             TInt value = (TInt)constant->value;
@@ -253,7 +255,8 @@ static shared_ptr_t(struct CConst) fold_zero_extend_uchar_const(Ctx ctx, struct 
     }
 }
 
-static shared_ptr_t(struct CConst) fold_zero_extend_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
+static shared_ptr_t(CConst)
+    fold_zero_extend_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Long_t:
         case AST_Pointer_t: {
@@ -269,8 +272,8 @@ static shared_ptr_t(struct CConst) fold_zero_extend_uint_const(Ctx ctx, struct T
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_zero_extend_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_zero_extend_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstUChar_t: {
             fold_constant = fold_zero_extend_uchar_const(ctx, node, &constant->get._CConstUChar);
@@ -289,17 +292,17 @@ static shared_ptr_t(struct TacValue) fold_zero_extend_const(Ctx ctx, struct TacV
 static void fold_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_zero_extend_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_dbl_to_signed_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+static shared_ptr_t(TacValue) fold_dbl_to_signed_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
     THROW_ABORT_IF(constant->type != AST_CConstDouble_t);
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Char_t:
         case AST_SChar_t: {
@@ -326,17 +329,17 @@ static shared_ptr_t(struct TacValue) fold_dbl_to_signed_const(Ctx ctx, struct Ta
 static void fold_dbl_to_signed_instr(Ctx ctx, struct TacDoubleToInt* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_dbl_to_signed_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_dbl_to_unsigned_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+static shared_ptr_t(TacValue) fold_dbl_to_unsigned_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
     THROW_ABORT_IF(constant->type != AST_CConstDouble_t);
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_UChar_t: {
             TUChar value = (TUChar)constant->get._CConstDouble.value;
@@ -362,16 +365,16 @@ static shared_ptr_t(struct TacValue) fold_dbl_to_unsigned_const(Ctx ctx, struct 
 static void fold_dbl_to_unsigned_instr(Ctx ctx, struct TacDoubleToUInt* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_dbl_to_unsigned_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_signed_to_dbl_const(struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_signed_to_dbl_const(struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstChar_t: {
             TDouble value = (TDouble)constant->get._CConstChar.value;
@@ -399,15 +402,15 @@ static void fold_signed_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, size_
         THROW_ABORT_IF(
             node->dst->type != AST_TacVariable_t
             || map_get(ctx->frontend->symbol_table, node->dst->get._TacVariable.name)->type_t->type != AST_Double_t);
-        shared_ptr_t(struct TacValue) src = fold_signed_to_dbl_const(node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) src = fold_signed_to_dbl_const(node->src->get._TacConstant.constant);
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_unsigned_to_dbl_const(struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_unsigned_to_dbl_const(struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstUChar_t: {
             TDouble value = (TDouble)constant->get._CConstUChar.value;
@@ -435,14 +438,14 @@ static void fold_unsigned_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, si
         THROW_ABORT_IF(
             node->dst->type != AST_TacVariable_t
             || map_get(ctx->frontend->symbol_table, node->dst->get._TacVariable.name)->type_t->type != AST_Double_t);
-        shared_ptr_t(struct TacValue) src = fold_unsigned_to_dbl_const(node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) src = fold_unsigned_to_dbl_const(node->src->get._TacConstant.constant);
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_char_const(struct TacUnaryOp* node, struct CConstChar* constant) {
+static shared_ptr_t(CConst) fold_unary_char_const(struct TacUnaryOp* node, struct CConstChar* constant) {
     if (node->type == AST_TacNot_t) {
         TInt value = !constant->value ? 1 : 0;
         return make_CConstInt(value);
@@ -452,7 +455,7 @@ static shared_ptr_t(struct CConst) fold_unary_char_const(struct TacUnaryOp* node
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_int_const(struct TacUnaryOp* node, struct CConstInt* constant) {
+static shared_ptr_t(CConst) fold_unary_int_const(struct TacUnaryOp* node, struct CConstInt* constant) {
     switch (node->type) {
         case AST_TacComplement_t: {
             TInt value = ~constant->value;
@@ -471,7 +474,7 @@ static shared_ptr_t(struct CConst) fold_unary_int_const(struct TacUnaryOp* node,
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_long_const(struct TacUnaryOp* node, struct CConstLong* constant) {
+static shared_ptr_t(CConst) fold_unary_long_const(struct TacUnaryOp* node, struct CConstLong* constant) {
     switch (node->type) {
         case AST_TacComplement_t: {
             TLong value = ~constant->value;
@@ -490,7 +493,7 @@ static shared_ptr_t(struct CConst) fold_unary_long_const(struct TacUnaryOp* node
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_dbl_const(struct TacUnaryOp* node, struct CConstDouble* constant) {
+static shared_ptr_t(CConst) fold_unary_dbl_const(struct TacUnaryOp* node, struct CConstDouble* constant) {
     switch (node->type) {
         case AST_TacNegate_t: {
             TDouble value = -constant->value;
@@ -505,7 +508,7 @@ static shared_ptr_t(struct CConst) fold_unary_dbl_const(struct TacUnaryOp* node,
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_uchar_const(struct TacUnaryOp* node, struct CConstUChar* constant) {
+static shared_ptr_t(CConst) fold_unary_uchar_const(struct TacUnaryOp* node, struct CConstUChar* constant) {
     if (node->type == AST_TacNot_t) {
         TInt value = !constant->value ? 1 : 0;
         return make_CConstInt(value);
@@ -515,7 +518,7 @@ static shared_ptr_t(struct CConst) fold_unary_uchar_const(struct TacUnaryOp* nod
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_uint_const(struct TacUnaryOp* node, struct CConstUInt* constant) {
+static shared_ptr_t(CConst) fold_unary_uint_const(struct TacUnaryOp* node, struct CConstUInt* constant) {
     switch (node->type) {
         case AST_TacComplement_t: {
             TUInt value = ~constant->value;
@@ -534,7 +537,7 @@ static shared_ptr_t(struct CConst) fold_unary_uint_const(struct TacUnaryOp* node
     }
 }
 
-static shared_ptr_t(struct CConst) fold_unary_ulong_const(struct TacUnaryOp* node, struct CConstULong* constant) {
+static shared_ptr_t(CConst) fold_unary_ulong_const(struct TacUnaryOp* node, struct CConstULong* constant) {
     switch (node->type) {
         case AST_TacComplement_t: {
             TULong value = ~constant->value;
@@ -553,8 +556,8 @@ static shared_ptr_t(struct CConst) fold_unary_ulong_const(struct TacUnaryOp* nod
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_unary_const(struct TacUnaryOp* node, struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_unary_const(struct TacUnaryOp* node, struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstChar_t: {
             fold_constant = fold_unary_char_const(node, &constant->get._CConstChar);
@@ -592,14 +595,15 @@ static shared_ptr_t(struct TacValue) fold_unary_const(struct TacUnaryOp* node, s
 
 static void fold_unary_instr(Ctx ctx, struct TacUnary* node, size_t instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
-        shared_ptr_t(struct TacValue) src = fold_unary_const(&node->unop, node->src->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) src = fold_unary_const(&node->unop, node->src->get._TacConstant.constant);
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct CConst) fold_binary_int_const(struct TacBinaryOp* node, struct CConstInt* constant_1, struct CConstInt* constant_2) {
+static shared_ptr_t(CConst)
+    fold_binary_int_const(struct TacBinaryOp* node, struct CConstInt* constant_1, struct CConstInt* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TInt value = constant_1->value + constant_2->value;
@@ -671,7 +675,8 @@ static shared_ptr_t(struct CConst) fold_binary_int_const(struct TacBinaryOp* nod
     }
 }
 
-static shared_ptr_t(struct CConst) fold_binary_long_const(struct TacBinaryOp* node, struct CConstLong* constant_1, struct CConstLong* constant_2) {
+static shared_ptr_t(CConst)
+    fold_binary_long_const(struct TacBinaryOp* node, struct CConstLong* constant_1, struct CConstLong* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TLong value = constant_1->value + constant_2->value;
@@ -743,7 +748,7 @@ static shared_ptr_t(struct CConst) fold_binary_long_const(struct TacBinaryOp* no
     }
 }
 
-static shared_ptr_t(struct CConst)
+static shared_ptr_t(CConst)
     fold_binary_dbl_const(struct TacBinaryOp* node, struct CConstDouble* constant_1, struct CConstDouble* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
@@ -791,7 +796,8 @@ static shared_ptr_t(struct CConst)
     }
 }
 
-static shared_ptr_t(struct CConst) fold_binary_uint_const(struct TacBinaryOp* node, struct CConstUInt* constant_1, struct CConstUInt* constant_2) {
+static shared_ptr_t(CConst)
+    fold_binary_uint_const(struct TacBinaryOp* node, struct CConstUInt* constant_1, struct CConstUInt* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
             TUInt value = constant_1->value + constant_2->value;
@@ -863,7 +869,7 @@ static shared_ptr_t(struct CConst) fold_binary_uint_const(struct TacBinaryOp* no
     }
 }
 
-static shared_ptr_t(struct CConst)
+static shared_ptr_t(CConst)
     fold_binary_ulong_const(struct TacBinaryOp* node, struct CConstULong* constant_1, struct CConstULong* constant_2) {
     switch (node->type) {
         case AST_TacAdd_t: {
@@ -936,9 +942,10 @@ static shared_ptr_t(struct CConst)
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_binary_const(struct TacBinaryOp* node, struct CConst* constant_1, struct CConst* constant_2) {
+static shared_ptr_t(TacValue)
+    fold_binary_const(struct TacBinaryOp* node, struct CConst* constant_1, struct CConst* constant_2) {
     THROW_ABORT_IF(constant_1->type != constant_2->type);
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant_1->type) {
         case AST_CConstInt_t: {
             fold_constant = fold_binary_int_const(node, &constant_1->get._CConstInt, &constant_2->get._CConstInt);
@@ -968,15 +975,15 @@ static shared_ptr_t(struct TacValue) fold_binary_const(struct TacBinaryOp* node,
 
 static void fold_binary_instr(Ctx ctx, struct TacBinary* node, size_t instr_idx) {
     if (node->src1->type == AST_TacConstant_t && node->src2->type == AST_TacConstant_t) {
-        shared_ptr_t(struct TacValue) src = fold_binary_const(
+        shared_ptr_t(TacValue) src = fold_binary_const(
             &node->binop, node->src1->get._TacConstant.constant, node->src2->get._TacConstant.constant);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         set_instr(ctx, make_TacCopy(&src, &dst), instr_idx);
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_char_const(Ctx ctx, struct TacVariable* node, struct CConstChar* constant) {
+static shared_ptr_t(CConst) fold_copy_char_const(Ctx ctx, struct TacVariable* node, struct CConstChar* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Char_t:
         case AST_SChar_t:
@@ -990,7 +997,7 @@ static shared_ptr_t(struct CConst) fold_copy_char_const(Ctx ctx, struct TacVaria
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
+static shared_ptr_t(CConst) fold_copy_int_const(Ctx ctx, struct TacVariable* node, struct CConstInt* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Int_t:
             return sptr_new();
@@ -1003,7 +1010,7 @@ static shared_ptr_t(struct CConst) fold_copy_int_const(Ctx ctx, struct TacVariab
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_long_const(Ctx ctx, struct TacVariable* node, struct CConstLong* constant) {
+static shared_ptr_t(CConst) fold_copy_long_const(Ctx ctx, struct TacVariable* node, struct CConstLong* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Long_t:
         case AST_Pointer_t:
@@ -1021,7 +1028,7 @@ static shared_ptr_t(struct CConst) fold_copy_long_const(Ctx ctx, struct TacVaria
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_dbl_const(Ctx ctx, struct TacVariable* node, struct CConstDouble* constant) {
+static shared_ptr_t(CConst) fold_copy_dbl_const(Ctx ctx, struct TacVariable* node, struct CConstDouble* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Long_t: {
             TLong value = (TLong)constant->value;
@@ -1038,7 +1045,7 @@ static shared_ptr_t(struct CConst) fold_copy_dbl_const(Ctx ctx, struct TacVariab
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_uchar_const(Ctx ctx, struct TacVariable* node, struct CConstUChar* constant) {
+static shared_ptr_t(CConst) fold_copy_uchar_const(Ctx ctx, struct TacVariable* node, struct CConstUChar* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Char_t:
         case AST_SChar_t: {
@@ -1052,7 +1059,7 @@ static shared_ptr_t(struct CConst) fold_copy_uchar_const(Ctx ctx, struct TacVari
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
+static shared_ptr_t(CConst) fold_copy_uint_const(Ctx ctx, struct TacVariable* node, struct CConstUInt* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Int_t: {
             TInt value = (TInt)constant->value;
@@ -1065,7 +1072,7 @@ static shared_ptr_t(struct CConst) fold_copy_uint_const(Ctx ctx, struct TacVaria
     }
 }
 
-static shared_ptr_t(struct CConst) fold_copy_ulong_const(Ctx ctx, struct TacVariable* node, struct CConstULong* constant) {
+static shared_ptr_t(CConst) fold_copy_ulong_const(Ctx ctx, struct TacVariable* node, struct CConstULong* constant) {
     switch (map_get(ctx->frontend->symbol_table, node->name)->type_t->type) {
         case AST_Long_t: {
             TLong value = (TLong)constant->value;
@@ -1083,8 +1090,8 @@ static shared_ptr_t(struct CConst) fold_copy_ulong_const(Ctx ctx, struct TacVari
     }
 }
 
-static shared_ptr_t(struct TacValue) fold_copy_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
-    shared_ptr_t(struct CConst) fold_constant = sptr_new();
+static shared_ptr_t(TacValue) fold_copy_const(Ctx ctx, struct TacVariable* node, struct CConst* constant) {
+    shared_ptr_t(CConst) fold_constant = sptr_new();
     switch (constant->type) {
         case AST_CConstChar_t: {
             fold_constant = fold_copy_char_const(ctx, node, &constant->get._CConstChar);
@@ -1128,7 +1135,7 @@ static shared_ptr_t(struct TacValue) fold_copy_const(Ctx ctx, struct TacVariable
 static void fold_copy_instr(Ctx ctx, struct TacCopy* node) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-        shared_ptr_t(struct TacValue) src =
+        shared_ptr_t(TacValue) src =
             fold_copy_const(ctx, &node->dst->get._TacVariable, node->src->get._TacConstant.constant);
         if (src) {
             sptr_move(TacValue, src, node->src);
@@ -1695,9 +1702,9 @@ static struct TacCopy* get_dfa_bak_copy_instr(Ctx ctx, size_t i) {
 static void set_dfa_bak_copy_instr(Ctx ctx, struct TacCopy* node, size_t instr_idx) {
     size_t i;
     if (set_dfa_bak_instr(ctx, instr_idx, &i)) {
-        shared_ptr_t(struct TacValue) src = sptr_new();
+        shared_ptr_t(TacValue) src = sptr_new();
         sptr_copy(TacValue, node->src, src);
-        shared_ptr_t(struct TacValue) dst = sptr_new();
+        shared_ptr_t(TacValue) dst = sptr_new();
         sptr_copy(TacValue, node->dst, dst);
         free_TacInstruction(&ctx->dfa_o1->bak_instrs[i]);
         ctx->dfa_o1->bak_instrs[i] = make_TacCopy(&src, &dst);

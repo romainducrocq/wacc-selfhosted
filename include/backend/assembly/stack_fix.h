@@ -18,7 +18,7 @@ struct BackEndContext;
 // Pseudo register replacement
 // Instruction fix up
 
-unique_ptr_t(struct AsmInstruction) alloc_stack_bytes(TLong byte);
+unique_ptr_t(AsmInstruction) alloc_stack_bytes(TLong byte);
 void fix_stack(struct AsmProgram* node, struct BackEndContext* backend);
 
 #endif

@@ -70,21 +70,21 @@
 #define tagged_def_init(E, T1, T2) \
     (struct T1) { tagged_def_t(E, T2) }
 
-#define unique_ptr_t(T) T*
+#define unique_ptr_t(T) struct T*
 #define unique_ptr_impl(T) tagged_def_impl(T)
 #define uptr_new() NULL
 #define uptr_delete(X) \
     if (!X) {          \
         return;        \
     }
-#define uptr_alloc(T, X)           \
-    do {                           \
-        free_##T(&X);              \
+#define uptr_alloc(T, X)                         \
+    do {                                         \
+        free_##T(&X);                            \
         X = (struct T*)malloc(sizeof(struct T)); \
-        if (!X) {                  \
-            THROW_ALLOC(T);        \
-        }                          \
-    }                              \
+        if (!X) {                                \
+            THROW_ALLOC(T);                      \
+        }                                        \
+    }                                            \
     while (0)
 #define uptr_free(X)    \
     if (X) {            \

@@ -16,6 +16,7 @@ struct FrontEndContext;
 // Register allocation
 // Register coalescing
 
-void allocate_registers(struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code);
+void allocate_registers(
+    struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code);
 
 #endif

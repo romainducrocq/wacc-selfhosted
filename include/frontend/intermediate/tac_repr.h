@@ -12,7 +12,7 @@ struct IdentifierContext;
 
 // Three address code representation
 
-unique_ptr_t(struct TacProgram) represent_three_address_code(
-    unique_ptr_t(struct CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
+unique_ptr_t(TacProgram) represent_three_address_code(
+    unique_ptr_t(CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

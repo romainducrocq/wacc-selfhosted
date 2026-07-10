@@ -18,7 +18,7 @@ typedef struct StackFixContext {
     TLong stack_bytes;
     hashmap_t(TIdentifier, TLong) pseudo_stack_map;
     // Instruction fix up
-    vector_t(unique_ptr_t(struct AsmInstruction)) * p_fix_instrs;
+    vector_t(unique_ptr_t(AsmInstruction)) * p_fix_instrs;
 } StackFixContext;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,26 +31,26 @@ typedef StackFixContext* Ctx;
 
 // Pseudo register replacement
 
-static void pseudo_data(struct AsmPseudo* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void pseudo_data(struct AsmPseudo* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     TIdentifier name = node->name;
     free_AsmOperand(pseudo_op);
     *pseudo_op = make_AsmData(name, 0l);
 }
 
-static void pseudo_mem_data(struct AsmPseudoMem* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void pseudo_mem_data(struct AsmPseudoMem* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     TIdentifier name = node->name;
     TLong offset = node->offset;
     free_AsmOperand(pseudo_op);
     *pseudo_op = make_AsmData(name, offset);
 }
 
-static void pseudo_memory(Ctx ctx, struct AsmPseudo* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void pseudo_memory(Ctx ctx, struct AsmPseudo* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     TLong value = -1l * map_get(ctx->pseudo_stack_map, node->name);
     free_AsmOperand(pseudo_op);
     *pseudo_op = gen_memory(REG_Bp, value);
 }
 
-static void pseudo_mem_memory(Ctx ctx, struct AsmPseudoMem* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void pseudo_mem_memory(Ctx ctx, struct AsmPseudoMem* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     TLong value = -1l * (map_get(ctx->pseudo_stack_map, node->name) - node->offset);
     free_AsmOperand(pseudo_op);
     *pseudo_op = gen_memory(REG_Bp, value);
@@ -95,7 +95,7 @@ static void alloc_offset_pseudo_mem(Ctx ctx, struct AssemblyType* asm_type) {
     }
 }
 
-static void repl_pseudo_op(Ctx ctx, struct AsmPseudo* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void repl_pseudo_op(Ctx ctx, struct AsmPseudo* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     if (map_find(ctx->pseudo_stack_map, node->name) == map_end()) {
 
         struct BackendObj* backend_obj = &map_get(ctx->backend->symbol_table, node->name)->get._BackendObj;
@@ -112,7 +112,7 @@ static void repl_pseudo_op(Ctx ctx, struct AsmPseudo* node, shared_ptr_t(struct 
     pseudo_memory(ctx, node, pseudo_op);
 }
 
-static void repl_pseudo_mem_op(Ctx ctx, struct AsmPseudoMem* node, shared_ptr_t(struct AsmOperand) * pseudo_op) {
+static void repl_pseudo_mem_op(Ctx ctx, struct AsmPseudoMem* node, shared_ptr_t(AsmOperand) * pseudo_op) {
     if (map_find(ctx->pseudo_stack_map, node->name) == map_end()) {
 
         struct BackendObj* backend_obj = &map_get(ctx->backend->symbol_table, node->name)->get._BackendObj;
@@ -428,10 +428,10 @@ static void repl_pseudo_regs(Ctx ctx, struct AsmInstruction* node) {
 
 // Instruction fix up
 
-unique_ptr_t(struct AsmInstruction) alloc_stack_bytes(TLong byte) {
+unique_ptr_t(AsmInstruction) alloc_stack_bytes(TLong byte) {
     struct AsmBinaryOp binop = init_AsmSub();
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     {
         TULong value = (TULong)byte;
         bool is_byte = byte <= 127l && byte >= -128l;
@@ -439,16 +439,16 @@ unique_ptr_t(struct AsmInstruction) alloc_stack_bytes(TLong byte) {
         bool is_neg = byte < 0l;
         src = make_AsmImm(value, is_byte, is_quad, is_neg);
     }
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Sp);
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_Sp);
     return make_AsmBinary(&binop, &asm_type, &src, &dst);
 }
 
-static void push_fix_instr(Ctx ctx, unique_ptr_t(struct AsmInstruction) instr) { vec_move_back(*ctx->p_fix_instrs, instr); }
+static void push_fix_instr(Ctx ctx, unique_ptr_t(AsmInstruction) instr) { vec_move_back(*ctx->p_fix_instrs, instr); }
 
 static void swap_fix_instr_back(Ctx ctx) {
-    unique_ptr_t(struct AsmInstruction) swap_instr = uptr_new();
-    unique_ptr_t(struct AsmInstruction)* instr_back_1 = &vec_back(*ctx->p_fix_instrs);
-    unique_ptr_t(struct AsmInstruction)* instr_back_2 = &(*ctx->p_fix_instrs)[vec_size(*ctx->p_fix_instrs) - 2];
+    unique_ptr_t(AsmInstruction) swap_instr = uptr_new();
+    unique_ptr_t(AsmInstruction)* instr_back_1 = &vec_back(*ctx->p_fix_instrs);
+    unique_ptr_t(AsmInstruction)* instr_back_2 = &(*ctx->p_fix_instrs)[vec_size(*ctx->p_fix_instrs) - 2];
     uptr_move(AsmInstruction, *instr_back_1, swap_instr);
     uptr_move(AsmInstruction, *instr_back_2, *instr_back_1);
     uptr_move(AsmInstruction, swap_instr, *instr_back_2);
@@ -464,15 +464,15 @@ static void fix_alloc_stack_bytes(Ctx ctx, TLong callee_saved_size) {
     }
 }
 
-static void push_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(struct AsmOperand)) callee_saved_regs) {
+static void push_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs) {
     for (size_t i = 0; i < vec_size(callee_saved_regs); ++i) {
-        shared_ptr_t(struct AsmOperand) src = sptr_new();
+        shared_ptr_t(AsmOperand) src = sptr_new();
         sptr_copy(AsmOperand, callee_saved_regs[i], src);
         push_fix_instr(ctx, make_AsmPush(&src));
     }
 }
 
-static void pop_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(struct AsmOperand)) callee_saved_regs) {
+static void pop_callee_saved_regs(Ctx ctx, vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs) {
     for (size_t i = vec_size(callee_saved_regs); i-- > 0;) {
         THROW_ABORT_IF(callee_saved_regs[i]->type != AST_AsmRegister_t);
         REGISTER_KIND reg_kind = register_mask_kind(&callee_saved_regs[i]->get._AsmRegister.reg);
@@ -517,10 +517,10 @@ static bool is_op_addr(struct AsmOperand* node) {
 }
 
 static void mov_dbl_from_addr_to_addr(Ctx ctx, struct AsmMov* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Xmm14);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_Xmm14);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -535,20 +535,20 @@ static void mov_from_quad_imm(Ctx ctx, struct AsmMov* node) {
         }
         return;
     }
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
 }
 
 static void mov_from_addr_to_addr(Ctx ctx, struct AsmMov* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -572,10 +572,10 @@ static void fix_mov_instr(Ctx ctx, struct AsmMov* node) {
 }
 
 static void mov_sx_from_imm(Ctx ctx, struct AsmMovSx* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type_src, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -583,10 +583,10 @@ static void mov_sx_from_imm(Ctx ctx, struct AsmMovSx* node) {
 }
 
 static void mov_sx_to_addr(Ctx ctx, struct AsmMovSx* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_R11);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_R11);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type_dst, asm_type);
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -602,42 +602,42 @@ static void fix_mov_sx_instr(Ctx ctx, struct AsmMovSx* node) {
 }
 
 static void byte_zero_extend_from_imm(Ctx ctx, struct AsmMovZeroExtend* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = make_Byte();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = make_Byte();
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
 }
 
 static void byte_zero_extend_to_addr(Ctx ctx, struct AsmMovZeroExtend* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_R11);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_R11);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type_dst, asm_type);
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
 }
 
 static struct AsmMov* zero_extend_as_mov(Ctx ctx, struct AsmMovZeroExtend* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = make_LongWord();
-    unique_ptr_t(struct AsmInstruction)* instr_back = &vec_back(*ctx->p_fix_instrs);
+    shared_ptr_t(AssemblyType) asm_type = make_LongWord();
+    unique_ptr_t(AsmInstruction)* instr_back = &vec_back(*ctx->p_fix_instrs);
     free_AsmInstruction(instr_back);
     *instr_back = make_AsmMov(&asm_type, &src, &dst);
     return &(*instr_back)->get._AsmMov;
 }
 
 static void zero_extend_to_addr(Ctx ctx, struct AsmMov* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_R11);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_R11);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
 }
@@ -660,10 +660,10 @@ static void fix_zero_extend_instr(Ctx ctx, struct AsmMovZeroExtend* node) {
 }
 
 static void lea_to_addr(Ctx ctx, struct AsmLea* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_R11);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_R11);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
 }
@@ -675,10 +675,10 @@ static void fix_lea_instr(Ctx ctx, struct AsmLea* node) {
 }
 
 static void cvttsd2si_to_addr(Ctx ctx, struct AsmCvttsd2si* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_R11);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_R11);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -691,10 +691,10 @@ static void fix_cvttsd2si_instr(Ctx ctx, struct AsmCvttsd2si* node) {
 }
 
 static void cvtsi2sd_from_imm(Ctx ctx, struct AsmCvtsi2sd* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -702,10 +702,10 @@ static void cvtsi2sd_from_imm(Ctx ctx, struct AsmCvtsi2sd* node) {
 }
 
 static void cvtsi2sd_to_addr(Ctx ctx, struct AsmCvtsi2sd* node) {
-    shared_ptr_t(struct AsmOperand) src = gen_register(REG_Xmm15);
-    shared_ptr_t(struct AsmOperand) dst = sptr_new();
+    shared_ptr_t(AsmOperand) src = gen_register(REG_Xmm15);
+    shared_ptr_t(AsmOperand) dst = sptr_new();
     sptr_move(AsmOperand, node->dst, dst);
-    shared_ptr_t(struct AssemblyType) asm_type = make_BackendDouble();
+    shared_ptr_t(AssemblyType) asm_type = make_BackendDouble();
     sptr_copy(AsmOperand, src, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
 }
@@ -720,17 +720,17 @@ static void fix_cvtsi2sd_instr(Ctx ctx, struct AsmCvtsi2sd* node) {
 }
 
 static void binary_dbl_to_addr(Ctx ctx, struct AsmBinary* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->dst, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Xmm15);
-    shared_ptr_t(struct AssemblyType) asm_type = make_BackendDouble();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_Xmm15);
+    shared_ptr_t(AssemblyType) asm_type = make_BackendDouble();
     sptr_copy(AsmOperand, dst, node->dst);
     {
-        shared_ptr_t(struct AsmOperand) src_cp = sptr_new();
+        shared_ptr_t(AsmOperand) src_cp = sptr_new();
         sptr_copy(AsmOperand, src, src_cp);
-        shared_ptr_t(struct AsmOperand) dst_cp = sptr_new();
+        shared_ptr_t(AsmOperand) dst_cp = sptr_new();
         sptr_copy(AsmOperand, dst, dst_cp);
-        shared_ptr_t(struct AssemblyType) asm_type_cp = sptr_new();
+        shared_ptr_t(AssemblyType) asm_type_cp = sptr_new();
         sptr_copy(AssemblyType, asm_type, asm_type_cp);
         push_fix_instr(ctx, make_AsmMov(&asm_type_cp, &src_cp, &dst_cp));
     }
@@ -739,20 +739,20 @@ static void binary_dbl_to_addr(Ctx ctx, struct AsmBinary* node) {
 }
 
 static void binary_from_quad_imm(Ctx ctx, struct AsmBinary* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
 }
 
 static void binary_from_addr_to_addr(Ctx ctx, struct AsmBinary* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -760,18 +760,18 @@ static void binary_from_addr_to_addr(Ctx ctx, struct AsmBinary* node) {
 }
 
 static void binary_imul_to_addr(Ctx ctx, struct AsmBinary* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->dst, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R11);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R11);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->dst);
     {
-        shared_ptr_t(struct AsmOperand) src_cp = sptr_new();
+        shared_ptr_t(AsmOperand) src_cp = sptr_new();
         sptr_copy(AsmOperand, src, src_cp);
-        shared_ptr_t(struct AsmOperand) dst_cp = sptr_new();
+        shared_ptr_t(AsmOperand) dst_cp = sptr_new();
         sptr_copy(AsmOperand, dst, dst_cp);
-        shared_ptr_t(struct AssemblyType) asm_type_cp = sptr_new();
+        shared_ptr_t(AssemblyType) asm_type_cp = sptr_new();
         sptr_copy(AssemblyType, asm_type, asm_type_cp);
         push_fix_instr(ctx, make_AsmMov(&asm_type_cp, &src_cp, &dst_cp));
     }
@@ -783,10 +783,10 @@ static void binary_shx_from_not_imm(Ctx ctx, struct AsmBinary* node) {
     if (node->src->type == AST_AsmRegister_t && register_mask_kind(&node->src->get._AsmRegister.reg) == REG_Cx) {
         return;
     }
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Cx);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_Cx);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -841,30 +841,30 @@ static void fix_binary_instr(Ctx ctx, struct AsmBinary* node) {
 }
 
 static void cmp_dbl_to_addr(Ctx ctx, struct AsmCmp* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->dst, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Xmm15);
-    shared_ptr_t(struct AssemblyType) asm_type = make_BackendDouble();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_Xmm15);
+    shared_ptr_t(AssemblyType) asm_type = make_BackendDouble();
     sptr_copy(AsmOperand, dst, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
 }
 
 static void cmp_from_quad_imm(Ctx ctx, struct AsmCmp* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
 }
 
 static void cmp_from_addr_to_addr(Ctx ctx, struct AsmCmp* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -872,10 +872,10 @@ static void cmp_from_addr_to_addr(Ctx ctx, struct AsmCmp* node) {
 }
 
 static void cmp_to_imm(Ctx ctx, struct AsmCmp* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->dst, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R11);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R11);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->dst);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -902,10 +902,10 @@ static void fix_cmp_instr(Ctx ctx, struct AsmCmp* node) {
 }
 
 static void idiv_from_imm(Ctx ctx, struct AsmIdiv* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -919,10 +919,10 @@ static void fix_idiv_instr(Ctx ctx, struct AsmIdiv* node) {
 }
 
 static void div_from_imm(Ctx ctx, struct AsmDiv* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = sptr_new();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = sptr_new();
     sptr_copy(AssemblyType, node->asm_type, asm_type);
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
@@ -936,30 +936,30 @@ static void fix_div_instr(Ctx ctx, struct AsmDiv* node) {
 }
 
 static void push_dbl_from_xmm_reg(Ctx ctx, struct AsmPush* node) {
-    shared_ptr_t(struct AsmOperand) src_reg = sptr_new();
+    shared_ptr_t(AsmOperand) src_reg = sptr_new();
     sptr_move(AsmOperand, node->src, src_reg);
-    shared_ptr_t(struct AssemblyType) asm_type_src = make_QuadWord();
+    shared_ptr_t(AssemblyType) asm_type_src = make_QuadWord();
     {
         struct AsmBinaryOp binop = init_AsmSub();
-        shared_ptr_t(struct AsmOperand) src = make_AsmImm(8ul, true, false, false);
-        shared_ptr_t(struct AsmOperand) dst = gen_register(REG_Sp);
-        shared_ptr_t(struct AssemblyType) asm_type_src_cp = sptr_new();
+        shared_ptr_t(AsmOperand) src = make_AsmImm(8ul, true, false, false);
+        shared_ptr_t(AsmOperand) dst = gen_register(REG_Sp);
+        shared_ptr_t(AssemblyType) asm_type_src_cp = sptr_new();
         sptr_copy(AssemblyType, asm_type_src, asm_type_src_cp);
-        unique_ptr_t(struct AsmInstruction)* instr_back = &vec_back(*ctx->p_fix_instrs);
+        unique_ptr_t(AsmInstruction)* instr_back = &vec_back(*ctx->p_fix_instrs);
         free_AsmInstruction(instr_back);
         *instr_back = make_AsmBinary(&binop, &asm_type_src_cp, &src, &dst);
     }
     {
-        shared_ptr_t(struct AsmOperand) dst = gen_memory(REG_Sp, 0l);
+        shared_ptr_t(AsmOperand) dst = gen_memory(REG_Sp, 0l);
         push_fix_instr(ctx, make_AsmMov(&asm_type_src, &src_reg, &dst));
     }
 }
 
 static void push_from_quad_imm(Ctx ctx, struct AsmPush* node) {
-    shared_ptr_t(struct AsmOperand) src = sptr_new();
+    shared_ptr_t(AsmOperand) src = sptr_new();
     sptr_move(AsmOperand, node->src, src);
-    shared_ptr_t(struct AsmOperand) dst = gen_register(REG_R10);
-    shared_ptr_t(struct AssemblyType) asm_type = make_QuadWord();
+    shared_ptr_t(AsmOperand) dst = gen_register(REG_R10);
+    shared_ptr_t(AssemblyType) asm_type = make_QuadWord();
     sptr_copy(AsmOperand, dst, node->src);
     push_fix_instr(ctx, make_AsmMov(&asm_type, &src, &dst));
     swap_fix_instr_back(ctx);
@@ -1018,7 +1018,7 @@ static void fix_instr(Ctx ctx, struct AsmInstruction* node) {
 }
 
 static void fix_fun_toplvl(Ctx ctx, struct AsmFunction* node) {
-    vector_t(unique_ptr_t(struct AsmInstruction)) instructions = vec_new();
+    vector_t(unique_ptr_t(AsmInstruction)) instructions = vec_new();
     vec_move(node->instructions, instructions);
     struct BackendFun* backend_fun = &map_get(ctx->backend->symbol_table, node->name)->get._BackendFun;
 

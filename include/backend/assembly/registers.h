@@ -16,9 +16,9 @@ struct AsmOperand;
 
 // Registers
 
-shared_ptr_t(struct AsmOperand) gen_register(REGISTER_KIND reg_kind);
-shared_ptr_t(struct AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value);
-shared_ptr_t(struct AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale);
+shared_ptr_t(AsmOperand) gen_register(REGISTER_KIND reg_kind);
+shared_ptr_t(AsmOperand) gen_memory(REGISTER_KIND reg_kind, TLong value);
+shared_ptr_t(AsmOperand) gen_indexed(REGISTER_KIND reg_kind_base, REGISTER_KIND reg_kind_idx, TLong scale);
 REGISTER_KIND register_mask_kind(struct AsmReg* node);
 size_t register_mask_bit(REGISTER_KIND reg_kind);
 bool register_mask_get(TULong reg_mask, REGISTER_KIND reg_kind);

@@ -1,5 +1,5 @@
-#include <sys/types.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 #include "util/c_std.h"
 #include "util/fileio.h"
@@ -843,7 +843,7 @@ static void emit_instr(Ctx ctx, struct AsmInstruction* node) {
     }
 }
 
-static void emit_instr_list(Ctx ctx, vector_t(unique_ptr_t(struct AsmInstruction)) node_list) {
+static void emit_instr_list(Ctx ctx, vector_t(unique_ptr_t(AsmInstruction)) node_list) {
     for (size_t i = node_list[0] ? 0 : 1; i < vec_size(node_list); ++i) {
         emit_instr(ctx, node_list[i]);
     }
@@ -874,7 +874,7 @@ static void emit_fun_toplvl(Ctx ctx, struct AsmFunction* node) {
 
 // -> if zero initialized $ .bss
 // ->                else $ .data
-static void static_section_toplvl(Ctx ctx, vector_t(shared_ptr_t(struct StaticInit)) node_list) {
+static void static_section_toplvl(Ctx ctx, vector_t(shared_ptr_t(StaticInit)) node_list) {
     if (vec_size(node_list) == 1 && node_list[0]->type == AST_ZeroInit_t) {
         emit(ctx, TAB ".bss" LF);
     }
@@ -1058,7 +1058,7 @@ static void emit_program(Ctx ctx, struct AsmProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void emit_gas_code(unique_ptr_t(struct AsmProgram) * asm_ast, struct BackEndContext* backend, struct FileIoContext* fileio,
+void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, struct BackEndContext* backend, struct FileIoContext* fileio,
     struct IdentifierContext* identifiers) {
     GasCodeContext ctx;
     {

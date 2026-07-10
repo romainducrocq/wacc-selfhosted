@@ -1,5 +1,5 @@
-#include <sys/types.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -81,13 +81,13 @@ TInt gen_type_alignment(struct FrontEndContext* ctx, struct Type* type) {
     }
 }
 
-static shared_ptr_t(struct AssemblyType) arr_asm_type(struct FrontEndContext* ctx, struct Array* arr_type) {
+static shared_ptr_t(AssemblyType) arr_asm_type(struct FrontEndContext* ctx, struct Array* arr_type) {
     TLong size;
     TInt alignment = get_arr_alignment(ctx, arr_type, &size);
     return make_ByteArray(size, alignment);
 }
 
-static shared_ptr_t(struct AssemblyType) struct_asm_type(struct FrontEndContext* ctx, struct Structure* struct_type) {
+static shared_ptr_t(AssemblyType) struct_asm_type(struct FrontEndContext* ctx, struct Structure* struct_type) {
     TLong size;
     TInt alignment;
     ssize_t map_it = map_find(ctx->struct_typedef_table, struct_type->tag);
@@ -103,7 +103,7 @@ static shared_ptr_t(struct AssemblyType) struct_asm_type(struct FrontEndContext*
     return make_ByteArray(size, alignment);
 }
 
-shared_ptr_t(struct AssemblyType) cvt_backend_asm_type(struct FrontEndContext* ctx, TIdentifier name) {
+shared_ptr_t(AssemblyType) cvt_backend_asm_type(struct FrontEndContext* ctx, TIdentifier name) {
     struct Type* symbol_type = map_get(ctx->symbol_table, name)->type_t;
     switch (symbol_type->type) {
         case AST_Char_t:
@@ -128,17 +128,17 @@ shared_ptr_t(struct AssemblyType) cvt_backend_asm_type(struct FrontEndContext* c
     }
 }
 
-static void cvt_backend_symbol(Ctx ctx, unique_ptr_t(struct BackendSymbol) node) {
+static void cvt_backend_symbol(Ctx ctx, unique_ptr_t(BackendSymbol) node) {
     map_move_add(ctx->backend->symbol_table, ctx->symbol, node);
 }
 
 static void dbl_static_const(Ctx ctx) {
-    shared_ptr_t(struct AssemblyType) asm_type = make_BackendDouble();
+    shared_ptr_t(AssemblyType) asm_type = make_BackendDouble();
     cvt_backend_symbol(ctx, make_BackendObj(true, true, &asm_type));
 }
 
 static void string_static_const(Ctx ctx, struct Array* arr_type) {
-    shared_ptr_t(struct AssemblyType) asm_type = arr_asm_type(ctx->frontend, arr_type);
+    shared_ptr_t(AssemblyType) asm_type = arr_asm_type(ctx->frontend, arr_type);
     cvt_backend_symbol(ctx, make_BackendObj(true, true, &asm_type));
 }
 
@@ -179,7 +179,7 @@ static void cvt_fun_type(Ctx ctx, struct FunAttr* node, struct FunType* fun_type
 
 static void cvt_obj_type(Ctx ctx, struct IdentifierAttr* node) {
     if (node->type != AST_ConstantAttr_t) {
-        shared_ptr_t(struct AssemblyType) asm_type = cvt_backend_asm_type(ctx->frontend, ctx->symbol);
+        shared_ptr_t(AssemblyType) asm_type = cvt_backend_asm_type(ctx->frontend, ctx->symbol);
         bool is_static = node->type == AST_StaticAttr_t;
         cvt_backend_symbol(ctx, make_BackendObj(is_static, false, &asm_type));
     }

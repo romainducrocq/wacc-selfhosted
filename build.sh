@@ -38,7 +38,7 @@ INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/frontend/"
 INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/backend/"
 INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/lib/"
 
-SOURCE_FILES="${PROJECT_DIR}/src/main.c"
+SOURCE_FILES="${PROJECT_DIR}/src/main.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/ast.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/back_ast.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/back_symt.wheelcc"

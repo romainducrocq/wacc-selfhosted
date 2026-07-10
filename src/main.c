@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/fileio.h"
@@ -29,23 +27,23 @@
 #include "optimization/optim_tac.h"
 #include "optimization/reg_alloc.h"
 
-typedef struct MainContext {
+struct MainContext {
     struct ErrorsContext* errors;
     // Main
     bool is_verbose;
-    uint8_t debug_code;
-    uint8_t optim_1_mask;
-    uint8_t optim_2_code;
+    uchar_t debug_code;
+    uchar_t optim_1_mask;
+    uchar_t optim_2_code;
     string_t filename;
     vector_t(char*) includedirs;
     vector_t(char*) stdlibdirs;
-} MainContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Main
 
-typedef MainContext* Ctx;
+#define Ctx struct MainContext*
 
 static void verbose(Ctx ctx, char* msg) {
     if (ctx->is_verbose) {
@@ -54,7 +52,7 @@ static void verbose(Ctx ctx, char* msg) {
 }
 
 static void set_filename_ext(Ctx ctx, char* ext) {
-    for (size_t i = str_size(ctx->filename); i-- > 0;) {
+    for (unsigned long i = str_size(ctx->filename); i-- > 0;) {
         if (ctx->filename[i] == '.') {
             str_substr(ctx->filename, 0, i);
             str_append(ctx->filename, ext);
@@ -177,23 +175,23 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     verbose(ctx, "OK\n");
 
     FINALLY;
-    for (size_t i = 0; i < map_size(identifiers.hash_table); ++i) {
+    for (unsigned long i = 0; i < map_size(identifiers.hash_table); ++i) {
         str_delete(pair_second(identifiers.hash_table[i]));
     }
     map_delete(identifiers.hash_table);
 
     map_delete(frontend.string_const_table);
-    for (size_t i = 0; i < map_size(frontend.struct_typedef_table); ++i) {
+    for (unsigned long i = 0; i < map_size(frontend.struct_typedef_table); ++i) {
         free_StructTypedef(&pair_second(frontend.struct_typedef_table[i]));
     }
     map_delete(frontend.struct_typedef_table);
-    for (size_t i = 0; i < map_size(frontend.symbol_table); ++i) {
+    for (unsigned long i = 0; i < map_size(frontend.symbol_table); ++i) {
         free_Symbol(&pair_second(frontend.symbol_table[i]));
     }
     map_delete(frontend.symbol_table);
     set_delete(frontend.addressed_set);
 
-    for (size_t i = 0; i < map_size(backend.symbol_table); ++i) {
+    for (unsigned long i = 0; i < map_size(backend.symbol_table); ++i) {
         free_BackendSymbol(&pair_second(backend.symbol_table[i]));
     }
     map_delete(backend.symbol_table);
@@ -205,15 +203,15 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     CATCH_EXIT;
 }
 
-static bool arg_parse_uint8(char* arg, uint8_t* value) {
+static bool arg_parse_uint8(char* arg, uchar_t* value) {
     char* end_ptr = NULL;
-    *value = (uint8_t)strtol(arg, &end_ptr, 10);
+    *value = (uchar_t)strtol(arg, &end_ptr, 10);
     return end_ptr == arg;
 }
 
 static error_t arg_parse(Ctx ctx, int argc, char** argv) {
     CATCH_ENTER;
-    size_t i = 0;
+    unsigned long i = 0;
 
     if (argc == 2 && strcmp(argv[1], "--help") == 0) {
         THROW_INIT(GET_ARG_MSG(1, MSG_print_help, argv[0]));
@@ -266,7 +264,7 @@ static error_t arg_parse(Ctx ctx, int argc, char** argv) {
 error_t main(int argc, char** argv) {
     struct ErrorsContext errors;
     struct FileIoContext fileio;
-    MainContext ctx;
+    struct MainContext ctx;
     {
         errors.errors = &errors;
         errors.fileio = &fileio;
@@ -293,7 +291,7 @@ error_t main(int argc, char** argv) {
 
     FINALLY;
     map_delete(errors.info_at_map);
-    for (size_t i = 0; i < vec_size(errors.fopen_lines); ++i) {
+    for (unsigned long i = 0; i < vec_size(errors.fopen_lines); ++i) {
         str_delete(errors.fopen_lines[i].filename);
     }
     vec_delete(errors.fopen_lines);
@@ -301,7 +299,7 @@ error_t main(int argc, char** argv) {
 
     str_delete(fileio.write_buf);
     str_delete(fileio.filename);
-    for (size_t i = 0; i < vec_size(fileio.file_reads); ++i) {
+    for (unsigned long i = 0; i < vec_size(fileio.file_reads); ++i) {
         str_delete(fileio.file_reads[i].filename);
     }
     vec_delete(fileio.file_reads);

@@ -18,8 +18,8 @@
 #endif
 
 /* inttypes.h */
-long strtoimax(char* nptr, char** endptr, int base);
-unsigned long strtoumax(char* nptr, char** endptr, int base);
+extern long strtoimax(char* nptr, char** endptr, int base);
+extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 
 /* stdbool.h */
 #define bool int
@@ -47,6 +47,7 @@ extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);
 
 /* stdlib.h */
 extern double strtod(char* nptr, char** endptr);
+extern long strtol(char* nptr, char** endptr, int base);
 extern void free(void* ptr);
 extern void* malloc(unsigned long size);
 extern void* realloc(void* ptr, unsigned long size);

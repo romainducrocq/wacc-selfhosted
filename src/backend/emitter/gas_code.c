@@ -1,5 +1,4 @@
-#include <stddef.h>
-#include <sys/types.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/fileio.h"
@@ -11,18 +10,18 @@
 
 #include "backend/emitter/gas_code.h"
 
-typedef struct GasCodeContext {
+struct GasCodeContext {
     struct BackEndContext* backend;
     struct FileIoContext* fileio;
     struct IdentifierContext* identifiers;
     // Gnu assembler code emission
-} GasCodeContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Gnu assembler code emission
 
-typedef GasCodeContext* Ctx;
+#define Ctx struct GasCodeContext*
 
 #define LF "\n"
 #define TAB "    "
@@ -422,7 +421,7 @@ static void memory_op(Ctx ctx, struct AsmMemory* node) {
 }
 
 static void data_op(Ctx ctx, struct AsmData* node) {
-    ssize_t map_it = map_find(ctx->backend->symbol_table, node->name);
+    long map_it = map_find(ctx->backend->symbol_table, node->name);
     if (map_it != map_end()) {
         struct BackendSymbol* backend_obj_symbol = pair_second(ctx->backend->symbol_table[map_it]);
         if (backend_obj_symbol->type == AST_BackendObj_t && backend_obj_symbol->get._BackendObj.is_const) {
@@ -844,7 +843,7 @@ static void emit_instr(Ctx ctx, struct AsmInstruction* node) {
 }
 
 static void emit_instr_list(Ctx ctx, vector_t(unique_ptr_t(AsmInstruction)) node_list) {
-    for (size_t i = node_list[0] ? 0 : 1; i < vec_size(node_list); ++i) {
+    for (unsigned long i = node_list[0] ? 0 : 1; i < vec_size(node_list); ++i) {
         emit_instr(ctx, node_list[i]);
     }
 }
@@ -975,7 +974,7 @@ static void emit_static_var_toplvl(Ctx ctx, struct AsmStaticVariable* node) {
     align_directive_toplvl(ctx, node->alignment);
     emit_identifier(ctx, node->name);
     emit(ctx, ":" LF);
-    for (size_t i = 0; i < vec_size(node->static_inits); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_inits); ++i) {
         static_init_toplvl(ctx, node->static_inits[i]);
     }
 }
@@ -1045,10 +1044,10 @@ static void emit_toplvl(Ctx ctx, struct AsmTopLevel* node) {
 // Program(top_level*) -> $ [<top_level>]
 //                        $     .section .note.GNU-stack,"",@progbits
 static void emit_program(Ctx ctx, struct AsmProgram* node) {
-    for (size_t i = 0; i < vec_size(node->static_const_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_const_toplvls); ++i) {
         emit_toplvl(ctx, node->static_const_toplvls[i]);
     }
-    for (size_t i = 0; i < vec_size(node->top_levels); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->top_levels); ++i) {
         emit_toplvl(ctx, node->top_levels[i]);
     }
 #ifndef __APPLE__
@@ -1060,7 +1059,7 @@ static void emit_program(Ctx ctx, struct AsmProgram* node) {
 
 void emit_gas_code(unique_ptr_t(AsmProgram) * asm_ast, struct BackEndContext* backend, struct FileIoContext* fileio,
     struct IdentifierContext* identifiers) {
-    GasCodeContext ctx;
+    struct GasCodeContext ctx;
     {
         ctx.backend = backend;
         ctx.fileio = fileio;

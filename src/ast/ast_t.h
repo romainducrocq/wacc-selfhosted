@@ -7,7 +7,7 @@
 
 // Abstract syntax tree
 
-#define TIdentifier uint64_t
+#define TIdentifier unsigned long
 #define TChar int8_t
 #define TInt int32_t
 #define TLong int64_t

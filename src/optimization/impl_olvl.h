@@ -35,7 +35,7 @@ struct ControlFlowGraph {
     vector_t(unsigned long) exit_pred_ids;
     vector_t(bool) reaching_code;
     vector_t(struct ControlFlowBlock) blocks;
-    hashmap_t(TIdentifier, uint64_t) identifier_id_map;
+    hashmap_t(TIdentifier, ulong_t) identifier_id_map;
 };
 
 struct DataFlowAnalysis {
@@ -1356,7 +1356,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         }
 
         for (unsigned long i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
-            pair_t(TIdentifier, uint64_t)* name_id = &ctx->cfg->identifier_id_map[i];
+            pair_t(TIdentifier, ulong_t)* name_id = &ctx->cfg->identifier_id_map[i];
 #if __OPTIM_LEVEL__ == 1
             if (map_get(ctx->frontend->symbol_table, pair_first(*name_id))->attrs->type == AST_StaticAttr_t) {
                 SET_DFA_INSTR_SET_AT(ctx->dfa->static_idx, pair_second(*name_id), true);

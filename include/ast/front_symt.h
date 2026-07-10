@@ -342,7 +342,8 @@ void free_StructTypedef(unique_ptr_t(StructTypedef) * self);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-PairKeyValue(TIdentifier, uint64_t);
+#define ulong_t unsigned long
+PairKeyValue(TIdentifier, ulong_t);
 PairKeyValue(TIdentifier, TIdentifier);
 #define UPtrStructTypedef unique_ptr_t(StructTypedef)
 PairKeyValue(TIdentifier, UPtrStructTypedef);

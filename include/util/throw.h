@@ -14,7 +14,7 @@ struct FileIoContext;
 #endif
 
 #define hash_t unsigned long
-PairKeyValue(hash_t, uint64_t);
+PairKeyValue(hash_t, hash_t);
 
 struct FileOpenLine {
     unsigned long linenum;
@@ -35,7 +35,7 @@ struct ErrorsContext {
     char msg[ERROR_MSG_SIZE];
     bool is_stdout;
     unsigned long info_at_buf;
-    hashmap_t(hash_t, uint64_t) info_at_map;
+    hashmap_t(hash_t, hash_t) info_at_map;
     vector_t(struct FileOpenLine) fopen_lines;
     vector_t(struct TokenInfo) token_infos;
 };

@@ -92,24 +92,25 @@ struct Structure {
     bool is_union;
 };
 
+union _Type {
+    struct Char _Char;
+    struct SChar _SChar;
+    struct UChar _UChar;
+    struct Int _Int;
+    struct Long _Long;
+    struct UInt _UInt;
+    struct ULong _ULong;
+    struct Double _Double;
+    struct Void _Void;
+    struct FunType _FunType;
+    struct Pointer _Pointer;
+    struct Array _Array;
+    struct Structure _Structure;
+};
+
 struct Type {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct Char _Char;
-        struct SChar _SChar;
-        struct UChar _UChar;
-        struct Int _Int;
-        struct Long _Long;
-        struct UInt _UInt;
-        struct ULong _ULong;
-        struct Double _Double;
-        struct Void _Void;
-        struct FunType _FunType;
-        struct Pointer _Pointer;
-        struct Array _Array;
-        struct Structure _Structure;
-    } get;
+    union _Type get;
 };
 
 shared_ptr_t(Type) make_Type(void);
@@ -183,21 +184,22 @@ struct PointerInit {
     TIdentifier name;
 };
 
+union _StaticInit {
+    struct IntInit _IntInit;
+    struct LongInit _LongInit;
+    struct UIntInit _UIntInit;
+    struct ULongInit _ULongInit;
+    struct CharInit _CharInit;
+    struct UCharInit _UCharInit;
+    struct DoubleInit _DoubleInit;
+    struct ZeroInit _ZeroInit;
+    struct StringInit _StringInit;
+    struct PointerInit _PointerInit;
+};
+
 struct StaticInit {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct IntInit _IntInit;
-        struct LongInit _LongInit;
-        struct UIntInit _UIntInit;
-        struct ULongInit _ULongInit;
-        struct CharInit _CharInit;
-        struct UCharInit _UCharInit;
-        struct DoubleInit _DoubleInit;
-        struct ZeroInit _ZeroInit;
-        struct StringInit _StringInit;
-        struct PointerInit _PointerInit;
-    } get;
+    union _StaticInit get;
 };
 
 shared_ptr_t(StaticInit) make_StaticInit(void);
@@ -232,14 +234,15 @@ struct NoInitializer {
     char _empty;
 };
 
+union _InitialValue {
+    struct Tentative _Tentative;
+    struct Initial _Initial;
+    struct NoInitializer _NoInitializer;
+};
+
 struct InitialValue {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct Tentative _Tentative;
-        struct Initial _Initial;
-        struct NoInitializer _NoInitializer;
-    } get;
+    union _InitialValue get;
 };
 
 shared_ptr_t(InitialValue) make_InitialValue(void);
@@ -273,15 +276,16 @@ struct LocalAttr {
     char _empty;
 };
 
+union _IdentifierAttr {
+    struct FunAttr _FunAttr;
+    struct StaticAttr _StaticAttr;
+    struct ConstantAttr _ConstantAttr;
+    struct LocalAttr _LocalAttr;
+};
+
 struct IdentifierAttr {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct FunAttr _FunAttr;
-        struct StaticAttr _StaticAttr;
-        struct ConstantAttr _ConstantAttr;
-        struct LocalAttr _LocalAttr;
-    } get;
+    union _IdentifierAttr get;
 };
 
 unique_ptr_t(IdentifierAttr) make_IdentifierAttr(void);

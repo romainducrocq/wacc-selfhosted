@@ -172,18 +172,19 @@ struct AsmIndexed {
     struct AsmReg reg_index;
 };
 
+union _AsmOperand {
+    struct AsmImm _AsmImm;
+    struct AsmRegister _AsmRegister;
+    struct AsmPseudo _AsmPseudo;
+    struct AsmMemory _AsmMemory;
+    struct AsmData _AsmData;
+    struct AsmPseudoMem _AsmPseudoMem;
+    struct AsmIndexed _AsmIndexed;
+};
+
 struct AsmOperand {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct AsmImm _AsmImm;
-        struct AsmRegister _AsmRegister;
-        struct AsmPseudo _AsmPseudo;
-        struct AsmMemory _AsmMemory;
-        struct AsmData _AsmData;
-        struct AsmPseudoMem _AsmPseudoMem;
-        struct AsmIndexed _AsmIndexed;
-    } get;
+    union _AsmOperand get;
 };
 
 shared_ptr_t(AsmOperand) make_AsmOperand(void);
@@ -367,31 +368,32 @@ struct AsmRet {
     char _empty;
 };
 
+union _AsmInstruction {
+    struct AsmMov _AsmMov;
+    struct AsmMovSx _AsmMovSx;
+    struct AsmMovZeroExtend _AsmMovZeroExtend;
+    struct AsmLea _AsmLea;
+    struct AsmCvttsd2si _AsmCvttsd2si;
+    struct AsmCvtsi2sd _AsmCvtsi2sd;
+    struct AsmUnary _AsmUnary;
+    struct AsmBinary _AsmBinary;
+    struct AsmCmp _AsmCmp;
+    struct AsmIdiv _AsmIdiv;
+    struct AsmDiv _AsmDiv;
+    struct AsmCdq _AsmCdq;
+    struct AsmJmp _AsmJmp;
+    struct AsmJmpCC _AsmJmpCC;
+    struct AsmSetCC _AsmSetCC;
+    struct AsmLabel _AsmLabel;
+    struct AsmPush _AsmPush;
+    struct AsmPop _AsmPop;
+    struct AsmCall _AsmCall;
+    struct AsmRet _AsmRet;
+};
+
 struct AsmInstruction {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct AsmMov _AsmMov;
-        struct AsmMovSx _AsmMovSx;
-        struct AsmMovZeroExtend _AsmMovZeroExtend;
-        struct AsmLea _AsmLea;
-        struct AsmCvttsd2si _AsmCvttsd2si;
-        struct AsmCvtsi2sd _AsmCvtsi2sd;
-        struct AsmUnary _AsmUnary;
-        struct AsmBinary _AsmBinary;
-        struct AsmCmp _AsmCmp;
-        struct AsmIdiv _AsmIdiv;
-        struct AsmDiv _AsmDiv;
-        struct AsmCdq _AsmCdq;
-        struct AsmJmp _AsmJmp;
-        struct AsmJmpCC _AsmJmpCC;
-        struct AsmSetCC _AsmSetCC;
-        struct AsmLabel _AsmLabel;
-        struct AsmPush _AsmPush;
-        struct AsmPop _AsmPop;
-        struct AsmCall _AsmCall;
-        struct AsmRet _AsmRet;
-    } get;
+    union _AsmInstruction get;
 };
 
 unique_ptr_t(AsmInstruction) make_AsmInstruction(void);
@@ -451,14 +453,15 @@ struct AsmStaticConstant {
     shared_ptr_t(StaticInit) static_init;
 };
 
+union _AsmTopLevel {
+    struct AsmFunction _AsmFunction;
+    struct AsmStaticVariable _AsmStaticVariable;
+    struct AsmStaticConstant _AsmStaticConstant;
+};
+
 struct AsmTopLevel {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct AsmFunction _AsmFunction;
-        struct AsmStaticVariable _AsmStaticVariable;
-        struct AsmStaticConstant _AsmStaticConstant;
-    } get;
+    union _AsmTopLevel get;
 };
 
 unique_ptr_t(AsmTopLevel) make_AsmTopLevel(void);

@@ -116,14 +116,15 @@ struct CAbstractBase {
     char _empty;
 };
 
+union _CAbstractDeclarator {
+    struct CAbstractPointer _CAbstractPointer;
+    struct CAbstractArray _CAbstractArray;
+    struct CAbstractBase _CAbstractBase;
+};
+
 struct CAbstractDeclarator {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CAbstractPointer _CAbstractPointer;
-        struct CAbstractArray _CAbstractArray;
-        struct CAbstractBase _CAbstractBase;
-    } get;
+    union _CAbstractDeclarator get;
 };
 
 unique_ptr_t(CAbstractDeclarator) make_CAbstractDeclarator(void);
@@ -170,15 +171,16 @@ struct CFunDeclarator {
     unique_ptr_t(CDeclarator) decltor;
 };
 
+union _CDeclarator {
+    struct CIdent _CIdent;
+    struct CPointerDeclarator _CPointerDeclarator;
+    struct CArrayDeclarator _CArrayDeclarator;
+    struct CFunDeclarator _CFunDeclarator;
+};
+
 struct CDeclarator {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CIdent _CIdent;
-        struct CPointerDeclarator _CPointerDeclarator;
-        struct CArrayDeclarator _CArrayDeclarator;
-        struct CFunDeclarator _CFunDeclarator;
-    } get;
+    union _CDeclarator get;
 };
 
 unique_ptr_t(CDeclarator) make_CDeclarator(void);
@@ -300,29 +302,30 @@ struct CArrow {
     struct CExp* _base;
 };
 
+union _CExp {
+    struct CConstant _CConstant;
+    struct CString _CString;
+    struct CVar _CVar;
+    struct CCast _CCast;
+    struct CUnary _CUnary;
+    struct CBinary _CBinary;
+    struct CAssignment _CAssignment;
+    struct CConditional _CConditional;
+    struct CFunctionCall _CFunctionCall;
+    struct CDereference _CDereference;
+    struct CAddrOf _CAddrOf;
+    struct CSubscript _CSubscript;
+    struct CSizeOf _CSizeOf;
+    struct CSizeOfT _CSizeOfT;
+    struct CDot _CDot;
+    struct CArrow _CArrow;
+};
+
 struct CExp {
     unique_ptr_impl(AST_T);
     shared_ptr_t(Type) exp_type;
     unsigned long info_at;
-
-    union {
-        struct CConstant _CConstant;
-        struct CString _CString;
-        struct CVar _CVar;
-        struct CCast _CCast;
-        struct CUnary _CUnary;
-        struct CBinary _CBinary;
-        struct CAssignment _CAssignment;
-        struct CConditional _CConditional;
-        struct CFunctionCall _CFunctionCall;
-        struct CDereference _CDereference;
-        struct CAddrOf _CAddrOf;
-        struct CSubscript _CSubscript;
-        struct CSizeOf _CSizeOf;
-        struct CSizeOfT _CSizeOfT;
-        struct CDot _CDot;
-        struct CArrow _CArrow;
-    } get;
+    union _CExp get;
 };
 
 unique_ptr_t(CExp) make_CExp(unsigned long info_at);
@@ -450,26 +453,27 @@ struct CNull {
     char _empty;
 };
 
+union _CStatement {
+    struct CReturn _CReturn;
+    struct CExpression _CExpression;
+    struct CIf _CIf;
+    struct CGoto _CGoto;
+    struct CLabel _CLabel;
+    struct CCompound _CCompound;
+    struct CWhile _CWhile;
+    struct CDoWhile _CDoWhile;
+    struct CFor _CFor;
+    struct CSwitch _CSwitch;
+    struct CCase _CCase;
+    struct CDefault _CDefault;
+    struct CBreak _CBreak;
+    struct CContinue _CContinue;
+    struct CNull _CNull;
+};
+
 struct CStatement {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CReturn _CReturn;
-        struct CExpression _CExpression;
-        struct CIf _CIf;
-        struct CGoto _CGoto;
-        struct CLabel _CLabel;
-        struct CCompound _CCompound;
-        struct CWhile _CWhile;
-        struct CDoWhile _CDoWhile;
-        struct CFor _CFor;
-        struct CSwitch _CSwitch;
-        struct CCase _CCase;
-        struct CDefault _CDefault;
-        struct CBreak _CBreak;
-        struct CContinue _CContinue;
-        struct CNull _CNull;
-    } get;
+    union _CStatement get;
 };
 
 unique_ptr_t(CStatement) make_CStatement(void);
@@ -505,13 +509,14 @@ struct CInitExp {
     unique_ptr_t(CExp) init;
 };
 
+union _CForInit {
+    struct CInitDecl _CInitDecl;
+    struct CInitExp _CInitExp;
+};
+
 struct CForInit {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CInitDecl _CInitDecl;
-        struct CInitExp _CInitExp;
-    } get;
+    union _CForInit get;
 };
 
 unique_ptr_t(CForInit) make_CForInit(void);
@@ -527,12 +532,13 @@ struct CB {
     vector_t(unique_ptr_t(CBlockItem)) block_items;
 };
 
+union _CBlock {
+    struct CB _CB;
+};
+
 struct CBlock {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CB _CB;
-    } get;
+    union _CBlock get;
 };
 
 unique_ptr_t(CBlock) make_CBlock(void);
@@ -552,13 +558,14 @@ struct CD {
     unique_ptr_t(CDeclaration) declaration;
 };
 
+union _CBlockItem {
+    struct CS _CS;
+    struct CD _CD;
+};
+
 struct CBlockItem {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CS _CS;
-        struct CD _CD;
-    } get;
+    union _CBlockItem get;
 };
 
 unique_ptr_t(CBlockItem) make_CBlockItem(void);
@@ -594,14 +601,15 @@ struct CCompoundInit {
     struct CInitializer* _base;
 };
 
+union _CInitializer {
+    struct CSingleInit _CSingleInit;
+    struct CCompoundInit _CCompoundInit;
+};
+
 struct CInitializer {
     unique_ptr_impl(AST_T);
     shared_ptr_t(Type) init_type;
-
-    union {
-        struct CSingleInit _CSingleInit;
-        struct CCompoundInit _CCompoundInit;
-    } get;
+    union _CInitializer get;
 };
 
 unique_ptr_t(CInitializer) make_CInitializer(void);
@@ -694,14 +702,15 @@ struct CStructDecl {
     unique_ptr_t(CStructDeclaration) struct_decl;
 };
 
+union _CDeclaration {
+    struct CFunDecl _CFunDecl;
+    struct CVarDecl _CVarDecl;
+    struct CStructDecl _CStructDecl;
+};
+
 struct CDeclaration {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct CFunDecl _CFunDecl;
-        struct CVarDecl _CVarDecl;
-        struct CStructDecl _CStructDecl;
-    } get;
+    union _CDeclaration get;
 };
 
 unique_ptr_t(CDeclaration) make_CDeclaration(void);

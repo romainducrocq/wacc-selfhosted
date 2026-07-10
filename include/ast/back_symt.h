@@ -44,16 +44,17 @@ struct ByteArray {
     TInt alignment;
 };
 
+union _AssemblyType {
+    struct Byte _Byte;
+    struct LongWord _LongWord;
+    struct QuadWord _QuadWord;
+    struct BackendDouble _BackendDouble;
+    struct ByteArray _ByteArray;
+};
+
 struct AssemblyType {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct Byte _Byte;
-        struct LongWord _LongWord;
-        struct QuadWord _QuadWord;
-        struct BackendDouble _BackendDouble;
-        struct ByteArray _ByteArray;
-    } get;
+    union _AssemblyType get;
 };
 
 shared_ptr_t(AssemblyType) make_AssemblyType(void);
@@ -80,13 +81,14 @@ struct BackendFun {
     vector_t(shared_ptr_t(AsmOperand)) callee_saved_regs;
 };
 
+union _BackendSymbol {
+    struct BackendObj _BackendObj;
+    struct BackendFun _BackendFun;
+};
+
 struct BackendSymbol {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct BackendObj _BackendObj;
-        struct BackendFun _BackendFun;
-    } get;
+    union _BackendSymbol get;
 };
 
 unique_ptr_t(BackendSymbol) make_BackendSymbol(void);

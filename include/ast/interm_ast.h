@@ -91,13 +91,14 @@ struct TacVariable {
     TIdentifier name;
 };
 
+union _TacValue {
+    struct TacConstant _TacConstant;
+    struct TacVariable _TacVariable;
+};
+
 struct TacValue {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct TacConstant _TacConstant;
-        struct TacVariable _TacVariable;
-    } get;
+    union _TacValue get;
 };
 
 shared_ptr_t(TacValue) make_TacValue(void);
@@ -124,14 +125,15 @@ struct TacSubObject {
     TLong offset;
 };
 
+union _TacExpResult {
+    struct TacPlainOperand _TacPlainOperand;
+    struct TacDereferencedPointer _TacDereferencedPointer;
+    struct TacSubObject _TacSubObject;
+};
+
 struct TacExpResult {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct TacPlainOperand _TacPlainOperand;
-        struct TacDereferencedPointer _TacDereferencedPointer;
-        struct TacSubObject _TacSubObject;
-    } get;
+    union _TacExpResult get;
 };
 
 unique_ptr_t(TacExpResult) make_TacExpResult(void);
@@ -280,33 +282,34 @@ struct TacLabel {
     TIdentifier name;
 };
 
+union _TacInstruction {
+    struct TacReturn _TacReturn;
+    struct TacSignExtend _TacSignExtend;
+    struct TacTruncate _TacTruncate;
+    struct TacZeroExtend _TacZeroExtend;
+    struct TacDoubleToInt _TacDoubleToInt;
+    struct TacDoubleToUInt _TacDoubleToUInt;
+    struct TacIntToDouble _TacIntToDouble;
+    struct TacUIntToDouble _TacUIntToDouble;
+    struct TacFunCall _TacFunCall;
+    struct TacUnary _TacUnary;
+    struct TacBinary _TacBinary;
+    struct TacCopy _TacCopy;
+    struct TacGetAddress _TacGetAddress;
+    struct TacLoad _TacLoad;
+    struct TacStore _TacStore;
+    struct TacAddPtr _TacAddPtr;
+    struct TacCopyToOffset _TacCopyToOffset;
+    struct TacCopyFromOffset _TacCopyFromOffset;
+    struct TacJump _TacJump;
+    struct TacJumpIfZero _TacJumpIfZero;
+    struct TacJumpIfNotZero _TacJumpIfNotZero;
+    struct TacLabel _TacLabel;
+};
+
 struct TacInstruction {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct TacReturn _TacReturn;
-        struct TacSignExtend _TacSignExtend;
-        struct TacTruncate _TacTruncate;
-        struct TacZeroExtend _TacZeroExtend;
-        struct TacDoubleToInt _TacDoubleToInt;
-        struct TacDoubleToUInt _TacDoubleToUInt;
-        struct TacIntToDouble _TacIntToDouble;
-        struct TacUIntToDouble _TacUIntToDouble;
-        struct TacFunCall _TacFunCall;
-        struct TacUnary _TacUnary;
-        struct TacBinary _TacBinary;
-        struct TacCopy _TacCopy;
-        struct TacGetAddress _TacGetAddress;
-        struct TacLoad _TacLoad;
-        struct TacStore _TacStore;
-        struct TacAddPtr _TacAddPtr;
-        struct TacCopyToOffset _TacCopyToOffset;
-        struct TacCopyFromOffset _TacCopyFromOffset;
-        struct TacJump _TacJump;
-        struct TacJumpIfZero _TacJumpIfZero;
-        struct TacJumpIfNotZero _TacJumpIfNotZero;
-        struct TacLabel _TacLabel;
-    } get;
+    union _TacInstruction get;
 };
 
 unique_ptr_t(TacInstruction) make_TacInstruction(void);
@@ -364,14 +367,15 @@ struct TacStaticConstant {
     shared_ptr_t(StaticInit) static_init;
 };
 
+union _TacTopLevel {
+    struct TacFunction _TacFunction;
+    struct TacStaticVariable _TacStaticVariable;
+    struct TacStaticConstant _TacStaticConstant;
+};
+
 struct TacTopLevel {
     unique_ptr_impl(AST_T);
-
-    union {
-        struct TacFunction _TacFunction;
-        struct TacStaticVariable _TacStaticVariable;
-        struct TacStaticConstant _TacStaticConstant;
-    } get;
+    union _TacTopLevel get;
 };
 
 unique_ptr_t(TacTopLevel) make_TacTopLevel(void);

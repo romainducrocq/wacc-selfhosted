@@ -52,18 +52,19 @@ struct CConstUChar {
     TUChar value;
 };
 
+union _CConst {
+    struct CConstInt _CConstInt;
+    struct CConstLong _CConstLong;
+    struct CConstUInt _CConstUInt;
+    struct CConstULong _CConstULong;
+    struct CConstDouble _CConstDouble;
+    struct CConstChar _CConstChar;
+    struct CConstUChar _CConstUChar;
+};
+
 struct CConst {
     shared_ptr_impl(AST_T);
-
-    union {
-        struct CConstInt _CConstInt;
-        struct CConstLong _CConstLong;
-        struct CConstUInt _CConstUInt;
-        struct CConstULong _CConstULong;
-        struct CConstDouble _CConstDouble;
-        struct CConstChar _CConstChar;
-        struct CConstUChar _CConstUChar;
-    } get;
+    union _CConst get;
 };
 
 shared_ptr_t(CConst) make_CConst(void);

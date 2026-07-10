@@ -54,7 +54,7 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/lexer.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/parser.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/idents.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/semantic.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/tac_repr.c"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/tac_repr.wheelcc"
 
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/asm_gen.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/registers.wheelcc"

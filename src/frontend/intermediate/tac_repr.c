@@ -1,6 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/str2t.h"
@@ -14,20 +12,20 @@
 #include "frontend/intermediate/idents.h"
 #include "frontend/intermediate/tac_repr.h"
 
-typedef struct TacReprContext {
+struct TacReprContext {
     struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Three address code representation
     vector_t(unique_ptr_t(TacInstruction)) * p_instrs;
     vector_t(unique_ptr_t(TacTopLevel)) * p_toplvls;
     vector_t(unique_ptr_t(TacTopLevel)) * p_static_consts;
-} TacReprContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Three address code representation
 
-typedef TacReprContext* Ctx;
+#define Ctx struct TacReprContext*
 
 // unary_operator = Complement | Negate | Not
 static struct TacUnaryOp repr_unop(struct CUnaryOp* node) {
@@ -152,7 +150,7 @@ static unique_ptr_t(TacExpResult) string_res_instr(Ctx ctx, struct CString* node
     TIdentifier string_const_label;
     {
         TIdentifier string_const = make_literal_identifier(ctx, node->literal);
-        ssize_t map_it = map_find(ctx->frontend->string_const_table, string_const);
+        long map_it = map_find(ctx->frontend->string_const_table, string_const);
         if (map_it != map_end()) {
             string_const_label = pair_second(ctx->frontend->string_const_table[map_it]);
         }
@@ -588,7 +586,7 @@ static unique_ptr_t(TacExpResult) assign_res_instr(Ctx ctx, struct CAssignment* 
                 ctx->p_instrs = &noeval_instrs;
                 res = repr_res_instr(ctx, exp_left);
                 ctx->p_instrs = p_instrs;
-                for (size_t i = 0; i < vec_size(noeval_instrs); ++i) {
+                for (unsigned long i = 0; i < vec_size(noeval_instrs); ++i) {
                     free_TacInstruction(&noeval_instrs[i]);
                 }
                 vec_delete(noeval_instrs);
@@ -696,7 +694,7 @@ static unique_ptr_t(TacExpResult) call_res_instr(Ctx ctx, struct CFunctionCall* 
     TIdentifier name = node->name;
     vector_t(shared_ptr_t(TacValue)) args = vec_new();
     vec_reserve(args, vec_size(node->args));
-    for (size_t i = 0; i < vec_size(node->args); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->args); ++i) {
         shared_ptr_t(TacValue) arg = repr_exp_instr(ctx, node->args[i]);
         vec_move_back(args, arg);
     }
@@ -1124,7 +1122,7 @@ static void switch_statement_instr(Ctx ctx, struct CSwitch* node) {
     TIdentifier target_break = repr_loop_identifier(ctx->identifiers, LBL_Lbreak, node->target);
     {
         shared_ptr_t(TacValue) match = repr_exp_instr(ctx, node->match);
-        for (size_t i = 0; i < vec_size(node->cases); ++i) {
+        for (unsigned long i = 0; i < vec_size(node->cases); ++i) {
             TIdentifier target_case = repr_case_identifier(ctx->identifiers, node->target, true, i);
             shared_ptr_t(TacValue) case_match = sptr_new();
             {
@@ -1231,10 +1229,10 @@ static void compound_init_instr(
 
 static void string_single_init_instr(
     Ctx ctx, struct CString* node, struct Array* arr_type, TIdentifier symbol, TLong size) {
-    size_t byte_at = 0;
+    unsigned long byte_at = 0;
 
-    size_t bytes_size = (size_t)arr_type->size;
-    size_t bytes_copy =
+    unsigned long bytes_size = (unsigned long)arr_type->size;
+    unsigned long bytes_copy =
         arr_type->size > (TLong)vec_size(node->literal->value) ? vec_size(node->literal->value) : bytes_size;
 
     while (byte_at < bytes_copy) {
@@ -1244,7 +1242,7 @@ static void string_single_init_instr(
         {
             shared_ptr_t(CConst) constant = sptr_new();
             {
-                size_t bytes_left = bytes_size - byte_at;
+                unsigned long bytes_left = bytes_size - byte_at;
                 if (bytes_left < 4) {
                     TChar value = string_bytes_to_int8(node->literal->value, byte_at);
                     constant = make_CConstChar(value);
@@ -1273,7 +1271,7 @@ static void string_single_init_instr(
         {
             shared_ptr_t(CConst) constant = sptr_new();
             {
-                size_t bytes_left = bytes_size - byte_at;
+                unsigned long bytes_left = bytes_size - byte_at;
                 if (bytes_left < 4) {
                     constant = make_CConstChar(0);
                     byte_at++;
@@ -1325,7 +1323,7 @@ static void scalar_compound_init_instr(
 
 static void arr_compound_init_instr(
     Ctx ctx, struct CCompoundInit* node, struct Array* arr_type, TIdentifier symbol, TLong* size) {
-    for (size_t i = 0; i < vec_size(node->initializers); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->initializers); ++i) {
         compound_init_instr(ctx, node->initializers[i], arr_type->elem_type, symbol, size);
         if (node->initializers[i]->type == AST_CSingleInit_t) {
             *size += get_type_scale(ctx, arr_type->elem_type);
@@ -1335,7 +1333,7 @@ static void arr_compound_init_instr(
 
 static void struct_compound_init_instr(
     Ctx ctx, struct CCompoundInit* node, struct Structure* struct_type, TIdentifier symbol, TLong* size) {
-    for (size_t i = vec_size(node->initializers); i-- > 0;) {
+    for (unsigned long i = vec_size(node->initializers); i-- > 0;) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         TLong offset = *size + member->offset;
         compound_init_instr(ctx, node->initializers[i], member->member_type, symbol, &offset);
@@ -1415,7 +1413,7 @@ static void declaration_instr(Ctx ctx, struct CDeclaration* node) {
 //             | CopyFromOffset(identifier, int, val) | Jump(identifier) | JumpIfZero(val, identifier)
 //             | JumpIfNotZero(val, identifier) | Label(identifier)
 static void repr_instr_list(Ctx ctx, vector_t(unique_ptr_t(CBlockItem)) node_list) {
-    for (size_t i = 0; i < vec_size(node_list); ++i) {
+    for (unsigned long i = 0; i < vec_size(node_list); ++i) {
         switch (node_list[i]->type) {
             case AST_CS_t:
                 statement_instr(ctx, node_list[i]->get._CS.statement);
@@ -1496,7 +1494,7 @@ static vector_t(shared_ptr_t(StaticInit)) tentative_static_toplvl(Ctx ctx, struc
 static vector_t(shared_ptr_t(StaticInit)) initial_static_toplvl(struct Initial* node) {
     vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
     vec_reserve(static_inits, vec_size(node->static_inits));
-    for (size_t i = 0; i < vec_size(node->static_inits); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_inits); ++i) {
         shared_ptr_t(StaticInit) static_init = sptr_new();
         sptr_copy(StaticInit, node->static_inits[i], static_init);
         vec_move_back(static_inits, static_init);
@@ -1562,7 +1560,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, struct CProgram* node) {
     vector_t(unique_ptr_t(TacTopLevel)) fun_toplvls = vec_new();
     {
         ctx->p_toplvls = &fun_toplvls;
-        for (size_t i = 0; i < vec_size(node->declarations); ++i) {
+        for (unsigned long i = 0; i < vec_size(node->declarations); ++i) {
             declaration_toplvl(ctx, node->declarations[i]);
         }
         ctx->p_toplvls = NULL;
@@ -1573,7 +1571,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, struct CProgram* node) {
     {
         ctx->p_toplvls = &static_var_toplvls;
         ctx->p_static_consts = &static_const_toplvls;
-        for (size_t i = 0; i < map_size(ctx->frontend->symbol_table); ++i) {
+        for (unsigned long i = 0; i < map_size(ctx->frontend->symbol_table); ++i) {
             pair_t(TIdentifier, UPtrSymbol)* symbol = &ctx->frontend->symbol_table[i];
             symbol_toplvl(ctx, pair_second(*symbol), pair_first(*symbol));
         }
@@ -1588,7 +1586,7 @@ static unique_ptr_t(TacProgram) repr_program(Ctx ctx, struct CProgram* node) {
 
 unique_ptr_t(TacProgram) represent_three_address_code(
     unique_ptr_t(CProgram) * c_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
-    TacReprContext ctx;
+    struct TacReprContext ctx;
     {
         ctx.frontend = frontend;
         ctx.identifiers = identifiers;

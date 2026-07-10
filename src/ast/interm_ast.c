@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -367,7 +367,7 @@ void free_TacInstruction(unique_ptr_t(TacInstruction) * self) {
             free_TacValue(&(*self)->get._TacUIntToDouble.dst);
             break;
         case AST_TacFunCall_t:
-            for (size_t i = 0; i < vec_size((*self)->get._TacFunCall.args); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._TacFunCall.args); ++i) {
                 free_TacValue(&(*self)->get._TacFunCall.args[i]);
             }
             vec_delete((*self)->get._TacFunCall.args);
@@ -477,14 +477,14 @@ void free_TacTopLevel(unique_ptr_t(TacTopLevel) * self) {
             break;
         case AST_TacFunction_t:
             vec_delete((*self)->get._TacFunction.params);
-            for (size_t i = 0; i < vec_size((*self)->get._TacFunction.body); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._TacFunction.body); ++i) {
                 free_TacInstruction(&(*self)->get._TacFunction.body[i]);
             }
             vec_delete((*self)->get._TacFunction.body);
             break;
         case AST_TacStaticVariable_t:
             free_Type(&(*self)->get._TacStaticVariable.static_init_type);
-            for (size_t i = 0; i < vec_size((*self)->get._TacStaticVariable.static_inits); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._TacStaticVariable.static_inits); ++i) {
                 free_StaticInit(&(*self)->get._TacStaticVariable.static_inits[i]);
             }
             vec_delete((*self)->get._TacStaticVariable.static_inits);
@@ -521,15 +521,15 @@ void free_TacProgram(unique_ptr_t(TacProgram) * self) {
         default:
             THROW_ABORT;
     }
-    for (size_t i = 0; i < vec_size((*self)->static_const_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->static_const_toplvls); ++i) {
         free_TacTopLevel(&(*self)->static_const_toplvls[i]);
     }
     vec_delete((*self)->static_const_toplvls);
-    for (size_t i = 0; i < vec_size((*self)->static_var_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->static_var_toplvls); ++i) {
         free_TacTopLevel(&(*self)->static_var_toplvls[i]);
     }
     vec_delete((*self)->static_var_toplvls);
-    for (size_t i = 0; i < vec_size((*self)->fun_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->fun_toplvls); ++i) {
         free_TacTopLevel(&(*self)->fun_toplvls[i]);
     }
     vec_delete((*self)->fun_toplvls);

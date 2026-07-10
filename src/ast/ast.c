@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"

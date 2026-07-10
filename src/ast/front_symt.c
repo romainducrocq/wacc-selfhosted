@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -129,7 +129,7 @@ void free_Type(shared_ptr_t(Type) * self) {
         case AST_Void_t:
             break;
         case AST_FunType_t:
-            for (size_t i = 0; i < vec_size((*self)->get._FunType.param_types); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._FunType.param_types); ++i) {
                 free_Type(&(*self)->get._FunType.param_types[i]);
             }
             vec_delete((*self)->get._FunType.param_types);
@@ -290,7 +290,7 @@ void free_InitialValue(shared_ptr_t(InitialValue) * self) {
         case AST_Tentative_t:
             break;
         case AST_Initial_t:
-            for (size_t i = 0; i < vec_size((*self)->get._Initial.static_inits); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._Initial.static_inits); ++i) {
                 free_StaticInit(&(*self)->get._Initial.static_inits[i]);
             }
             vec_delete((*self)->get._Initial.static_inits);
@@ -430,7 +430,7 @@ void free_StructTypedef(unique_ptr_t(StructTypedef) * self) {
             THROW_ABORT;
     }
     vec_delete((*self)->member_names);
-    for (size_t i = 0; i < map_size((*self)->members); ++i) {
+    for (unsigned long i = 0; i < map_size((*self)->members); ++i) {
         free_StructMember(&pair_second((*self)->members[i]));
     }
     map_delete((*self)->members);

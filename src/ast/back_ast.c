@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -447,13 +447,13 @@ void free_AsmTopLevel(unique_ptr_t(AsmTopLevel) * self) {
         case AST_AsmTopLevel_t:
             break;
         case AST_AsmFunction_t:
-            for (size_t i = 0; i < vec_size((*self)->get._AsmFunction.instructions); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._AsmFunction.instructions); ++i) {
                 free_AsmInstruction(&(*self)->get._AsmFunction.instructions[i]);
             }
             vec_delete((*self)->get._AsmFunction.instructions);
             break;
         case AST_AsmStaticVariable_t:
-            for (size_t i = 0; i < vec_size((*self)->get._AsmStaticVariable.static_inits); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._AsmStaticVariable.static_inits); ++i) {
                 free_StaticInit(&(*self)->get._AsmStaticVariable.static_inits[i]);
             }
             vec_delete((*self)->get._AsmStaticVariable.static_inits);
@@ -487,11 +487,11 @@ void free_AsmProgram(unique_ptr_t(AsmProgram) * self) {
         default:
             THROW_ABORT;
     }
-    for (size_t i = 0; i < vec_size((*self)->static_const_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->static_const_toplvls); ++i) {
         free_AsmTopLevel(&(*self)->static_const_toplvls[i]);
     }
     vec_delete((*self)->static_const_toplvls);
-    for (size_t i = 0; i < vec_size((*self)->top_levels); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->top_levels); ++i) {
         free_AsmTopLevel(&(*self)->top_levels[i]);
     }
     vec_delete((*self)->top_levels);

@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -102,7 +102,7 @@ void free_BackendSymbol(unique_ptr_t(BackendSymbol) * self) {
             free_AssemblyType(&(*self)->get._BackendObj.asm_type);
             break;
         case AST_BackendFun_t:
-            for (size_t i = 0; i < vec_size((*self)->get._BackendFun.callee_saved_regs); ++i) {
+            for (unsigned long i = 0; i < vec_size((*self)->get._BackendFun.callee_saved_regs); ++i) {
                 free_AsmOperand(&(*self)->get._BackendFun.callee_saved_regs[i]);
             }
             vec_delete((*self)->get._BackendFun.callee_saved_regs);

@@ -13,6 +13,46 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct TacUnaryOp make_TacUnaryOp(tagged_def_impl(AST_T)) {
+    struct TacUnaryOp self = {type};
+    switch (type) {
+        case AST_TacUnaryOp_t:
+        case AST_TacComplement_t:
+        case AST_TacNegate_t:
+        case AST_TacNot_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
+struct TacBinaryOp make_TacBinaryOp(tagged_def_impl(AST_T)) {
+    struct TacBinaryOp self = {type};
+    switch (type) {
+        case AST_TacBinaryOp_t:
+        case AST_TacAdd_t:
+        case AST_TacSubtract_t:
+        case AST_TacMultiply_t:
+        case AST_TacDivide_t:
+        case AST_TacRemainder_t:
+        case AST_TacBitAnd_t:
+        case AST_TacBitOr_t:
+        case AST_TacBitXor_t:
+        case AST_TacBitShiftLeft_t:
+        case AST_TacBitShiftRight_t:
+        case AST_TacBitShrArithmetic_t:
+        case AST_TacEqual_t:
+        case AST_TacNotEqual_t:
+        case AST_TacLessThan_t:
+        case AST_TacLessOrEqual_t:
+        case AST_TacGreaterThan_t:
+        case AST_TacGreaterOrEqual_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
 shared_ptr_t(TacValue) make_TacValue(void) {
     shared_ptr_t(TacValue) self = sptr_new();
     sptr_alloc(TacValue, self);

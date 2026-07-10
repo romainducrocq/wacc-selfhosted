@@ -14,6 +14,69 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct AsmReg make_AsmReg(tagged_def_impl(AST_T)) {
+    struct AsmReg self = {type};
+    switch (type) {
+        case AST_AsmReg_t:
+        case AST_AsmAx_t:
+        case AST_AsmBx_t:
+        case AST_AsmCx_t:
+        case AST_AsmDx_t:
+        case AST_AsmDi_t:
+        case AST_AsmSi_t:
+        case AST_AsmR8_t:
+        case AST_AsmR9_t:
+        case AST_AsmR10_t:
+        case AST_AsmR11_t:
+        case AST_AsmR12_t:
+        case AST_AsmR13_t:
+        case AST_AsmR14_t:
+        case AST_AsmR15_t:
+        case AST_AsmSp_t:
+        case AST_AsmBp_t:
+        case AST_AsmXMM0_t:
+        case AST_AsmXMM1_t:
+        case AST_AsmXMM2_t:
+        case AST_AsmXMM3_t:
+        case AST_AsmXMM4_t:
+        case AST_AsmXMM5_t:
+        case AST_AsmXMM6_t:
+        case AST_AsmXMM7_t:
+        case AST_AsmXMM8_t:
+        case AST_AsmXMM9_t:
+        case AST_AsmXMM10_t:
+        case AST_AsmXMM11_t:
+        case AST_AsmXMM12_t:
+        case AST_AsmXMM13_t:
+        case AST_AsmXMM14_t:
+        case AST_AsmXMM15_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
+struct AsmCondCode make_AsmCondCode(tagged_def_impl(AST_T)) {
+    struct AsmCondCode self = {type};
+    switch (type) {
+        case AST_AsmCondCode_t:
+        case AST_AsmE_t:
+        case AST_AsmNE_t:
+        case AST_AsmG_t:
+        case AST_AsmGE_t:
+        case AST_AsmL_t:
+        case AST_AsmLE_t:
+        case AST_AsmA_t:
+        case AST_AsmAE_t:
+        case AST_AsmB_t:
+        case AST_AsmBE_t:
+        case AST_AsmP_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
 shared_ptr_t(AsmOperand) make_AsmOperand(void) {
     shared_ptr_t(AsmOperand) self = sptr_new();
     sptr_alloc(AsmOperand, self);
@@ -100,6 +163,39 @@ void free_AsmOperand(shared_ptr_t(AsmOperand) * self) {
             THROW_ABORT;
     }
     sptr_free(*self);
+}
+
+struct AsmBinaryOp make_AsmBinaryOp(tagged_def_impl(AST_T)) {
+    struct AsmBinaryOp self = {type};
+    switch (type) {
+        case AST_AsmBinaryOp_t:
+        case AST_AsmAdd_t:
+        case AST_AsmSub_t:
+        case AST_AsmMult_t:
+        case AST_AsmDivDouble_t:
+        case AST_AsmBitAnd_t:
+        case AST_AsmBitOr_t:
+        case AST_AsmBitXor_t:
+        case AST_AsmBitShiftLeft_t:
+        case AST_AsmBitShiftRight_t:
+        case AST_AsmBitShrArithmetic_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
+struct AsmUnaryOp make_AsmUnaryOp(tagged_def_impl(AST_T)) {
+    struct AsmUnaryOp self = {type};
+    switch (type) {
+        case AST_AsmUnaryOp_t:
+        case AST_AsmNot_t:
+        case AST_AsmNeg_t:
+        case AST_AsmShr_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
 }
 
 unique_ptr_t(AsmInstruction) make_AsmInstruction(void) {

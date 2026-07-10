@@ -43,6 +43,7 @@ struct CUnaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct CUnaryOp make_CUnaryOp(tagged_def_impl(AST_T));
 #define init_CUnaryOp() tagged_def_init(AST, CUnaryOp, CUnaryOp)
 #define init_CComplement() tagged_def_init(AST, CUnaryOp, CComplement)
 #define init_CNegate() tagged_def_init(AST, CUnaryOp, CNegate)
@@ -76,6 +77,7 @@ struct CBinaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct CBinaryOp make_CBinaryOp(tagged_def_impl(AST_T));
 #define init_CBinaryOp() tagged_def_init(AST, CBinaryOp, CBinaryOp)
 #define init_CAdd() tagged_def_init(AST, CBinaryOp, CAdd)
 #define init_CSubtract() tagged_def_init(AST, CBinaryOp, CSubtract)
@@ -582,6 +584,7 @@ struct CStorageClass {
     tagged_def_impl(AST_T);
 };
 
+struct CStorageClass make_CStorageClass(tagged_def_impl(AST_T));
 #define init_CStorageClass() tagged_def_init(AST, CStorageClass, CStorageClass)
 #define init_CStatic() tagged_def_init(AST, CStorageClass, CStatic)
 #define init_CExtern() tagged_def_init(AST, CStorageClass, CExtern)

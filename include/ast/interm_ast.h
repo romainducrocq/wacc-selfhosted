@@ -30,6 +30,7 @@ struct TacUnaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct TacUnaryOp make_TacUnaryOp(tagged_def_impl(AST_T));
 #define init_TacUnaryOp() tagged_def_init(AST, TacUnaryOp, TacUnaryOp)
 #define init_TacComplement() tagged_def_init(AST, TacUnaryOp, TacComplement)
 #define init_TacNegate() tagged_def_init(AST, TacUnaryOp, TacNegate)
@@ -59,6 +60,7 @@ struct TacBinaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct TacBinaryOp make_TacBinaryOp(tagged_def_impl(AST_T));
 #define init_TacBinaryOp() tagged_def_init(AST, TacBinaryOp, TacBinaryOp)
 #define init_TacAdd() tagged_def_init(AST, TacBinaryOp, TacAdd)
 #define init_TacSubtract() tagged_def_init(AST, TacBinaryOp, TacSubtract)

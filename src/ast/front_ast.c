@@ -13,6 +13,50 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct CUnaryOp make_CUnaryOp(tagged_def_impl(AST_T)) {
+    struct CUnaryOp self = {type};
+    switch (type) {
+        case AST_CUnaryOp_t:
+        case AST_CComplement_t:
+        case AST_CNegate_t:
+        case AST_CNot_t:
+        case AST_CPrefix_t:
+        case AST_CPostfix_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
+struct CBinaryOp make_CBinaryOp(tagged_def_impl(AST_T)) {
+    struct CBinaryOp self = {type};
+    switch (type) {
+        case AST_CBinaryOp_t:
+        case AST_CAdd_t:
+        case AST_CSubtract_t:
+        case AST_CMultiply_t:
+        case AST_CDivide_t:
+        case AST_CRemainder_t:
+        case AST_CBitAnd_t:
+        case AST_CBitOr_t:
+        case AST_CBitXor_t:
+        case AST_CBitShiftLeft_t:
+        case AST_CBitShiftRight_t:
+        case AST_CBitShrArithmetic_t:
+        case AST_CAnd_t:
+        case AST_COr_t:
+        case AST_CEqual_t:
+        case AST_CNotEqual_t:
+        case AST_CLessThan_t:
+        case AST_CLessOrEqual_t:
+        case AST_CGreaterThan_t:
+        case AST_CGreaterOrEqual_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
+}
+
 unique_ptr_t(CAbstractDeclarator) make_CAbstractDeclarator(void) {
     unique_ptr_t(CAbstractDeclarator) self = uptr_new();
     uptr_alloc(CAbstractDeclarator, self);
@@ -729,6 +773,18 @@ void free_CBlockItem(unique_ptr_t(CBlockItem) * self) {
             THROW_ABORT;
     }
     uptr_free(*self);
+}
+
+struct CStorageClass make_CStorageClass(tagged_def_impl(AST_T)) {
+    struct CStorageClass self = {type};
+    switch (type) {
+        case AST_CStorageClass_t:
+        case AST_CStatic_t:
+        case AST_CExtern_t:
+            return self;
+        default:
+            THROW_ABORT;
+    }
 }
 
 unique_ptr_t(CInitializer) make_CInitializer(void) {

@@ -61,6 +61,7 @@ struct AsmReg {
     tagged_def_impl(AST_T);
 };
 
+struct AsmReg make_AsmReg(tagged_def_impl(AST_T));
 #define init_AsmReg() tagged_def_init(AST, AsmReg, AsmReg)
 #define init_AsmAx() tagged_def_init(AST, AsmReg, AsmAx)
 #define init_AsmBx() tagged_def_init(AST, AsmReg, AsmBx)
@@ -113,6 +114,7 @@ struct AsmCondCode {
     tagged_def_impl(AST_T);
 };
 
+struct AsmCondCode make_AsmCondCode(tagged_def_impl(AST_T));
 #define init_AsmCondCode() tagged_def_init(AST, AsmCondCode, AsmCondCode)
 #define init_AsmE() tagged_def_init(AST, AsmCondCode, AsmE)
 #define init_AsmNE() tagged_def_init(AST, AsmCondCode, AsmNE)
@@ -214,6 +216,7 @@ struct AsmBinaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct AsmBinaryOp make_AsmBinaryOp(tagged_def_impl(AST_T));
 #define init_AsmBinaryOp() tagged_def_init(AST, AsmBinaryOp, AsmBinaryOp)
 #define init_AsmAdd() tagged_def_init(AST, AsmBinaryOp, AsmAdd)
 #define init_AsmSub() tagged_def_init(AST, AsmBinaryOp, AsmSub)
@@ -236,6 +239,7 @@ struct AsmUnaryOp {
     tagged_def_impl(AST_T);
 };
 
+struct AsmUnaryOp make_AsmUnaryOp(tagged_def_impl(AST_T));
 #define init_AsmUnaryOp() tagged_def_init(AST, AsmUnaryOp, AsmUnaryOp)
 #define init_AsmNot() tagged_def_init(AST, AsmUnaryOp, AsmNot)
 #define init_AsmNeg() tagged_def_init(AST, AsmUnaryOp, AsmNeg)

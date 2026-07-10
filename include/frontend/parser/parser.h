@@ -13,7 +13,7 @@ struct IdentifierContext;
 
 // Parser
 
-error_t parse_tokens(vector_t(struct Token) * tokens, struct ErrorsContext* errors, struct IdentifierContext* identifiers,
-    unique_ptr_t(CProgram) * c_ast);
+error_t parse_tokens(vector_t(struct Token) * tokens, struct ErrorsContext* errors,
+    struct IdentifierContext* identifiers, unique_ptr_t(CProgram) * c_ast);
 
 #endif

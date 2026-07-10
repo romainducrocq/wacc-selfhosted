@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -10,23 +10,11 @@
 #include "frontend/parser/errors.h"
 #include "frontend/parser/lexer.h"
 
-// TODO
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
-#elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
-#endif
-extern int snprintf(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
+// TODO remove
 int snprintf2(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4) {
     snprintf(s, n, format, arg1, arg2, arg3, arg4);
 }
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#endif
+//
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -362,7 +350,7 @@ char* get_assign_fmt(struct CBinaryOp* node, struct CUnaryOp* unop) {
 char* get_name_fmt(struct IdentifierContext* ctx, TIdentifier name, string_t* name_fmt) {
     string_t value = map_get(ctx->hash_table, name);
     str_copy(value, *name_fmt);
-    for (size_t i = str_size(*name_fmt); i-- > 0;) {
+    for (unsigned long i = str_size(*name_fmt); i-- > 0;) {
         if ((*name_fmt)[i] == UID_SEPARATOR[0]) {
             str_substr(*name_fmt, 0, i - 1);
             break;
@@ -389,7 +377,7 @@ char* get_fun_fmt(struct IdentifierContext* ctx, struct FunType* fun_type, strin
         str_delete(type_fmt);
     }
     str_append(*fun_fmt, ")(");
-    for (size_t i = 0; i < vec_size(fun_type->param_types); ++i) {
+    for (unsigned long i = 0; i < vec_size(fun_type->param_types); ++i) {
         {
             string_t type_fmt = str_new(NULL);
             str_append(*fun_fmt, get_type_fmt(ctx, fun_type->param_types[i], &type_fmt));

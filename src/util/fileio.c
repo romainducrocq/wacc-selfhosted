@@ -8,8 +8,7 @@
 #include "util/fileio.h"
 #include "util/throw.h"
 
-// TODO errors
-// #include "frontend/parser/errors.h"
+#include "frontend/parser/errors.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -59,7 +58,7 @@ error_t open_fread(Ctx ctx, string_t filename) {
     struct FileRead file_read = {0, NULL, NULL, str_new(NULL)};
     file_read.fd = fopen(filename, "rb");
     if (!file_read.fd || str_size(filename) >= 4096) {
-        goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, filename)); // TODO errors
+        THROW_BASE(GET_UTIL_MSG(1, MSG_failed_fread, filename));
     }
     str_copy(filename, file_read.filename);
     vec_push_back(ctx->file_reads, file_read);
@@ -74,7 +73,7 @@ error_t open_fwrite(Ctx ctx, string_t filename) {
     ctx->fd_write = NULL;
     ctx->fd_write = fopen(filename, "wb");
     if (!ctx->fd_write || str_size(filename) >= 4096) {
-        goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fwrite, filename)); // TODO errors
+        THROW_BASE(GET_UTIL_MSG(1, MSG_failed_fwrite, filename));
     }
 
     ctx->write_buf = str_new("");
@@ -124,14 +123,12 @@ error_t close_fread(Ctx ctx, unsigned long linenum) {
         THROW_ABORT_IF(vec_back(ctx->file_reads).buf || vec_back(ctx->file_reads).len != 0);
         vec_back(ctx->file_reads).fd = fopen(vec_back(ctx->file_reads).filename, "rb");
         if (!vec_back(ctx->file_reads).fd) {
-            goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); // TODO
-                            // errors
+            THROW_BASE(GET_UTIL_MSG(1, MSG_failed_fread, vec_back(ctx->file_reads).filename));
         }
         for (unsigned long i = 0; i < linenum; ++i) {
             if (getline(&vec_back(ctx->file_reads).buf, &vec_back(ctx->file_reads).len, vec_back(ctx->file_reads).fd)
                 == -1) {
-                goto _Lfinally; // THROW_BASE(GET_UTIL_MSG(MSG_failed_fread, vec_back(ctx->file_reads).filename)); //
-                                // TODO errors
+                THROW_BASE(GET_UTIL_MSG(1, MSG_failed_fread, vec_back(ctx->file_reads).filename));
             }
         }
     }

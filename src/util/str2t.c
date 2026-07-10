@@ -4,8 +4,7 @@
 #include "util/str2t.h"
 #include "util/throw.h"
 
-// TODO errors
-// #include "frontend/parser/errors.h"
+#include "frontend/parser/errors.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -199,18 +198,12 @@ string_t string_literal_to_const(vector_t(char_t) string_literal) {
     return string_const;
 }
 
-// TODO errors
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#endif
-
 error_t string_to_long(struct ErrorsContext* ctx, char* str_int, unsigned long info_at, long* value) {
     CATCH_ENTER;
     char* end_ptr = NULL;
     *value = strtoimax(str_int, &end_ptr, 10);
     if (end_ptr == str_int) {
-        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtoi, str_int)); // TODO errors
+        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(1, MSG_failed_strtoi, str_int));
     }
     FINALLY;
     CATCH_EXIT;
@@ -221,7 +214,7 @@ error_t string_to_ulong(struct ErrorsContext* ctx, char* str_uint, unsigned long
     char* end_ptr = NULL;
     *value = strtoumax(str_uint, &end_ptr, 10);
     if (end_ptr == str_uint) {
-        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtou, str_uint)); // TODO errors
+        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(1, MSG_failed_strtou, str_uint));
     }
     FINALLY;
     CATCH_EXIT;
@@ -232,13 +225,8 @@ error_t string_to_dbl(struct ErrorsContext* ctx, char* str_dbl, unsigned long in
     char* end_ptr = NULL;
     *value = strtod(str_dbl, &end_ptr);
     if (end_ptr == str_dbl) {
-        goto _Lfinally; // THROW_AT_TOKEN(info_at, GET_UTIL_MSG(MSG_failed_strtod, str_dbl)); // TODO errors
+        THROW_AT_TOKEN(info_at, GET_UTIL_MSG(1, MSG_failed_strtod, str_dbl));
     }
     FINALLY;
     CATCH_EXIT;
 }
-
-// TODO errors
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif

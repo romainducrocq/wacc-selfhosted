@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/str2t.h"
@@ -18,7 +16,7 @@
 #define StStructure struct Structure
 PairKeyValue(TIdentifier, StStructure);
 
-typedef struct SemanticContext {
+struct SemanticContext {
     struct ErrorsContext* errors;
     struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
@@ -38,13 +36,13 @@ typedef struct SemanticContext {
     hashset_t(TIdentifier) struct_def_set;
     hashset_t(TIdentifier) union_def_set;
     vector_t(shared_ptr_t(StaticInit)) * p_static_inits;
-} SemanticContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Semantic analysis
 
-typedef SemanticContext* Ctx;
+#define Ctx struct SemanticContext*
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -88,7 +86,7 @@ static bool is_same_fun_type(struct FunType* fun_type_1, struct FunType* fun_typ
         || !is_same_type(fun_type_1->ret_type, fun_type_2->ret_type)) {
         return false;
     }
-    for (size_t i = 0; i < vec_size(fun_type_1->param_types); ++i) {
+    for (unsigned long i = 0; i < vec_size(fun_type_1->param_types); ++i) {
         if (!is_same_type(fun_type_1->param_types[i], fun_type_2->param_types[i])) {
             return false;
         }
@@ -561,7 +559,7 @@ static TULong get_const_ptr_value(struct CConstant* node) {
     }
 }
 
-static size_t get_compound_info_at(struct CCompoundInit* node) {
+static unsigned long get_compound_info_at(struct CCompoundInit* node) {
     THROW_ABORT_IF(vec_empty(node->initializers));
     struct CInitializer* initializer = node->initializers[0];
     while (initializer->type == AST_CCompoundInit_t) {
@@ -655,7 +653,7 @@ static error_t check_cast_exp(Ctx ctx, struct CCast* node) {
 static error_t cast_exp(Ctx ctx, shared_ptr_t(Type) * exp_type, unique_ptr_t(CExp) * exp) {
     shared_ptr_t(Type) exp_type_cp = sptr_new();
     CATCH_ENTER;
-    size_t info_at = (*exp)->info_at;
+    unsigned long info_at = (*exp)->info_at;
     sptr_copy(Type, *exp_type, exp_type_cp);
     *exp = make_CCast(exp, &exp_type_cp, info_at);
     TRY(check_cast_exp(ctx, &(*exp)->get._CCast));
@@ -1197,7 +1195,7 @@ static error_t check_call_exp(Ctx ctx, struct CFunctionCall* node) {
         THROW_AT_TOKEN(node->_base->info_at, GET_SEMANTIC_MSG(3, MSG_call_with_wrong_argc,
                                                  str_fmt_name(node->name, &name_fmt), strto_fmt_1, strto_fmt_2));
     }
-    for (size_t i = 0; i < vec_size(node->args); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->args); ++i) {
         if (!is_same_type(node->args[i]->exp_type, fun_type->param_types[i])) {
             TRY(cast_assign(ctx, &fun_type->param_types[i], &node->args[i]));
         }
@@ -1309,7 +1307,7 @@ static error_t check_dot_exp(Ctx ctx, struct CDot* node) {
     struct Structure* struct_type;
     struct StructTypedef* struct_typedef;
     struct Type* member_type;
-    ssize_t map_it;
+    long map_it;
     if (node->structure->exp_type->type != AST_Structure_t) {
         THROW_AT_TOKEN(
             node->_base->info_at, GET_SEMANTIC_MSG(2, MSG_dot_not_struct, str_fmt_name(node->member, &name_fmt),
@@ -1339,7 +1337,7 @@ static error_t check_arrow_exp(Ctx ctx, struct CArrow* node) {
     struct Structure* struct_type;
     struct StructTypedef* struct_typedef;
     struct Type* member_type;
-    ssize_t map_it;
+    long map_it;
     if (node->pointer->exp_type->type != AST_Pointer_t) {
         THROW_AT_TOKEN(
             node->_base->info_at, GET_SEMANTIC_MSG(2, MSG_arrow_not_struct_ptr, str_fmt_name(node->member, &name_fmt),
@@ -1380,7 +1378,7 @@ static void check_arr_typed_exp(unique_ptr_t(CExp) * addrof) {
         free_Type(&(*addrof)->exp_type);
         (*addrof)->exp_type = make_Pointer(&ref_type);
     }
-    size_t info_at = (*addrof)->info_at;
+    unsigned long info_at = (*addrof)->info_at;
     *addrof = make_CAddrOf(addrof, info_at);
     sptr_copy(Type, (*addrof)->get._CAddrOf.exp->exp_type, (*addrof)->exp_type);
 }
@@ -1493,11 +1491,11 @@ static error_t check_switch_int_cases(Ctx ctx, struct CSwitch* node) {
     vector_t(TInt) values = vec_new();
     CATCH_ENTER;
     vec_resize(values, vec_size(node->cases));
-    for (size_t i = 0; i < vec_size(values); ++i) {
+    for (unsigned long i = 0; i < vec_size(values); ++i) {
         THROW_ABORT_IF(node->cases[i]->type != AST_CConstant_t);
         struct CConstant* esac = &node->cases[i]->get._CConstant;
         values[i] = get_const_int_value(esac);
-        for (size_t j = 0; j < i; ++j) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (values[i] == values[j]) {
                 strto_fmt = str_to_string(values[i]);
                 THROW_AT_TOKEN(node->cases[i]->info_at, GET_SEMANTIC_MSG(1, MSG_duplicate_case_value, strto_fmt));
@@ -1518,11 +1516,11 @@ static error_t check_switch_long_cases(Ctx ctx, struct CSwitch* node) {
     vector_t(TLong) values = vec_new();
     CATCH_ENTER;
     vec_resize(values, vec_size(node->cases));
-    for (size_t i = 0; i < vec_size(values); ++i) {
+    for (unsigned long i = 0; i < vec_size(values); ++i) {
         THROW_ABORT_IF(node->cases[i]->type != AST_CConstant_t);
         struct CConstant* esac = &node->cases[i]->get._CConstant;
         values[i] = get_const_long_value(esac);
-        for (size_t j = 0; j < i; ++j) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (values[i] == values[j]) {
                 strto_fmt = str_to_string(values[i]);
                 THROW_AT_TOKEN(node->cases[i]->info_at, GET_SEMANTIC_MSG(1, MSG_duplicate_case_value, strto_fmt));
@@ -1543,11 +1541,11 @@ static error_t check_switch_uint_cases(Ctx ctx, struct CSwitch* node) {
     vector_t(TUInt) values = vec_new();
     CATCH_ENTER;
     vec_resize(values, vec_size(node->cases));
-    for (size_t i = 0; i < vec_size(values); ++i) {
+    for (unsigned long i = 0; i < vec_size(values); ++i) {
         THROW_ABORT_IF(node->cases[i]->type != AST_CConstant_t);
         struct CConstant* esac = &node->cases[i]->get._CConstant;
         values[i] = get_const_uint_value(esac);
-        for (size_t j = 0; j < i; ++j) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (values[i] == values[j]) {
                 strto_fmt = str_to_string(values[i]);
                 THROW_AT_TOKEN(node->cases[i]->info_at, GET_SEMANTIC_MSG(1, MSG_duplicate_case_value, strto_fmt));
@@ -1568,11 +1566,11 @@ static error_t check_switch_ulong_cases(Ctx ctx, struct CSwitch* node) {
     vector_t(TULong) values = vec_new();
     CATCH_ENTER;
     vec_resize(values, vec_size(node->cases));
-    for (size_t i = 0; i < vec_size(values); ++i) {
+    for (unsigned long i = 0; i < vec_size(values); ++i) {
         THROW_ABORT_IF(node->cases[i]->type != AST_CConstant_t);
         struct CConstant* esac = &node->cases[i]->get._CConstant;
         values[i] = get_const_ulong_value(esac);
-        for (size_t j = 0; j < i; ++j) {
+        for (unsigned long j = 0; j < i; ++j) {
             if (values[i] == values[j]) {
                 strto_fmt = str_to_string(values[i]);
                 THROW_AT_TOKEN(node->cases[i]->info_at, GET_SEMANTIC_MSG(1, MSG_duplicate_case_value, strto_fmt));
@@ -1634,7 +1632,7 @@ static error_t check_bound_string_init(Ctx ctx, struct CString* node, struct Arr
         THROW_AT_TOKEN(
             node->_base->info_at, GET_SEMANTIC_MSG(1, MSG_string_init_not_char_arr, str_fmt_arr(arr_type, &type_fmt)));
     }
-    else if (vec_size(node->literal->value) > (size_t)arr_type->size) {
+    else if (vec_size(node->literal->value) > (unsigned long)arr_type->size) {
         strto_fmt_1 = str_to_string(arr_type->size);
         strto_fmt_2 = str_to_string(vec_size(node->literal->value));
         THROW_AT_TOKEN(node->_base->info_at, GET_SEMANTIC_MSG(2, MSG_string_init_overflow, strto_fmt_1, strto_fmt_2));
@@ -1708,9 +1706,9 @@ static unique_ptr_t(CInitializer) check_single_zero_init(struct Type* elem_type)
 
 static unique_ptr_t(CInitializer) check_arr_zero_init(Ctx ctx, struct Array* arr_type) {
     vector_t(unique_ptr_t(CInitializer)) zero_inits = vec_new();
-    size_t arr_type_size = (size_t)arr_type->size;
+    unsigned long arr_type_size = (unsigned long)arr_type->size;
     vec_reserve(zero_inits, arr_type_size);
-    for (size_t i = 0; i < arr_type_size; ++i) {
+    for (unsigned long i = 0; i < arr_type_size; ++i) {
         unique_ptr_t(CInitializer) initializer = check_zero_init(ctx, arr_type->elem_type);
         vec_move_back(zero_inits, initializer);
     }
@@ -1721,7 +1719,7 @@ static unique_ptr_t(CInitializer) check_struct_zero_init(Ctx ctx, struct Structu
     vector_t(unique_ptr_t(CInitializer)) zero_inits = vec_new();
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
     vec_reserve(zero_inits, vec_size(struct_typedef->member_names));
-    for (size_t i = 0; i < vec_size(struct_typedef->member_names); ++i) {
+    for (unsigned long i = 0; i < vec_size(struct_typedef->member_names); ++i) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         unique_ptr_t(CInitializer) initializer = check_zero_init(ctx, member->member_type);
         vec_move_back(zero_inits, initializer);
@@ -1745,7 +1743,7 @@ static error_t check_bound_arr_init(Ctx ctx, struct CCompoundInit* node, struct 
     string_t strto_fmt_1 = str_new(NULL);
     string_t strto_fmt_2 = str_new(NULL);
     CATCH_ENTER;
-    if (vec_size(node->initializers) > (size_t)arr_type->size) {
+    if (vec_size(node->initializers) > (unsigned long)arr_type->size) {
         strto_fmt_1 = str_to_string(arr_type->size);
         strto_fmt_2 = str_to_string(vec_size(node->initializers));
         THROW_AT_TOKEN(get_compound_info_at(node),
@@ -1764,7 +1762,7 @@ static error_t check_bound_struct_init(Ctx ctx, struct CCompoundInit* node, stru
     string_t strto_fmt_2 = str_new(NULL);
     CATCH_ENTER;
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
-    size_t bound = struct_type->is_union ? 1 : map_size(struct_typedef->members);
+    unsigned long bound = struct_type->is_union ? 1 : map_size(struct_typedef->members);
     if (vec_size(node->initializers) > bound) {
         strto_fmt_1 = str_to_string(vec_size(node->initializers));
         strto_fmt_2 = str_to_string(bound);
@@ -1781,7 +1779,7 @@ static error_t check_bound_struct_init(Ctx ctx, struct CCompoundInit* node, stru
 
 static void check_arr_init(
     Ctx ctx, struct CCompoundInit* node, struct Array* arr_type, shared_ptr_t(Type) * init_type) {
-    while (vec_size(node->initializers) < (size_t)arr_type->size) {
+    while (vec_size(node->initializers) < (unsigned long)arr_type->size) {
         unique_ptr_t(CInitializer) zero_init = check_zero_init(ctx, arr_type->elem_type);
         vec_move_back(node->initializers, zero_init);
     }
@@ -1791,7 +1789,7 @@ static void check_arr_init(
 static void check_struct_init(
     Ctx ctx, struct CCompoundInit* node, struct Structure* struct_type, shared_ptr_t(Type) * init_type) {
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
-    for (size_t i = vec_size(node->initializers); i < map_size(struct_typedef->members); ++i) {
+    for (unsigned long i = vec_size(node->initializers); i < map_size(struct_typedef->members); ++i) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         unique_ptr_t(CInitializer) zero_init = check_zero_init(ctx, member->member_type);
         vec_move_back(node->initializers, zero_init);
@@ -1829,7 +1827,7 @@ static error_t check_ret_fun_decl(Ctx ctx, struct CFunctionDeclaration* node) {
     CATCH_EXIT;
 }
 
-static void check_arr_param_decl(struct FunType* fun_type, size_t i) {
+static void check_arr_param_decl(struct FunType* fun_type, unsigned long i) {
     shared_ptr_t(Type) ref_type = sptr_new();
     sptr_copy(Type, fun_type->param_types[i]->get._Array.elem_type, ref_type);
     free_Type(&fun_type->param_types[i]);
@@ -1845,7 +1843,7 @@ static error_t check_fun_params_decl(Ctx ctx, struct CFunctionDeclaration* node)
     shared_ptr_t(Type) param_type = sptr_new();
     CATCH_ENTER;
     struct FunType* fun_type = &node->fun_type->get._FunType;
-    for (size_t i = 0; i < vec_size(node->params); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->params); ++i) {
         ctx->errors->info_at_buf = node->info_at;
         TRY(reslv_struct_type(ctx, fun_type->param_types[i]));
         if (fun_type->param_types[i]->type == AST_Void_t) {
@@ -1894,7 +1892,7 @@ static error_t check_fun_decl(Ctx ctx, struct CFunctionDeclaration* node) {
     bool is_def = set_find(ctx->fun_def_set, node->name) != set_end();
     bool is_glob = node->storage_class.type != AST_CStatic_t;
 
-    ssize_t map_it = map_find(ctx->frontend->symbol_table, node->name);
+    long map_it = map_find(ctx->frontend->symbol_table, node->name);
     if (map_it != map_end()) {
         struct Symbol* fun_symbol = pair_second(ctx->frontend->symbol_table[map_it]);
         struct FunType* fun_type = &fun_symbol->type_t->get._FunType;
@@ -2102,7 +2100,7 @@ static void check_static_ptr_string_init(Ctx ctx, struct CString* node) {
     TIdentifier string_const_label;
     {
         TIdentifier string_const = make_literal_identifier(ctx, node->literal);
-        ssize_t map_it = map_find(ctx->frontend->string_const_table, string_const);
+        long map_it = map_find(ctx->frontend->string_const_table, string_const);
         if (map_it != map_end()) {
             string_const_label = pair_second(ctx->frontend->string_const_table[map_it]);
         }
@@ -2192,10 +2190,10 @@ static error_t check_static_arr_init(Ctx ctx, struct CCompoundInit* node, struct
     CATCH_ENTER;
     TRY(check_bound_arr_init(ctx, node, arr_type));
 
-    for (size_t i = 0; i < vec_size(node->initializers); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->initializers); ++i) {
         TRY(check_static_init(ctx, node->initializers[i], arr_type->elem_type));
     }
-    if ((size_t)arr_type->size > vec_size(node->initializers)) {
+    if ((unsigned long)arr_type->size > vec_size(node->initializers)) {
         check_static_no_init(ctx, arr_type->elem_type, arr_type->size - vec_size(node->initializers));
     }
     FINALLY;
@@ -2208,7 +2206,7 @@ static error_t check_static_struct_init(Ctx ctx, struct CCompoundInit* node, str
     TRY(check_bound_struct_init(ctx, node, struct_type));
 
     size = 0l;
-    for (size_t i = 0; i < vec_size(node->initializers); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->initializers); ++i) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         if (member->offset != size) {
             check_static_no_init(ctx, NULL, member->offset - size);
@@ -2271,7 +2269,7 @@ static error_t check_initializer(
     }
     *init_value = make_Initial(&static_inits);
     FINALLY;
-    for (size_t i = 0; i < vec_size(static_inits); ++i) {
+    for (unsigned long i = 0; i < vec_size(static_inits); ++i) {
         free_StaticInit(&static_inits[i]);
     }
     vec_delete(static_inits);
@@ -2288,7 +2286,7 @@ static error_t check_file_var_decl(Ctx ctx, struct CVariableDeclaration* node) {
     shared_ptr_t(Type) glob_var_type = sptr_new();
     CATCH_ENTER;
     bool is_glob;
-    ssize_t map_it;
+    long map_it;
     ctx->errors->info_at_buf = node->info_at;
     TRY(reslv_struct_type(ctx, node->var_type));
     if (node->var_type->type == AST_Void_t) {
@@ -2374,7 +2372,7 @@ static error_t check_extern_block_var_decl(Ctx ctx, struct CVariableDeclaration*
     shared_ptr_t(InitialValue) init_value = sptr_new();
     shared_ptr_t(Type) local_var_type = sptr_new();
     CATCH_ENTER;
-    ssize_t map_it;
+    long map_it;
     if (node->init) {
         THROW_AT_TOKEN(node->info_at, GET_SEMANTIC_MSG(1, MSG_redef_extern_var, str_fmt_name(node->name, &name_fmt)));
     }
@@ -2493,8 +2491,8 @@ static error_t check_struct_members_decl(Ctx ctx, struct CStructDeclaration* nod
     string_t struct_fmt = str_new(NULL);
     string_t type_fmt = str_new(NULL);
     CATCH_ENTER;
-    for (size_t i = 0; i < vec_size(node->members); ++i) {
-        for (size_t j = i + 1; j < vec_size(node->members); ++j) {
+    for (unsigned long i = 0; i < vec_size(node->members); ++i) {
+        for (unsigned long j = i + 1; j < vec_size(node->members); ++j) {
             if (node->members[i]->member_name == node->members[j]->member_name) {
                 THROW_AT_TOKEN(
                     node->members[i]->info_at, GET_SEMANTIC_MSG(2, MSG_duplicate_member_decl,
@@ -2537,7 +2535,7 @@ static error_t check_struct_decl(Ctx ctx, struct CStructDeclaration* node) {
     alignment = 0;
     size = 0l;
     vec_reserve(member_names, vec_size(node->members));
-    for (size_t i = 0; i < vec_size(node->members); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->members); ++i) {
         {
             TIdentifier name = node->members[i]->member_name;
             vec_push_back(member_names, name);
@@ -2583,7 +2581,7 @@ static error_t check_struct_decl(Ctx ctx, struct CStructDeclaration* node) {
     free_StructTypedef(&struct_typedef);
     free_Type(&member_type);
     vec_delete(member_names);
-    for (size_t i = 0; i < map_size(members); ++i) {
+    for (unsigned long i = 0; i < map_size(members); ++i) {
         free_StructMember(&pair_second(members[i]));
     }
     map_delete(members);
@@ -2695,9 +2693,9 @@ static void enter_scope(Ctx ctx) {
 }
 
 static void exit_scope(Ctx ctx) {
-    for (size_t i = 0; i < map_size(vec_back(ctx->scoped_identifier_maps)); ++i) {
+    for (unsigned long i = 0; i < map_size(vec_back(ctx->scoped_identifier_maps)); ++i) {
         TIdentifier identifier = pair_first(vec_back(ctx->scoped_identifier_maps)[i]);
-        ssize_t map_it = map_find(ctx->extern_scope_map, identifier);
+        long map_it = map_find(ctx->extern_scope_map, identifier);
         if (map_it != map_end()
             && pair_second(ctx->extern_scope_map[map_it]) == vec_size(ctx->scoped_identifier_maps)) {
             map_erase(ctx->extern_scope_map, identifier);
@@ -2713,7 +2711,7 @@ static error_t reslv_label(Ctx ctx, struct CFunctionDeclaration* node) {
     string_t name_fmt_1 = str_new(NULL);
     string_t name_fmt_2 = str_new(NULL);
     CATCH_ENTER;
-    for (size_t i = 0; i < map_size(ctx->goto_map); ++i) {
+    for (unsigned long i = 0; i < map_size(ctx->goto_map); ++i) {
         if (set_find(ctx->label_set, pair_first(ctx->goto_map[i])) == set_end()) {
             THROW_AT_TOKEN(map_get(ctx->errors->info_at_map, pair_second(ctx->goto_map[i])),
                 GET_SEMANTIC_MSG(2, MSG_undef_goto_target, str_fmt_name(pair_first(ctx->goto_map[i]), &name_fmt_1),
@@ -2752,8 +2750,8 @@ static error_t reslv_struct(Ctx ctx, struct Structure* struct_type) {
     else if (set_find(ctx->struct_def_set, struct_type->tag) != set_end()) {
         EARLY_EXIT;
     }
-    for (size_t i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
-        ssize_t map_it = map_find(ctx->scoped_struct_maps[i], struct_type->tag);
+    for (unsigned long i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
+        long map_it = map_find(ctx->scoped_struct_maps[i], struct_type->tag);
         if (map_it != map_end()) {
             struct Structure* structure = &pair_second(ctx->scoped_struct_maps[i][map_it]);
             if (structure->is_union != struct_type->is_union) {
@@ -2804,8 +2802,8 @@ static void reslv_string_exp(struct CString* node) { check_string_exp(node); }
 static error_t reslv_var_exp(Ctx ctx, struct CVar* node) {
     string_t name_fmt = str_new(NULL);
     CATCH_ENTER;
-    for (size_t i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
-        ssize_t map_it = map_find(ctx->scoped_identifier_maps[i], node->name);
+    for (unsigned long i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
+        long map_it = map_find(ctx->scoped_identifier_maps[i], node->name);
         if (map_it != map_end()) {
             node->name = pair_second(ctx->scoped_identifier_maps[i][map_it]);
             goto Lelse;
@@ -2870,8 +2868,8 @@ static error_t reslv_conditional_exp(Ctx ctx, struct CConditional* node) {
 static error_t reslv_call_exp(Ctx ctx, struct CFunctionCall* node) {
     string_t name_fmt = str_new(NULL);
     CATCH_ENTER;
-    for (size_t i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
-        ssize_t map_it = map_find(ctx->scoped_identifier_maps[i], node->name);
+    for (unsigned long i = vec_size(ctx->scoped_identifier_maps); i-- > 0;) {
+        long map_it = map_find(ctx->scoped_identifier_maps[i], node->name);
         if (map_it != map_end()) {
             node->name = pair_second(ctx->scoped_identifier_maps[i][map_it]);
             goto Lelse;
@@ -2881,7 +2879,7 @@ static error_t reslv_call_exp(Ctx ctx, struct CFunctionCall* node) {
         node->_base->info_at, GET_SEMANTIC_MSG(1, MSG_undecl_fun_in_scope, str_fmt_name(node->name, &name_fmt)));
 Lelse:
 
-    for (size_t i = 0; i < vec_size(node->args); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->args); ++i) {
         TRY(reslv_typed_exp(ctx, &node->args[i]));
     }
     TRY(check_call_exp(ctx, node));
@@ -3087,7 +3085,7 @@ static error_t reslv_if_statement(Ctx ctx, struct CIf* node) {
 }
 
 static void reslv_goto_statement(Ctx ctx, struct CGoto* node) {
-    ssize_t map_it = map_find(ctx->goto_map, node->target);
+    long map_it = map_find(ctx->goto_map, node->target);
     if (map_it != map_end()) {
         node->target = pair_second(ctx->goto_map[map_it]);
         map_add(ctx->errors->info_at_map, node->target, node->info_at);
@@ -3102,7 +3100,7 @@ static void reslv_goto_statement(Ctx ctx, struct CGoto* node) {
 
 static error_t reslv_label_statement(Ctx ctx, struct CLabel* node) {
     CATCH_ENTER;
-    ssize_t map_it;
+    long map_it;
     TRY(annotate_goto_label(ctx, node));
     map_it = map_find(ctx->goto_map, node->target);
     if (map_it != map_end()) {
@@ -3276,7 +3274,7 @@ static error_t reslv_declaration(Ctx ctx, struct CDeclaration* node);
 
 static error_t reslv_block_items(Ctx ctx, vector_t(unique_ptr_t(CBlockItem)) node_list) {
     CATCH_ENTER;
-    for (size_t i = 0; i < vec_size(node_list); ++i) {
+    for (unsigned long i = 0; i < vec_size(node_list); ++i) {
         switch (node_list[i]->type) {
             case AST_CS_t:
                 TRY(reslv_statement(ctx, node_list[i]->get._CS.statement));
@@ -3321,7 +3319,7 @@ static error_t reslv_arr_init(
     CATCH_ENTER;
     TRY(check_bound_arr_init(ctx, node, arr_type));
 
-    for (size_t i = 0; i < vec_size(node->initializers); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->initializers); ++i) {
         TRY(reslv_initializer(ctx, node->initializers[i], &arr_type->elem_type));
     }
     check_arr_init(ctx, node, arr_type, init_type);
@@ -3334,7 +3332,7 @@ static error_t reslv_struct_init(
     CATCH_ENTER;
     TRY(check_bound_struct_init(ctx, node, struct_type));
 
-    for (size_t i = 0; i < vec_size(node->initializers); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->initializers); ++i) {
         struct StructMember* member = get_struct_typedef_member(ctx->frontend, struct_type->tag, i);
         TRY(reslv_initializer(ctx, node->initializers[i], &member->member_type));
     }
@@ -3381,7 +3379,7 @@ static error_t reslv_initializer(Ctx ctx, struct CInitializer* node, shared_ptr_
 static error_t reslv_fun_params_decl(Ctx ctx, struct CFunctionDeclaration* node) {
     string_t name_fmt = str_new(NULL);
     CATCH_ENTER;
-    for (size_t i = 0; i < vec_size(node->params); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->params); ++i) {
         TIdentifier param = node->params[i];
         if (map_find(vec_back(ctx->scoped_identifier_maps), param) != map_end()) {
             THROW_AT_TOKEN(node->info_at, GET_SEMANTIC_MSG(1, MSG_redecl_var_in_scope, str_fmt_name(param, &name_fmt)));
@@ -3491,7 +3489,7 @@ static error_t reslv_struct_declaration(Ctx ctx, struct CStructDeclaration* node
     string_t struct_fmt_1 = str_new(NULL);
     string_t struct_fmt_2 = str_new(NULL);
     CATCH_ENTER;
-    ssize_t map_it = map_find(vec_back(ctx->scoped_struct_maps), node->tag);
+    long map_it = map_find(vec_back(ctx->scoped_struct_maps), node->tag);
     if (map_it != map_end()) {
         node->tag = pair_second(vec_back(ctx->scoped_struct_maps)[map_it]).tag;
         if (node->is_union) {
@@ -3588,7 +3586,7 @@ static error_t reslv_declaration(Ctx ctx, struct CDeclaration* node) {
 static error_t resolve_program(Ctx ctx, struct CProgram* node) {
     CATCH_ENTER;
     enter_scope(ctx);
-    for (size_t i = 0; i < vec_size(node->declarations); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->declarations); ++i) {
         TRY(reslv_declaration(ctx, node->declarations[i]));
     }
     FINALLY;
@@ -3599,7 +3597,7 @@ static error_t resolve_program(Ctx ctx, struct CProgram* node) {
 
 error_t analyze_semantic(struct CProgram* node, struct ErrorsContext* errors, struct FrontEndContext* frontend,
     struct IdentifierContext* identifiers) {
-    SemanticContext ctx;
+    struct SemanticContext ctx;
     {
         ctx.errors = errors;
         ctx.frontend = frontend;
@@ -3621,11 +3619,11 @@ error_t analyze_semantic(struct CProgram* node, struct ErrorsContext* errors, st
     FINALLY;
     map_delete(ctx.extern_scope_map);
     map_delete(ctx.goto_map);
-    for (size_t i = 0; i < vec_size(ctx.scoped_identifier_maps); ++i) {
+    for (unsigned long i = 0; i < vec_size(ctx.scoped_identifier_maps); ++i) {
         map_delete(ctx.scoped_identifier_maps[i]);
     }
     vec_delete(ctx.scoped_identifier_maps);
-    for (size_t i = 0; i < vec_size(ctx.scoped_struct_maps); ++i) {
+    for (unsigned long i = 0; i < vec_size(ctx.scoped_struct_maps); ++i) {
         map_delete(ctx.scoped_struct_maps[i]);
     }
     vec_delete(ctx.scoped_struct_maps);
@@ -3637,7 +3635,7 @@ error_t analyze_semantic(struct CProgram* node, struct ErrorsContext* errors, st
     set_delete(ctx.union_def_set);
 
     map_delete(errors->info_at_map);
-    for (size_t i = 0; i < vec_size(errors->fopen_lines); ++i) {
+    for (unsigned long i = 0; i < vec_size(errors->fopen_lines); ++i) {
         str_delete(errors->fopen_lines[i].filename);
     }
     vec_delete(errors->fopen_lines);

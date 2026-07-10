@@ -52,7 +52,7 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/reg_alloc.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/errors.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/lexer.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/parser.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/idents.c"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/idents.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/semantic.c"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/tac_repr.c"
 

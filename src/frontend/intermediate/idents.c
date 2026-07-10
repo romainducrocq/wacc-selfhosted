@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -12,7 +12,7 @@
 
 // Identifiers
 
-typedef struct IdentifierContext* Ctx;
+#define Ctx struct IdentifierContext*
 
 TIdentifier rslv_label_identifier(Ctx ctx, TIdentifier label) {
     string_t name = str_new(NULL);
@@ -130,7 +130,7 @@ TIdentifier repr_loop_identifier(Ctx ctx, LABEL_KIND label_kind, TIdentifier tar
     return make_string_identifier(ctx, &name);
 }
 
-TIdentifier repr_case_identifier(Ctx ctx, TIdentifier target, bool is_label, size_t i) {
+TIdentifier repr_case_identifier(Ctx ctx, TIdentifier target, bool is_label, unsigned long i) {
     string_t name = is_label ? str_new("case_") : str_new("");
     {
         string_t strto_i = str_to_string(i);

@@ -1,8 +1,6 @@
 #ifndef _OPTIMIZATION_REG_ALLOC_H
 #define _OPTIMIZATION_REG_ALLOC_H
 
-#include <inttypes.h>
-
 struct AsmProgram;
 struct BackEndContext;
 struct FrontEndContext;
@@ -17,6 +15,6 @@ struct FrontEndContext;
 // Register coalescing
 
 void allocate_registers(
-    struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code);
+    struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uchar_t optim_2_code);
 
 #endif

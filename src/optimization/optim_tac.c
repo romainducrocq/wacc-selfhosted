@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <string.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/str2t.h"
@@ -103,7 +102,7 @@ static shared_ptr_t(TacValue) fold_sign_extend_const(Ctx ctx, struct TacVariable
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, size_t instr_idx) {
+static void fold_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
         shared_ptr_t(TacValue) src =
@@ -219,7 +218,7 @@ static shared_ptr_t(TacValue) fold_truncate_const(Ctx ctx, struct TacVariable* n
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_truncate_instr(Ctx ctx, struct TacTruncate* node, size_t instr_idx) {
+static void fold_truncate_instr(Ctx ctx, struct TacTruncate* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
         shared_ptr_t(TacValue) src =
@@ -289,7 +288,7 @@ static shared_ptr_t(TacValue) fold_zero_extend_const(Ctx ctx, struct TacVariable
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, size_t instr_idx) {
+static void fold_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
         shared_ptr_t(TacValue) src =
@@ -326,7 +325,7 @@ static shared_ptr_t(TacValue) fold_dbl_to_signed_const(Ctx ctx, struct TacVariab
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_dbl_to_signed_instr(Ctx ctx, struct TacDoubleToInt* node, size_t instr_idx) {
+static void fold_dbl_to_signed_instr(Ctx ctx, struct TacDoubleToInt* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
         shared_ptr_t(TacValue) src =
@@ -362,7 +361,7 @@ static shared_ptr_t(TacValue) fold_dbl_to_unsigned_const(Ctx ctx, struct TacVari
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_dbl_to_unsigned_instr(Ctx ctx, struct TacDoubleToUInt* node, size_t instr_idx) {
+static void fold_dbl_to_unsigned_instr(Ctx ctx, struct TacDoubleToUInt* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
         shared_ptr_t(TacValue) src =
@@ -397,7 +396,7 @@ static shared_ptr_t(TacValue) fold_signed_to_dbl_const(struct CConst* constant) 
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_signed_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, size_t instr_idx) {
+static void fold_signed_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(
             node->dst->type != AST_TacVariable_t
@@ -433,7 +432,7 @@ static shared_ptr_t(TacValue) fold_unsigned_to_dbl_const(struct CConst* constant
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_unsigned_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, size_t instr_idx) {
+static void fold_unsigned_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         THROW_ABORT_IF(
             node->dst->type != AST_TacVariable_t
@@ -593,7 +592,7 @@ static shared_ptr_t(TacValue) fold_unary_const(struct TacUnaryOp* node, struct C
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_unary_instr(Ctx ctx, struct TacUnary* node, size_t instr_idx) {
+static void fold_unary_instr(Ctx ctx, struct TacUnary* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacConstant_t) {
         shared_ptr_t(TacValue) src = fold_unary_const(&node->unop, node->src->get._TacConstant.constant);
         shared_ptr_t(TacValue) dst = sptr_new();
@@ -973,7 +972,7 @@ static shared_ptr_t(TacValue)
     return make_TacConstant(&fold_constant);
 }
 
-static void fold_binary_instr(Ctx ctx, struct TacBinary* node, size_t instr_idx) {
+static void fold_binary_instr(Ctx ctx, struct TacBinary* node, unsigned long instr_idx) {
     if (node->src1->type == AST_TacConstant_t && node->src2->type == AST_TacConstant_t) {
         shared_ptr_t(TacValue) src = fold_binary_const(
             &node->binop, node->src1->get._TacConstant.constant, node->src2->get._TacConstant.constant);
@@ -1165,7 +1164,7 @@ static bool is_const_zero(struct CConst* constant) {
     }
 }
 
-static void fold_jmp_eq_0_instr(Ctx ctx, struct TacJumpIfZero* node, size_t instr_idx) {
+static void fold_jmp_eq_0_instr(Ctx ctx, struct TacJumpIfZero* node, unsigned long instr_idx) {
     if (node->condition->type == AST_TacConstant_t) {
         if (is_const_zero(node->condition->get._TacConstant.constant)) {
             TIdentifier target = node->target;
@@ -1177,7 +1176,7 @@ static void fold_jmp_eq_0_instr(Ctx ctx, struct TacJumpIfZero* node, size_t inst
     }
 }
 
-static void fold_jmp_ne_0_instr(Ctx ctx, struct TacJumpIfNotZero* node, size_t instr_idx) {
+static void fold_jmp_ne_0_instr(Ctx ctx, struct TacJumpIfNotZero* node, unsigned long instr_idx) {
     if (node->condition->type == AST_TacConstant_t) {
         if (is_const_zero(node->condition->get._TacConstant.constant)) {
             set_instr(ctx, uptr_new(), instr_idx);
@@ -1189,7 +1188,7 @@ static void fold_jmp_ne_0_instr(Ctx ctx, struct TacJumpIfNotZero* node, size_t i
     }
 }
 
-static void fold_instr(Ctx ctx, size_t instr_idx) {
+static void fold_instr(Ctx ctx, unsigned long instr_idx) {
     struct TacInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_TacSignExtend_t:
@@ -1234,7 +1233,7 @@ static void fold_instr(Ctx ctx, size_t instr_idx) {
 }
 
 static void fold_constants(Ctx ctx) {
-    for (size_t instr_idx = 0; instr_idx < vec_size(*ctx->p_instrs); ++instr_idx) {
+    for (unsigned long instr_idx = 0; instr_idx < vec_size(*ctx->p_instrs); ++instr_idx) {
         if (GET_INSTR(instr_idx)) {
             fold_instr(ctx, instr_idx);
         }
@@ -1245,23 +1244,23 @@ static void fold_constants(Ctx ctx) {
 
 // Unreachable code elimination
 
-static void unreach_reachable_block(Ctx ctx, size_t block_id);
+static void unreach_reachable_block(Ctx ctx, unsigned long block_id);
 
-static void unreach_succ_reachable_blocks(Ctx ctx, size_t block_id) {
-    for (size_t i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
+static void unreach_succ_reachable_blocks(Ctx ctx, unsigned long block_id) {
+    for (unsigned long i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
         unreach_reachable_block(ctx, GET_CFG_BLOCK(block_id).succ_ids[i]);
     }
 }
 
-static void unreach_reachable_block(Ctx ctx, size_t block_id) {
+static void unreach_reachable_block(Ctx ctx, unsigned long block_id) {
     if (block_id < ctx->cfg->exit_id && !ctx->cfg->reaching_code[block_id]) {
         ctx->cfg->reaching_code[block_id] = true;
         unreach_succ_reachable_blocks(ctx, block_id);
     }
 }
 
-static void unreach_empty_block(Ctx ctx, size_t block_id) {
-    for (size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
+static void unreach_empty_block(Ctx ctx, unsigned long block_id) {
+    for (unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
          instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx; ++instr_idx) {
         if (GET_INSTR(instr_idx)) {
             set_instr(ctx, uptr_new(), instr_idx);
@@ -1273,7 +1272,7 @@ static void unreach_empty_block(Ctx ctx, size_t block_id) {
     vec_clear(GET_CFG_BLOCK(block_id).pred_ids);
 }
 
-static void unreach_jump_instr(Ctx ctx, size_t block_id) {
+static void unreach_jump_instr(Ctx ctx, unsigned long block_id) {
     struct TacInstruction* node = GET_INSTR(GET_CFG_BLOCK(block_id).instrs_back_idx);
     switch (node->type) {
         case AST_TacJump_t:
@@ -1286,18 +1285,18 @@ static void unreach_jump_instr(Ctx ctx, size_t block_id) {
     }
 }
 
-static void unreach_jump_block(Ctx ctx, size_t block_id, size_t next_block_id) {
+static void unreach_jump_block(Ctx ctx, unsigned long block_id, unsigned long next_block_id) {
     if (vec_size(GET_CFG_BLOCK(block_id).succ_ids) == 1 && GET_CFG_BLOCK(block_id).succ_ids[0] == next_block_id) {
         unreach_jump_instr(ctx, block_id);
     }
 }
 
-static void unreach_label_instr(Ctx ctx, size_t block_id) {
+static void unreach_label_instr(Ctx ctx, unsigned long block_id) {
     THROW_ABORT_IF(GET_INSTR(GET_CFG_BLOCK(block_id).instrs_front_idx)->type != AST_TacLabel_t);
     cfg_rm_block_instr(ctx, GET_CFG_BLOCK(block_id).instrs_front_idx, block_id);
 }
 
-static void unreach_label_block(Ctx ctx, size_t block_id, size_t prev_block_id) {
+static void unreach_label_block(Ctx ctx, unsigned long block_id, unsigned long prev_block_id) {
     if (vec_size(GET_CFG_BLOCK(block_id).pred_ids) == 1 && GET_CFG_BLOCK(block_id).pred_ids[0] == prev_block_id) {
         unreach_label_instr(ctx, block_id);
     }
@@ -1311,12 +1310,12 @@ static void eliminate_unreachable_code(Ctx ctx) {
         vec_resize(ctx->cfg->reaching_code, vec_size(ctx->cfg->blocks));
     }
     memset(ctx->cfg->reaching_code, false, sizeof(bool) * vec_size(ctx->cfg->blocks));
-    for (size_t i = 0; i < vec_size(ctx->cfg->entry_succ_ids); ++i) {
+    for (unsigned long i = 0; i < vec_size(ctx->cfg->entry_succ_ids); ++i) {
         unreach_reachable_block(ctx, ctx->cfg->entry_succ_ids[i]);
     }
 
-    size_t block_id = vec_size(ctx->cfg->blocks);
-    size_t next_block_id = ctx->cfg->exit_id;
+    unsigned long block_id = vec_size(ctx->cfg->blocks);
+    unsigned long next_block_id = ctx->cfg->exit_id;
     while (block_id-- > 0) {
         if (ctx->cfg->reaching_code[block_id]) {
             next_block_id = block_id;
@@ -1336,8 +1335,8 @@ static void eliminate_unreachable_code(Ctx ctx) {
         }
     }
 
-    for (size_t i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
-        size_t label_id = pair_second(ctx->cfg->identifier_id_map[i]);
+    for (unsigned long i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
+        unsigned long label_id = pair_second(ctx->cfg->identifier_id_map[i]);
         if (ctx->cfg->reaching_code[label_id]) {
             for (block_id = label_id; block_id-- > 0;) {
                 if (ctx->cfg->reaching_code[block_id]) {
@@ -1494,15 +1493,15 @@ static bool is_copy_null_ptr(Ctx ctx, struct TacCopy* node) {
     }
 }
 
-static void prop_transfer_dst_value(Ctx ctx, struct TacValue* node, size_t next_instr_idx) {
+static void prop_transfer_dst_value(Ctx ctx, struct TacValue* node, unsigned long next_instr_idx) {
     THROW_ABORT_IF(node->type != AST_TacVariable_t);
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(next_instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -1522,15 +1521,15 @@ static void prop_transfer_dst_value(Ctx ctx, struct TacValue* node, size_t next_
     }
 }
 
-static void prop_transfer_call(Ctx ctx, struct TacFunCall* node, size_t next_instr_idx) {
+static void prop_transfer_call(Ctx ctx, struct TacFunCall* node, unsigned long next_instr_idx) {
     THROW_ABORT_IF(node->dst && node->dst->type != AST_TacVariable_t);
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(next_instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -1551,9 +1550,9 @@ static void prop_transfer_call(Ctx ctx, struct TacFunCall* node, size_t next_ins
     }
 }
 
-static bool prop_transfer_copy(Ctx ctx, struct TacCopy* node, size_t next_instr_idx) {
+static bool prop_transfer_copy(Ctx ctx, struct TacCopy* node, unsigned long next_instr_idx) {
     THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-    for (size_t i = 0; i < ctx->dfa->set_size; ++i) {
+    for (unsigned long i = 0; i < ctx->dfa->set_size; ++i) {
         THROW_ABORT_IF(GET_DFA_INSTR(i)->type != AST_TacCopy_t);
         struct TacCopy* copy = &GET_DFA_INSTR(i)->get._TacCopy;
         THROW_ABORT_IF(copy->dst->type != AST_TacVariable_t);
@@ -1580,14 +1579,14 @@ static bool prop_transfer_copy(Ctx ctx, struct TacCopy* node, size_t next_instr_
     return true;
 }
 
-static void prop_transfer_store(Ctx ctx, size_t next_instr_idx) {
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+static void prop_transfer_store(Ctx ctx, unsigned long next_instr_idx) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(next_instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -1607,14 +1606,14 @@ static void prop_transfer_store(Ctx ctx, size_t next_instr_idx) {
     }
 }
 
-static void prop_transfer_cp_to_offset(Ctx ctx, struct TacCopyToOffset* node, size_t next_instr_idx) {
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+static void prop_transfer_cp_to_offset(Ctx ctx, struct TacCopyToOffset* node, unsigned long next_instr_idx) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(next_instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -1634,7 +1633,7 @@ static void prop_transfer_cp_to_offset(Ctx ctx, struct TacCopyToOffset* node, si
     }
 }
 
-static bool prop_transfer_reach_copies(Ctx ctx, size_t instr_idx, size_t next_instr_idx) {
+static bool prop_transfer_reach_copies(Ctx ctx, unsigned long instr_idx, unsigned long next_instr_idx) {
     struct TacInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_TacSignExtend_t:
@@ -1693,14 +1692,14 @@ static bool prop_transfer_reach_copies(Ctx ctx, size_t instr_idx, size_t next_in
     return true;
 }
 
-static struct TacCopy* get_dfa_bak_copy_instr(Ctx ctx, size_t i) {
+static struct TacCopy* get_dfa_bak_copy_instr(Ctx ctx, unsigned long i) {
     struct TacInstruction* node = get_dfa_bak_instr(ctx, i);
     THROW_ABORT_IF(node->type != AST_TacCopy_t);
     return &node->get._TacCopy;
 }
 
-static void set_dfa_bak_copy_instr(Ctx ctx, struct TacCopy* node, size_t instr_idx) {
-    size_t i;
+static void set_dfa_bak_copy_instr(Ctx ctx, struct TacCopy* node, unsigned long instr_idx) {
+    unsigned long i;
     if (set_dfa_bak_instr(ctx, instr_idx, &i)) {
         shared_ptr_t(TacValue) src = sptr_new();
         sptr_copy(TacValue, node->src, src);
@@ -1711,16 +1710,16 @@ static void set_dfa_bak_copy_instr(Ctx ctx, struct TacCopy* node, size_t instr_i
     }
 }
 
-static void prop_ret_instr(Ctx ctx, struct TacReturn* node, size_t incoming_idx, bool exit_block) {
+static void prop_ret_instr(Ctx ctx, struct TacReturn* node, unsigned long incoming_idx, bool exit_block) {
     if (node->val && node->val->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if ((exit_block && GET_DFA_BLOCK_SET_MASK(incoming_idx, j) == MASK_FALSE)
                 || (!exit_block && GET_DFA_INSTR_SET_MASK(incoming_idx, j) == MASK_FALSE)) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1740,15 +1739,15 @@ static void prop_ret_instr(Ctx ctx, struct TacReturn* node, size_t incoming_idx,
     }
 }
 
-static void prop_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, size_t instr_idx) {
+static void prop_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1767,15 +1766,15 @@ static void prop_sign_extend_instr(Ctx ctx, struct TacSignExtend* node, size_t i
     }
 }
 
-static void prop_truncate_instr(Ctx ctx, struct TacTruncate* node, size_t instr_idx) {
+static void prop_truncate_instr(Ctx ctx, struct TacTruncate* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1794,15 +1793,15 @@ static void prop_truncate_instr(Ctx ctx, struct TacTruncate* node, size_t instr_
     }
 }
 
-static void prop_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, size_t instr_idx) {
+static void prop_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1821,15 +1820,15 @@ static void prop_zero_extend_instr(Ctx ctx, struct TacZeroExtend* node, size_t i
     }
 }
 
-static void prop_dbl_to_int_instr(Ctx ctx, struct TacDoubleToInt* node, size_t instr_idx) {
+static void prop_dbl_to_int_instr(Ctx ctx, struct TacDoubleToInt* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1848,15 +1847,15 @@ static void prop_dbl_to_int_instr(Ctx ctx, struct TacDoubleToInt* node, size_t i
     }
 }
 
-static void prop_dbl_to_uint_instr(Ctx ctx, struct TacDoubleToUInt* node, size_t instr_idx) {
+static void prop_dbl_to_uint_instr(Ctx ctx, struct TacDoubleToUInt* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1875,15 +1874,15 @@ static void prop_dbl_to_uint_instr(Ctx ctx, struct TacDoubleToUInt* node, size_t
     }
 }
 
-static void prop_int_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, size_t instr_idx) {
+static void prop_int_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1902,15 +1901,15 @@ static void prop_int_to_dbl_instr(Ctx ctx, struct TacIntToDouble* node, size_t i
     }
 }
 
-static void prop_uint_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, size_t instr_idx) {
+static void prop_uint_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1929,16 +1928,16 @@ static void prop_uint_to_dbl_instr(Ctx ctx, struct TacUIntToDouble* node, size_t
     }
 }
 
-static void prop_call_instr(Ctx ctx, struct TacFunCall* node, size_t instr_idx) {
-    for (size_t i = 0; i < vec_size(node->args); ++i) {
+static void prop_call_instr(Ctx ctx, struct TacFunCall* node, unsigned long instr_idx) {
+    for (unsigned long i = 0; i < vec_size(node->args); ++i) {
         if (node->args[i]->type == AST_TacVariable_t) {
-            size_t j = 0;
-            for (size_t k = 0; k < ctx->dfa->mask_size; ++k) {
+            unsigned long j = 0;
+            for (unsigned long k = 0; k < ctx->dfa->mask_size; ++k) {
                 if (GET_DFA_INSTR_SET_MASK(instr_idx, k) == MASK_FALSE) {
                     j += 64;
                     continue;
                 }
-                size_t mask_set_size = j + 64;
+                unsigned long mask_set_size = j + 64;
                 if (mask_set_size > ctx->dfa->set_size) {
                     mask_set_size = ctx->dfa->set_size;
                 }
@@ -1959,15 +1958,15 @@ static void prop_call_instr(Ctx ctx, struct TacFunCall* node, size_t instr_idx) 
     }
 }
 
-static void prop_unary_instr(Ctx ctx, struct TacUnary* node, size_t instr_idx) {
+static void prop_unary_instr(Ctx ctx, struct TacUnary* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -1986,17 +1985,17 @@ static void prop_unary_instr(Ctx ctx, struct TacUnary* node, size_t instr_idx) {
     }
 }
 
-static void prop_binary_instr(Ctx ctx, struct TacBinary* node, size_t instr_idx) {
+static void prop_binary_instr(Ctx ctx, struct TacBinary* node, unsigned long instr_idx) {
     bool is_src1 = node->src1->type == AST_TacVariable_t;
     bool is_src2 = node->src2->type == AST_TacVariable_t;
     if (is_src1 || is_src2) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2026,15 +2025,15 @@ static void prop_binary_instr(Ctx ctx, struct TacBinary* node, size_t instr_idx)
     }
 }
 
-static void prop_copy_instr(Ctx ctx, struct TacCopy* node, size_t instr_idx, size_t block_id) {
+static void prop_copy_instr(Ctx ctx, struct TacCopy* node, unsigned long instr_idx, unsigned long block_id) {
     THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -2059,15 +2058,15 @@ static void prop_copy_instr(Ctx ctx, struct TacCopy* node, size_t instr_idx, siz
     }
 }
 
-static void prop_load_instr(Ctx ctx, struct TacLoad* node, size_t instr_idx) {
+static void prop_load_instr(Ctx ctx, struct TacLoad* node, unsigned long instr_idx) {
     if (node->src_ptr->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2086,15 +2085,15 @@ static void prop_load_instr(Ctx ctx, struct TacLoad* node, size_t instr_idx) {
     }
 }
 
-static void prop_store_instr(Ctx ctx, struct TacStore* node, size_t instr_idx) {
+static void prop_store_instr(Ctx ctx, struct TacStore* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2113,17 +2112,17 @@ static void prop_store_instr(Ctx ctx, struct TacStore* node, size_t instr_idx) {
     }
 }
 
-static void prop_add_ptr_instr(Ctx ctx, struct TacAddPtr* node, size_t instr_idx) {
+static void prop_add_ptr_instr(Ctx ctx, struct TacAddPtr* node, unsigned long instr_idx) {
     bool is_src_ptr = node->src_ptr->type == AST_TacVariable_t;
     bool is_idx = node->idx->type == AST_TacVariable_t;
     if (is_src_ptr || is_idx) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2153,15 +2152,15 @@ static void prop_add_ptr_instr(Ctx ctx, struct TacAddPtr* node, size_t instr_idx
     }
 }
 
-static void prop_cp_to_offset_instr(Ctx ctx, struct TacCopyToOffset* node, size_t instr_idx) {
+static void prop_cp_to_offset_instr(Ctx ctx, struct TacCopyToOffset* node, unsigned long instr_idx) {
     if (node->src->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2180,14 +2179,14 @@ static void prop_cp_to_offset_instr(Ctx ctx, struct TacCopyToOffset* node, size_
     }
 }
 
-static void prop_cp_from_offset_instr(Ctx ctx, struct TacCopyFromOffset* node, size_t instr_idx) {
-    size_t i = 0;
-    for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+static void prop_cp_from_offset_instr(Ctx ctx, struct TacCopyFromOffset* node, unsigned long instr_idx) {
+    unsigned long i = 0;
+    for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
         if (GET_DFA_INSTR_SET_MASK(instr_idx, j) == MASK_FALSE) {
             i += 64;
             continue;
         }
-        size_t mask_set_size = i + 64;
+        unsigned long mask_set_size = i + 64;
         if (mask_set_size > ctx->dfa->set_size) {
             mask_set_size = ctx->dfa->set_size;
         }
@@ -2206,16 +2205,17 @@ static void prop_cp_from_offset_instr(Ctx ctx, struct TacCopyFromOffset* node, s
     }
 }
 
-static void prop_jmp_eq_0_instr(Ctx ctx, struct TacJumpIfZero* node, size_t incoming_idx, size_t exit_block) {
+static void prop_jmp_eq_0_instr(
+    Ctx ctx, struct TacJumpIfZero* node, unsigned long incoming_idx, unsigned long exit_block) {
     if (node->condition->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if ((exit_block && GET_DFA_BLOCK_SET_MASK(incoming_idx, j) == MASK_FALSE)
                 || (!exit_block && GET_DFA_INSTR_SET_MASK(incoming_idx, j) == MASK_FALSE)) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2235,16 +2235,17 @@ static void prop_jmp_eq_0_instr(Ctx ctx, struct TacJumpIfZero* node, size_t inco
     }
 }
 
-static void prop_jmp_ne_0_instr(Ctx ctx, struct TacJumpIfNotZero* node, size_t incoming_idx, size_t exit_block) {
+static void prop_jmp_ne_0_instr(
+    Ctx ctx, struct TacJumpIfNotZero* node, unsigned long incoming_idx, unsigned long exit_block) {
     if (node->condition->type == AST_TacVariable_t) {
-        size_t i = 0;
-        for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
             if ((exit_block && GET_DFA_BLOCK_SET_MASK(incoming_idx, j) == MASK_FALSE)
                 || (!exit_block && GET_DFA_INSTR_SET_MASK(incoming_idx, j) == MASK_FALSE)) {
                 i += 64;
                 continue;
             }
-            size_t mask_set_size = i + 64;
+            unsigned long mask_set_size = i + 64;
             if (mask_set_size > ctx->dfa->set_size) {
                 mask_set_size = ctx->dfa->set_size;
             }
@@ -2264,7 +2265,7 @@ static void prop_jmp_ne_0_instr(Ctx ctx, struct TacJumpIfNotZero* node, size_t i
     }
 }
 
-static void prop_instr(Ctx ctx, size_t instr_idx, size_t copy_instr_idx, size_t block_id) {
+static void prop_instr(Ctx ctx, unsigned long instr_idx, unsigned long copy_instr_idx, unsigned long block_id) {
     struct TacInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_TacReturn_t:
@@ -2335,11 +2336,11 @@ static void propagate_copies(Ctx ctx) {
     }
     dfa_forward_iter_alg(ctx);
 
-    for (size_t block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
+    for (unsigned long block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
         if (GET_CFG_BLOCK(block_id).size > 0) {
-            size_t incoming_idx = block_id;
-            size_t exit_block = 1;
-            for (size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_back_idx + 1;
+            unsigned long incoming_idx = block_id;
+            unsigned long exit_block = 1;
+            for (unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_back_idx + 1;
                  instr_idx-- > GET_CFG_BLOCK(block_id).instrs_front_idx;) {
                 if (GET_INSTR(instr_idx)) {
                     switch (GET_INSTR(instr_idx)->type) {
@@ -2387,37 +2388,37 @@ static void propagate_copies(Ctx ctx) {
 
 // Dead store elimination
 
-static void elim_transfer_addressed(Ctx ctx, size_t next_instr_idx) {
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+static void elim_transfer_addressed(Ctx ctx, unsigned long next_instr_idx) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(next_instr_idx, i) |= GET_DFA_INSTR_SET_MASK(ctx->dfa_o1->addressed_idx, i);
     }
 }
 
-static void elim_transfer_aliased(Ctx ctx, size_t next_instr_idx) {
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+static void elim_transfer_aliased(Ctx ctx, unsigned long next_instr_idx) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(next_instr_idx, i) |= GET_DFA_INSTR_SET_MASK(ctx->dfa->static_idx, i);
         GET_DFA_INSTR_SET_MASK(next_instr_idx, i) |= GET_DFA_INSTR_SET_MASK(ctx->dfa_o1->addressed_idx, i);
     }
 }
 
-static void elim_transfer_src_name(Ctx ctx, TIdentifier name, size_t next_instr_idx) {
-    size_t i = map_get(ctx->cfg->identifier_id_map, name);
+static void elim_transfer_src_name(Ctx ctx, TIdentifier name, unsigned long next_instr_idx) {
+    unsigned long i = map_get(ctx->cfg->identifier_id_map, name);
     SET_DFA_INSTR_SET_AT(next_instr_idx, i, true);
 }
 
-static void elim_transfer_src_value(Ctx ctx, struct TacValue* node, size_t next_instr_idx) {
+static void elim_transfer_src_value(Ctx ctx, struct TacValue* node, unsigned long next_instr_idx) {
     if (node->type == AST_TacVariable_t) {
         elim_transfer_src_name(ctx, node->get._TacVariable.name, next_instr_idx);
     }
 }
 
-static void elim_transfer_dst_value(Ctx ctx, struct TacValue* node, size_t next_instr_idx) {
+static void elim_transfer_dst_value(Ctx ctx, struct TacValue* node, unsigned long next_instr_idx) {
     THROW_ABORT_IF(node->type != AST_TacVariable_t);
-    size_t i = map_get(ctx->cfg->identifier_id_map, node->get._TacVariable.name);
+    unsigned long i = map_get(ctx->cfg->identifier_id_map, node->get._TacVariable.name);
     SET_DFA_INSTR_SET_AT(next_instr_idx, i, false);
 }
 
-static void elim_transfer_live_values(Ctx ctx, size_t instr_idx, size_t next_instr_idx) {
+static void elim_transfer_live_values(Ctx ctx, unsigned long instr_idx, unsigned long next_instr_idx) {
     struct TacInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_TacReturn_t: {
@@ -2474,7 +2475,7 @@ static void elim_transfer_live_values(Ctx ctx, size_t instr_idx, size_t next_ins
             if (p_node->dst) {
                 elim_transfer_dst_value(ctx, p_node->dst, next_instr_idx);
             }
-            for (size_t i = 0; i < vec_size(p_node->args); ++i) {
+            for (unsigned long i = 0; i < vec_size(p_node->args); ++i) {
                 elim_transfer_src_value(ctx, p_node->args[i], next_instr_idx);
             }
             elim_transfer_aliased(ctx, next_instr_idx);
@@ -2542,19 +2543,19 @@ static void elim_transfer_live_values(Ctx ctx, size_t instr_idx, size_t next_ins
     }
 }
 
-static void elim_dst_name_instr(Ctx ctx, TIdentifier name, size_t instr_idx) {
-    size_t i = map_get(ctx->cfg->identifier_id_map, name);
+static void elim_dst_name_instr(Ctx ctx, TIdentifier name, unsigned long instr_idx) {
+    unsigned long i = map_get(ctx->cfg->identifier_id_map, name);
     if (!GET_DFA_INSTR_SET_AT(instr_idx, i)) {
         set_instr(ctx, uptr_new(), instr_idx);
     }
 }
 
-static void elim_dst_value_instr(Ctx ctx, struct TacValue* node, size_t instr_idx) {
+static void elim_dst_value_instr(Ctx ctx, struct TacValue* node, unsigned long instr_idx) {
     THROW_ABORT_IF(node->type != AST_TacVariable_t);
     elim_dst_name_instr(ctx, node->get._TacVariable.name, instr_idx);
 }
 
-static void elim_instr(Ctx ctx, size_t instr_idx) {
+static void elim_instr(Ctx ctx, unsigned long instr_idx) {
     struct TacInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
         case AST_TacSignExtend_t:
@@ -2613,9 +2614,9 @@ static void eliminate_dead_stores(Ctx ctx, bool is_addressed_set) {
     }
     dfa_iter_alg(ctx);
 
-    for (size_t block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
+    for (unsigned long block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
         if (GET_CFG_BLOCK(block_id).size > 0) {
-            for (size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
+            for (unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
                  instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx; ++instr_idx) {
                 if (GET_INSTR(instr_idx)) {
                     elim_instr(ctx, instr_idx);
@@ -2667,7 +2668,7 @@ static void optim_toplvl(Ctx ctx, struct TacTopLevel* node) {
 }
 
 static void optim_program(Ctx ctx, struct TacProgram* node) {
-    for (size_t i = 0; i < vec_size(node->fun_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->fun_toplvls); ++i) {
         optim_toplvl(ctx, node->fun_toplvls[i]);
     }
     set_clear(ctx->frontend->addressed_set);
@@ -2675,17 +2676,17 @@ static void optim_program(Ctx ctx, struct TacProgram* node) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask) {
+void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uchar_t optim_1_mask) {
     struct OptimTacContext ctx;
     {
         ctx.frontend = frontend;
         ctx.is_fixed_point = true;
 
-        ctx.enabled_optims[CONSTANT_FOLDING] = (optim_1_mask & (((uint8_t)1u) << 0)) > 0;
-        ctx.enabled_optims[COPY_PROPAGATION] = (optim_1_mask & (((uint8_t)1u) << 1)) > 0;
-        ctx.enabled_optims[UNREACHABLE_CODE_ELIMINATION] = (optim_1_mask & (((uint8_t)1u) << 2)) > 0;
-        ctx.enabled_optims[DEAD_STORE_ELIMINATION] = (optim_1_mask & (((uint8_t)1u) << 3)) > 0;
-        ctx.enabled_optims[CONTROL_FLOW_GRAPH] = (optim_1_mask & ~(((uint8_t)1u) << 0)) > 0;
+        ctx.enabled_optims[CONSTANT_FOLDING] = (optim_1_mask & (((uchar_t)1u) << 0)) > 0;
+        ctx.enabled_optims[COPY_PROPAGATION] = (optim_1_mask & (((uchar_t)1u) << 1)) > 0;
+        ctx.enabled_optims[UNREACHABLE_CODE_ELIMINATION] = (optim_1_mask & (((uchar_t)1u) << 2)) > 0;
+        ctx.enabled_optims[DEAD_STORE_ELIMINATION] = (optim_1_mask & (((uchar_t)1u) << 3)) > 0;
+        ctx.enabled_optims[CONTROL_FLOW_GRAPH] = (optim_1_mask & ~(((uchar_t)1u) << 0)) > 0;
 
         ctx.cfg = uptr_new();
         ctx.dfa = uptr_new();

@@ -1,8 +1,6 @@
 #ifndef _OPTIMIZATION_OPTIM_TAC_H
 #define _OPTIMIZATION_OPTIM_TAC_H
 
-#include <inttypes.h>
-
 struct TacProgram;
 struct FrontEndContext;
 
@@ -17,6 +15,6 @@ struct FrontEndContext;
 // Copy propagation
 // Dead store elimination
 
-void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask);
+void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uchar_t optim_1_mask);
 
 #endif

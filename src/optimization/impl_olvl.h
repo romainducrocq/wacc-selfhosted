@@ -21,30 +21,30 @@
 #endif
 
 struct ControlFlowBlock {
-    size_t size;
-    size_t instrs_front_idx;
-    size_t instrs_back_idx;
-    vector_t(size_t) pred_ids;
-    vector_t(size_t) succ_ids;
+    unsigned long size;
+    unsigned long instrs_front_idx;
+    unsigned long instrs_back_idx;
+    vector_t(unsigned long) pred_ids;
+    vector_t(unsigned long) succ_ids;
 };
 
 struct ControlFlowGraph {
-    size_t entry_id;
-    size_t exit_id;
-    vector_t(size_t) entry_succ_ids;
-    vector_t(size_t) exit_pred_ids;
+    unsigned long entry_id;
+    unsigned long exit_id;
+    vector_t(unsigned long) entry_succ_ids;
+    vector_t(unsigned long) exit_pred_ids;
     vector_t(bool) reaching_code;
     vector_t(struct ControlFlowBlock) blocks;
     hashmap_t(TIdentifier, ulong_t) identifier_id_map;
 };
 
 struct DataFlowAnalysis {
-    size_t set_size;
-    size_t mask_size;
-    size_t incoming_idx;
-    size_t static_idx;
-    vector_t(size_t) open_data_map;
-    vector_t(size_t) instr_idx_map;
+    unsigned long set_size;
+    unsigned long mask_size;
+    unsigned long incoming_idx;
+    unsigned long static_idx;
+    vector_t(unsigned long) open_data_map;
+    vector_t(unsigned long) instr_idx_map;
     vector_t(mask_t) blocks_mask_sets;
     vector_t(mask_t) instrs_mask_sets;
 };
@@ -52,10 +52,10 @@ struct DataFlowAnalysis {
 #if __OPTIM_LEVEL__ == 1
 struct DataFlowAnalysisO1 {
     // Copy propagation
-    vector_t(size_t) data_idx_map;
+    vector_t(unsigned long) data_idx_map;
     vector_t(unique_ptr_t(TacInstruction)) bak_instrs;
     // Dead store elimination
-    size_t addressed_idx;
+    unsigned long addressed_idx;
 };
 #elif __OPTIM_LEVEL__ == 2
 struct DataFlowAnalysisO2 {
@@ -69,7 +69,7 @@ static void free_ControlFlowGraph(unique_ptr_t(ControlFlowGraph) * self) {
     vec_delete((*self)->entry_succ_ids);
     vec_delete((*self)->exit_pred_ids);
     vec_delete((*self)->reaching_code);
-    for (size_t i = 0; i < vec_size((*self)->blocks); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->blocks); ++i) {
         vec_delete((*self)->blocks[i].pred_ids);
         vec_delete((*self)->blocks[i].succ_ids);
     }
@@ -118,7 +118,7 @@ static unique_ptr_t(DataFlowAnalysis) make_DataFlowAnalysis(void) {
 static void free_DataFlowAnalysisO1(unique_ptr_t(DataFlowAnalysisO1) * self) {
     uptr_delete(*self);
     vec_delete((*self)->data_idx_map);
-    for (size_t i = 0; i < vec_size((*self)->bak_instrs); ++i) {
+    for (unsigned long i = 0; i < vec_size((*self)->bak_instrs); ++i) {
         free_TacInstruction(&(*self)->bak_instrs[i]);
     }
     vec_delete((*self)->bak_instrs);
@@ -148,7 +148,7 @@ static unique_ptr_t(DataFlowAnalysisO2) make_DataFlowAnalysisO2(void) {
 }
 #endif
 
-static void set_instr(Ctx ctx, unique_ptr_t(AstInstruction) instr, size_t instr_idx) {
+static void set_instr(Ctx ctx, unique_ptr_t(AstInstruction) instr, unsigned long instr_idx) {
     if (instr) {
         uptr_move_AstInstruction(instr, GET_INSTR(instr_idx));
     }
@@ -164,8 +164,8 @@ static void set_instr(Ctx ctx, unique_ptr_t(AstInstruction) instr, size_t instr_
 
 // Control flow graph
 
-static bool find_size_t(vector_t(size_t) xs, size_t x) {
-    for (size_t i = 0; i < vec_size(xs); ++i) {
+static bool find_size_t(vector_t(unsigned long) xs, unsigned long x) {
+    for (unsigned long i = 0; i < vec_size(xs); ++i) {
         if (xs[i] == x) {
             return true;
         }
@@ -173,7 +173,8 @@ static bool find_size_t(vector_t(size_t) xs, size_t x) {
     return false;
 }
 
-static void cfg_add_edge(vector_t(size_t) * succ_ids, vector_t(size_t) * pred_ids, size_t succ_id, size_t pred_id) {
+static void cfg_add_edge(vector_t(unsigned long) * succ_ids, vector_t(unsigned long) * pred_ids, unsigned long succ_id,
+    unsigned long pred_id) {
     if (!find_size_t(*succ_ids, succ_id)) {
         vec_push_back(*succ_ids, succ_id);
     }
@@ -182,7 +183,7 @@ static void cfg_add_edge(vector_t(size_t) * succ_ids, vector_t(size_t) * pred_id
     }
 }
 
-static void cfg_add_succ_edge(Ctx ctx, size_t block_id, size_t succ_id) {
+static void cfg_add_succ_edge(Ctx ctx, unsigned long block_id, unsigned long succ_id) {
     if (succ_id < ctx->cfg->exit_id) {
         cfg_add_edge(&GET_CFG_BLOCK(block_id).succ_ids, &GET_CFG_BLOCK(succ_id).pred_ids, succ_id, block_id);
     }
@@ -194,7 +195,7 @@ static void cfg_add_succ_edge(Ctx ctx, size_t block_id, size_t succ_id) {
     }
 }
 
-static void cfg_add_pred_edge(Ctx ctx, size_t block_id, size_t pred_id) {
+static void cfg_add_pred_edge(Ctx ctx, unsigned long block_id, unsigned long pred_id) {
     if (pred_id < ctx->cfg->exit_id) {
         cfg_add_edge(&GET_CFG_BLOCK(pred_id).succ_ids, &GET_CFG_BLOCK(block_id).pred_ids, block_id, pred_id);
     }
@@ -206,17 +207,17 @@ static void cfg_add_pred_edge(Ctx ctx, size_t block_id, size_t pred_id) {
     }
 }
 
-static void cfg_rm_edge(
-    vector_t(size_t) * succ_ids, vector_t(size_t) * pred_ids, size_t succ_id, size_t pred_id, bool is_reachable) {
+static void cfg_rm_edge(vector_t(unsigned long) * succ_ids, vector_t(unsigned long) * pred_ids, unsigned long succ_id,
+    unsigned long pred_id, bool is_reachable) {
     if (is_reachable) {
-        for (size_t i = vec_size(*succ_ids); i-- > 0;) {
+        for (unsigned long i = vec_size(*succ_ids); i-- > 0;) {
             if ((*succ_ids)[i] == succ_id) {
                 vec_remove_swap(*succ_ids, i);
                 break;
             }
         }
     }
-    for (size_t i = vec_size(*pred_ids); i-- > 0;) {
+    for (unsigned long i = vec_size(*pred_ids); i-- > 0;) {
         if ((*pred_ids)[i] == pred_id) {
             vec_remove_swap(*pred_ids, i);
             break;
@@ -224,7 +225,7 @@ static void cfg_rm_edge(
     }
 }
 
-static void cfg_rm_succ_edge(Ctx ctx, size_t block_id, size_t succ_id, bool is_reachable) {
+static void cfg_rm_succ_edge(Ctx ctx, unsigned long block_id, unsigned long succ_id, bool is_reachable) {
     if (succ_id < ctx->cfg->exit_id) {
         cfg_rm_edge(
             &GET_CFG_BLOCK(block_id).succ_ids, &GET_CFG_BLOCK(succ_id).pred_ids, succ_id, block_id, is_reachable);
@@ -237,7 +238,7 @@ static void cfg_rm_succ_edge(Ctx ctx, size_t block_id, size_t succ_id, bool is_r
     }
 }
 
-static void cfg_rm_pred_edge(Ctx ctx, size_t block_id, size_t pred_id) {
+static void cfg_rm_pred_edge(Ctx ctx, unsigned long block_id, unsigned long pred_id) {
     if (pred_id < ctx->cfg->exit_id) {
         cfg_rm_edge(&GET_CFG_BLOCK(pred_id).succ_ids, &GET_CFG_BLOCK(block_id).pred_ids, block_id, pred_id, true);
     }
@@ -249,12 +250,12 @@ static void cfg_rm_pred_edge(Ctx ctx, size_t block_id, size_t pred_id) {
     }
 }
 
-static void cfg_rm_empty_block(Ctx ctx, size_t block_id, bool is_reachable) {
-    for (size_t i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
-        size_t succ_id = GET_CFG_BLOCK(block_id).succ_ids[i];
+static void cfg_rm_empty_block(Ctx ctx, unsigned long block_id, bool is_reachable) {
+    for (unsigned long i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
+        unsigned long succ_id = GET_CFG_BLOCK(block_id).succ_ids[i];
         if (is_reachable) {
-            for (size_t j = 0; j < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++j) {
-                size_t pred_id = GET_CFG_BLOCK(block_id).pred_ids[j];
+            for (unsigned long j = 0; j < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++j) {
+                unsigned long pred_id = GET_CFG_BLOCK(block_id).pred_ids[j];
                 if (pred_id == ctx->cfg->entry_id) {
                     cfg_add_pred_edge(ctx, succ_id, pred_id);
                 }
@@ -266,8 +267,8 @@ static void cfg_rm_empty_block(Ctx ctx, size_t block_id, bool is_reachable) {
         cfg_rm_succ_edge(ctx, block_id, succ_id, is_reachable);
     }
     if (is_reachable) {
-        for (size_t i = 0; i < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++i) {
-            size_t pred_id = GET_CFG_BLOCK(block_id).pred_ids[i];
+        for (unsigned long i = 0; i < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++i) {
+            unsigned long pred_id = GET_CFG_BLOCK(block_id).pred_ids[i];
             cfg_rm_pred_edge(ctx, block_id, pred_id);
         }
     }
@@ -275,7 +276,7 @@ static void cfg_rm_empty_block(Ctx ctx, size_t block_id, bool is_reachable) {
     GET_CFG_BLOCK(block_id).instrs_back_idx = ctx->cfg->exit_id;
 }
 
-static void cfg_rm_block_instr(Ctx ctx, size_t instr_idx, size_t block_id) {
+static void cfg_rm_block_instr(Ctx ctx, unsigned long instr_idx, unsigned long block_id) {
     if (GET_INSTR(instr_idx)) {
         set_instr(ctx, uptr_new(), instr_idx);
         GET_CFG_BLOCK(block_id).size--;
@@ -312,7 +313,7 @@ static void cfg_init_label_block(Ctx ctx, struct AsmLabel* node) {
 }
 #endif
 
-static void cfg_init_block(Ctx ctx, size_t instr_idx, size_t* instrs_back_idx) {
+static void cfg_init_block(Ctx ctx, unsigned long instr_idx, unsigned long* instrs_back_idx) {
     struct AstInstruction* node = GET_INSTR(instr_idx);
     switch (node->type) {
 #if __OPTIM_LEVEL__ == 1
@@ -357,31 +358,31 @@ static void cfg_init_block(Ctx ctx, size_t instr_idx, size_t* instrs_back_idx) {
 }
 
 #if __OPTIM_LEVEL__ == 1
-static void cfg_init_jump_edges(Ctx ctx, struct TacJump* node, size_t block_id) {
+static void cfg_init_jump_edges(Ctx ctx, struct TacJump* node, unsigned long block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
 }
 
-static void cfg_init_jmp_eq_0_edges(Ctx ctx, struct TacJumpIfZero* node, size_t block_id) {
+static void cfg_init_jmp_eq_0_edges(Ctx ctx, struct TacJumpIfZero* node, unsigned long block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
     cfg_add_succ_edge(ctx, block_id, block_id + 1);
 }
 
-static void cfg_init_jmp_ne_0_edges(Ctx ctx, struct TacJumpIfNotZero* node, size_t block_id) {
+static void cfg_init_jmp_ne_0_edges(Ctx ctx, struct TacJumpIfNotZero* node, unsigned long block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
     cfg_add_succ_edge(ctx, block_id, block_id + 1);
 }
 #elif __OPTIM_LEVEL__ == 2
-static void cfg_init_jmp_edges(Ctx ctx, struct AsmJmp* node, size_t block_id) {
+static void cfg_init_jmp_edges(Ctx ctx, struct AsmJmp* node, unsigned long block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
 }
 
-static void cfg_init_jmp_cc_edges(Ctx ctx, struct AsmJmpCC* node, size_t block_id) {
+static void cfg_init_jmp_cc_edges(Ctx ctx, struct AsmJmpCC* node, unsigned long block_id) {
     cfg_add_succ_edge(ctx, block_id, map_get(ctx->cfg->identifier_id_map, node->target));
     cfg_add_succ_edge(ctx, block_id, block_id + 1);
 }
 #endif
 
-static void cfg_init_edges(Ctx ctx, size_t block_id) {
+static void cfg_init_edges(Ctx ctx, unsigned long block_id) {
     struct AstInstruction* node = GET_INSTR(GET_CFG_BLOCK(block_id).instrs_back_idx);
     switch (node->type) {
 #if __OPTIM_LEVEL__ == 1
@@ -416,15 +417,15 @@ static void cfg_init_edges(Ctx ctx, size_t block_id) {
 }
 
 static void init_control_flow_graph(Ctx ctx) {
-    for (size_t block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
+    for (unsigned long block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
         vec_delete(GET_CFG_BLOCK(block_id).pred_ids);
         vec_delete(GET_CFG_BLOCK(block_id).succ_ids);
     }
     vec_clear(ctx->cfg->blocks);
     map_clear(ctx->cfg->identifier_id_map);
     {
-        size_t instrs_back_idx = vec_size(*ctx->p_instrs);
-        for (size_t instr_idx = 0; instr_idx < vec_size(*ctx->p_instrs); ++instr_idx) {
+        unsigned long instrs_back_idx = vec_size(*ctx->p_instrs);
+        for (unsigned long instr_idx = 0; instr_idx < vec_size(*ctx->p_instrs); ++instr_idx) {
             if (GET_INSTR(instr_idx)) {
                 if (instrs_back_idx == vec_size(*ctx->p_instrs)) {
                     struct ControlFlowBlock block = {0, instr_idx, 0, vec_new(), vec_new()};
@@ -445,7 +446,7 @@ static void init_control_flow_graph(Ctx ctx) {
     vec_clear(ctx->cfg->exit_pred_ids);
     if (!vec_empty(ctx->cfg->blocks)) {
         cfg_add_pred_edge(ctx, 0, ctx->cfg->entry_id);
-        for (size_t block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
+        for (unsigned long block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
             cfg_init_edges(ctx, block_id);
         }
     }
@@ -455,14 +456,14 @@ static void init_control_flow_graph(Ctx ctx) {
 
 // Data flow analysis
 
-static bool mask_get(TULong mask, size_t bit) {
+static bool mask_get(TULong mask, unsigned long bit) {
     if (bit > 63) {
         bit %= 64;
     }
     return (mask & (((TULong)1ul) << bit)) > 0;
 }
 
-static void mask_set(TULong* mask, size_t bit, bool value) {
+static void mask_set(TULong* mask, unsigned long bit, bool value) {
     if (bit > 63) {
         bit %= 64;
     }
@@ -495,7 +496,7 @@ static void mask_set(TULong* mask, size_t bit, bool value) {
 #define GET_DFA_INSTR(X) GET_INSTR(ctx->dfa_o1->data_idx_map[X])
 #endif
 
-static bool is_transfer_instr(Ctx ctx, size_t instr_idx
+static bool is_transfer_instr(Ctx ctx, unsigned long instr_idx
 #if __OPTIM_LEVEL__ == 1
     ,
     bool is_store_elim
@@ -549,8 +550,8 @@ static bool is_transfer_instr(Ctx ctx, size_t instr_idx
 }
 
 #if __OPTIM_LEVEL__ == 1
-static size_t get_dfa_data_idx(Ctx ctx, size_t instr_idx) {
-    for (size_t i = 0; i < ctx->dfa->set_size; ++i) {
+static unsigned long get_dfa_data_idx(Ctx ctx, unsigned long instr_idx) {
+    for (unsigned long i = 0; i < ctx->dfa->set_size; ++i) {
         if (ctx->dfa_o1->data_idx_map[i] == instr_idx) {
             return i;
         }
@@ -558,7 +559,7 @@ static size_t get_dfa_data_idx(Ctx ctx, size_t instr_idx) {
     THROW_ABORT;
 }
 
-static struct TacInstruction* get_dfa_bak_instr(Ctx ctx, size_t i) {
+static struct TacInstruction* get_dfa_bak_instr(Ctx ctx, unsigned long i) {
     if (ctx->cfg->reaching_code[i]) {
         if (ctx->dfa_o1->bak_instrs[i]) {
             return ctx->dfa_o1->bak_instrs[i];
@@ -575,7 +576,7 @@ static struct TacInstruction* get_dfa_bak_instr(Ctx ctx, size_t i) {
     }
 }
 
-static bool set_dfa_bak_instr(Ctx ctx, size_t instr_idx, size_t* i) {
+static bool set_dfa_bak_instr(Ctx ctx, unsigned long instr_idx, unsigned long* i) {
     *i = get_dfa_data_idx(ctx, instr_idx);
     if (!ctx->cfg->reaching_code[*i]) {
         ctx->cfg->reaching_code[*i] = true;
@@ -588,33 +589,33 @@ static bool set_dfa_bak_instr(Ctx ctx, size_t instr_idx, size_t* i) {
 #endif
 
 #if __OPTIM_LEVEL__ == 1
-static bool prop_transfer_reach_copies(Ctx ctx, size_t instr_idx, size_t next_instr_idx);
-static void elim_transfer_live_values(Ctx ctx, size_t instr_idx, size_t next_instr_idx);
+static bool prop_transfer_reach_copies(Ctx ctx, unsigned long instr_idx, unsigned long next_instr_idx);
+static void elim_transfer_live_values(Ctx ctx, unsigned long instr_idx, unsigned long next_instr_idx);
 #elif __OPTIM_LEVEL__ == 2
-static void infer_transfer_live_regs(Ctx ctx, size_t instr_idx, size_t next_instr_idx);
+static void infer_transfer_live_regs(Ctx ctx, unsigned long instr_idx, unsigned long next_instr_idx);
 #endif
 
 #if __OPTIM_LEVEL__ == 1
-static size_t dfa_forward_transfer_block(Ctx ctx, size_t instr_idx, size_t block_id) {
-    for (size_t next_instr_idx = instr_idx + 1; next_instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx;
+static unsigned long dfa_forward_transfer_block(Ctx ctx, unsigned long instr_idx, unsigned long block_id) {
+    for (unsigned long next_instr_idx = instr_idx + 1; next_instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx;
          ++next_instr_idx) {
         if (GET_INSTR(next_instr_idx) && is_transfer_instr(ctx, next_instr_idx, false)) {
-            for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+            for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
                 GET_DFA_INSTR_SET_MASK(next_instr_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
             }
             if (!prop_transfer_reach_copies(ctx, instr_idx, next_instr_idx)) {
-                for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+                for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
                     GET_DFA_INSTR_SET_MASK(next_instr_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
                 }
             }
             instr_idx = next_instr_idx;
         }
     }
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(ctx->dfa->incoming_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
     }
     if (!prop_transfer_reach_copies(ctx, instr_idx, ctx->dfa->incoming_idx)) {
-        for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+        for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
             GET_DFA_INSTR_SET_MASK(ctx->dfa->incoming_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
         }
     }
@@ -622,9 +623,9 @@ static size_t dfa_forward_transfer_block(Ctx ctx, size_t instr_idx, size_t block
 }
 #endif
 
-static size_t dfa_backward_transfer_block(Ctx ctx, size_t instr_idx, size_t block_id) {
+static unsigned long dfa_backward_transfer_block(Ctx ctx, unsigned long instr_idx, unsigned long block_id) {
     if (instr_idx > 0) {
-        for (size_t next_instr_idx = instr_idx; next_instr_idx-- > GET_CFG_BLOCK(block_id).instrs_front_idx;) {
+        for (unsigned long next_instr_idx = instr_idx; next_instr_idx-- > GET_CFG_BLOCK(block_id).instrs_front_idx;) {
             if (GET_INSTR(next_instr_idx)
                 && is_transfer_instr(ctx, next_instr_idx
 #if __OPTIM_LEVEL__ == 1
@@ -632,7 +633,7 @@ static size_t dfa_backward_transfer_block(Ctx ctx, size_t instr_idx, size_t bloc
                     true
 #endif
                     )) {
-                for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+                for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
                     GET_DFA_INSTR_SET_MASK(next_instr_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
                 }
 #if __OPTIM_LEVEL__ == 1
@@ -645,7 +646,7 @@ static size_t dfa_backward_transfer_block(Ctx ctx, size_t instr_idx, size_t bloc
             }
         }
     }
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(ctx->dfa->incoming_idx, i) = GET_DFA_INSTR_SET_MASK(instr_idx, i);
     }
 #if __OPTIM_LEVEL__ == 1
@@ -657,10 +658,10 @@ static size_t dfa_backward_transfer_block(Ctx ctx, size_t instr_idx, size_t bloc
     return instr_idx;
 }
 
-static bool dfa_after_meet_block(Ctx ctx, size_t block_id) {
+static bool dfa_after_meet_block(Ctx ctx, unsigned long block_id) {
     bool is_fixed_point = true;
     {
-        size_t i = 0;
+        unsigned long i = 0;
         for (; i < ctx->dfa->mask_size; ++i) {
             if (GET_DFA_BLOCK_SET_MASK(block_id, i) != GET_DFA_INSTR_SET_MASK(ctx->dfa->incoming_idx, i)) {
                 is_fixed_point = false;
@@ -675,8 +676,8 @@ static bool dfa_after_meet_block(Ctx ctx, size_t block_id) {
 }
 
 #if __OPTIM_LEVEL__ == 1
-static bool dfa_forward_meet_block(Ctx ctx, size_t block_id) {
-    size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
+static bool dfa_forward_meet_block(Ctx ctx, unsigned long block_id) {
+    unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
     for (; instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx; ++instr_idx) {
         if (GET_INSTR(instr_idx) && is_transfer_instr(ctx, instr_idx, false)) {
             goto Lelse;
@@ -684,19 +685,19 @@ static bool dfa_forward_meet_block(Ctx ctx, size_t block_id) {
     }
     instr_idx = ctx->dfa->incoming_idx;
 Lelse:
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(instr_idx, i) = MASK_TRUE;
     }
 
-    for (size_t i = 0; i < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++i) {
-        size_t pred_id = GET_CFG_BLOCK(block_id).pred_ids[i];
+    for (unsigned long i = 0; i < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++i) {
+        unsigned long pred_id = GET_CFG_BLOCK(block_id).pred_ids[i];
         if (pred_id < ctx->cfg->exit_id) {
-            for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+            for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
                 GET_DFA_INSTR_SET_MASK(instr_idx, j) &= GET_DFA_BLOCK_SET_MASK(pred_id, j);
             }
         }
         else if (pred_id == ctx->cfg->entry_id) {
-            for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+            for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
                 GET_DFA_INSTR_SET_MASK(instr_idx, j) = MASK_FALSE;
             }
             break;
@@ -717,8 +718,8 @@ Lelse:
 }
 #endif
 
-static bool dfa_backward_meet_block(Ctx ctx, size_t block_id) {
-    size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_back_idx + 1;
+static bool dfa_backward_meet_block(Ctx ctx, unsigned long block_id) {
+    unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_back_idx + 1;
     while (instr_idx-- > GET_CFG_BLOCK(block_id).instrs_front_idx) {
         if (GET_INSTR(instr_idx)
             && is_transfer_instr(ctx, instr_idx
@@ -732,19 +733,19 @@ static bool dfa_backward_meet_block(Ctx ctx, size_t block_id) {
     }
     instr_idx = ctx->dfa->incoming_idx;
 Lelse:
-    for (size_t i = 0; i < ctx->dfa->mask_size; ++i) {
+    for (unsigned long i = 0; i < ctx->dfa->mask_size; ++i) {
         GET_DFA_INSTR_SET_MASK(instr_idx, i) = MASK_FALSE;
     }
 
-    for (size_t i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
-        size_t succ_id = GET_CFG_BLOCK(block_id).succ_ids[i];
+    for (unsigned long i = 0; i < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++i) {
+        unsigned long succ_id = GET_CFG_BLOCK(block_id).succ_ids[i];
         if (succ_id < ctx->cfg->exit_id) {
-            for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+            for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
                 GET_DFA_INSTR_SET_MASK(instr_idx, j) |= GET_DFA_BLOCK_SET_MASK(succ_id, j);
             }
         }
         else if (succ_id == ctx->cfg->exit_id) {
-            for (size_t j = 0; j < ctx->dfa->mask_size; ++j) {
+            for (unsigned long j = 0; j < ctx->dfa->mask_size; ++j) {
                 GET_DFA_INSTR_SET_MASK(instr_idx, j) = GET_DFA_INSTR_SET_MASK(ctx->dfa->static_idx, j);
             }
             break;
@@ -766,19 +767,19 @@ Lelse:
 
 #if __OPTIM_LEVEL__ == 1
 static void dfa_forward_iter_alg(Ctx ctx) {
-    size_t open_data_map_size = vec_size(ctx->cfg->blocks);
-    for (size_t i = 0; i < open_data_map_size; ++i) {
-        size_t block_id = ctx->dfa->open_data_map[i];
+    unsigned long open_data_map_size = vec_size(ctx->cfg->blocks);
+    for (unsigned long i = 0; i < open_data_map_size; ++i) {
+        unsigned long block_id = ctx->dfa->open_data_map[i];
         if (block_id == ctx->cfg->exit_id) {
             continue;
         }
 
         bool is_fixed_point = dfa_forward_meet_block(ctx, block_id);
         if (!is_fixed_point) {
-            for (size_t j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
-                size_t succ_id = GET_CFG_BLOCK(block_id).succ_ids[j];
+            for (unsigned long j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
+                unsigned long succ_id = GET_CFG_BLOCK(block_id).succ_ids[j];
                 if (succ_id < ctx->cfg->exit_id) {
-                    for (size_t k = i + 1; k < open_data_map_size; ++k) {
+                    for (unsigned long k = i + 1; k < open_data_map_size; ++k) {
                         if (succ_id == ctx->dfa->open_data_map[k]) {
                             goto Lelse;
                         }
@@ -802,19 +803,19 @@ static void dfa_forward_iter_alg(Ctx ctx) {
 #endif
 
 static void dfa_iter_alg(Ctx ctx) {
-    size_t open_data_map_size = vec_size(ctx->cfg->blocks);
-    for (size_t i = 0; i < open_data_map_size; ++i) {
-        size_t block_id = ctx->dfa->open_data_map[i];
+    unsigned long open_data_map_size = vec_size(ctx->cfg->blocks);
+    for (unsigned long i = 0; i < open_data_map_size; ++i) {
+        unsigned long block_id = ctx->dfa->open_data_map[i];
         if (block_id == ctx->cfg->exit_id) {
             continue;
         }
 
         bool is_fixed_point = dfa_backward_meet_block(ctx, block_id);
         if (!is_fixed_point) {
-            for (size_t j = 0; j < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++j) {
-                size_t pred_id = GET_CFG_BLOCK(block_id).pred_ids[j];
+            for (unsigned long j = 0; j < vec_size(GET_CFG_BLOCK(block_id).pred_ids); ++j) {
+                unsigned long pred_id = GET_CFG_BLOCK(block_id).pred_ids[j];
                 if (pred_id < ctx->cfg->exit_id) {
-                    for (size_t k = i + 1; k < open_data_map_size; ++k) {
+                    for (unsigned long k = i + 1; k < open_data_map_size; ++k) {
                         if (pred_id == ctx->dfa->open_data_map[k]) {
                             goto Lelse;
                         }
@@ -837,26 +838,26 @@ static void dfa_iter_alg(Ctx ctx) {
 }
 
 #if __OPTIM_LEVEL__ == 1
-static void dfa_forward_open_block(Ctx ctx, size_t block_id, size_t* i);
+static void dfa_forward_open_block(Ctx ctx, unsigned long block_id, unsigned long* i);
 #endif
-static void dfa_backward_open_block(Ctx ctx, size_t block_id, size_t* i);
+static void dfa_backward_open_block(Ctx ctx, unsigned long block_id, unsigned long* i);
 
 #if __OPTIM_LEVEL__ == 1
-static void dfa_forward_succ_open_block(Ctx ctx, size_t block_id, size_t* i) {
-    for (size_t j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
+static void dfa_forward_succ_open_block(Ctx ctx, unsigned long block_id, unsigned long* i) {
+    for (unsigned long j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
         dfa_forward_open_block(ctx, GET_CFG_BLOCK(block_id).succ_ids[j], i);
     }
 }
 #endif
 
-static void dfa_backward_succ_open_block(Ctx ctx, size_t block_id, size_t* i) {
-    for (size_t j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
+static void dfa_backward_succ_open_block(Ctx ctx, unsigned long block_id, unsigned long* i) {
+    for (unsigned long j = 0; j < vec_size(GET_CFG_BLOCK(block_id).succ_ids); ++j) {
         dfa_backward_open_block(ctx, GET_CFG_BLOCK(block_id).succ_ids[j], i);
     }
 }
 
 #if __OPTIM_LEVEL__ == 1
-static void dfa_forward_open_block(Ctx ctx, size_t block_id, size_t* i) {
+static void dfa_forward_open_block(Ctx ctx, unsigned long block_id, unsigned long* i) {
     if (block_id < ctx->cfg->exit_id && !ctx->cfg->reaching_code[block_id]) {
         ctx->cfg->reaching_code[block_id] = true;
         dfa_forward_succ_open_block(ctx, block_id, i);
@@ -866,7 +867,7 @@ static void dfa_forward_open_block(Ctx ctx, size_t block_id, size_t* i) {
 }
 #endif
 
-static void dfa_backward_open_block(Ctx ctx, size_t block_id, size_t* i) {
+static void dfa_backward_open_block(Ctx ctx, unsigned long block_id, unsigned long* i) {
     if (block_id < ctx->cfg->exit_id && !ctx->cfg->reaching_code[block_id]) {
         ctx->cfg->reaching_code[block_id] = true;
         dfa_backward_succ_open_block(ctx, block_id, i);
@@ -889,7 +890,7 @@ static void dfa_add_aliased_value(Ctx ctx, struct TacValue* node) {
 
 static bool is_same_value(struct TacValue* node_1, struct TacValue* node_2);
 
-static bool prop_add_data_idx(Ctx ctx, struct TacCopy* node, size_t instr_idx, size_t block_id) {
+static bool prop_add_data_idx(Ctx ctx, struct TacCopy* node, unsigned long instr_idx, unsigned long block_id) {
     THROW_ABORT_IF(node->dst->type != AST_TacVariable_t);
     if (is_same_value(node->src, node->dst)) {
         cfg_rm_block_instr(ctx, instr_idx, block_id);
@@ -948,7 +949,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         vec_resize(ctx->dfa->open_data_map, vec_size(ctx->cfg->blocks));
     }
     {
-        size_t i;
+        unsigned long i;
 #if __OPTIM_LEVEL__ == 1
         i = is_store_elim ? 3 : 1;
 #elif __OPTIM_LEVEL__ == 2
@@ -963,7 +964,7 @@ static bool init_data_flow_analysis(Ctx ctx,
     }
     memset(ctx->cfg->reaching_code, false, sizeof(bool) * vec_size(ctx->cfg->blocks));
 
-    size_t instrs_mask_sets_size = 0;
+    unsigned long instrs_mask_sets_size = 0;
 #if __OPTIM_LEVEL__ == 1
     bool is_copy_prop = !is_store_elim;
     if (is_store_elim) {
@@ -977,9 +978,9 @@ static bool init_data_flow_analysis(Ctx ctx,
         set_clear(ctx->frontend->addressed_set);
     }
 #endif
-    for (size_t block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
+    for (unsigned long block_id = 0; block_id < vec_size(ctx->cfg->blocks); ++block_id) {
         if (GET_CFG_BLOCK(block_id).size > 0) {
-            for (size_t instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
+            for (unsigned long instr_idx = GET_CFG_BLOCK(block_id).instrs_front_idx;
                  instr_idx <= GET_CFG_BLOCK(block_id).instrs_back_idx; ++instr_idx) {
                 if (GET_INSTR(instr_idx)) {
                     struct AstInstruction* node = GET_INSTR(instr_idx);
@@ -1054,7 +1055,7 @@ static bool init_data_flow_analysis(Ctx ctx,
                         case AST_TacFunCall_t: {
                             if (is_store_elim) {
                                 struct TacFunCall* p_node = &node->get._TacFunCall;
-                                for (size_t i = 0; i < vec_size(p_node->args); ++i) {
+                                for (unsigned long i = 0; i < vec_size(p_node->args); ++i) {
                                     elim_add_data_value(ctx, p_node->args[i]);
                                 }
                                 if (p_node->dst) {
@@ -1265,7 +1266,7 @@ static bool init_data_flow_analysis(Ctx ctx,
 #endif
     ctx->dfa->mask_size = (ctx->dfa->set_size + 63) / 64;
     instrs_mask_sets_size *= ctx->dfa->mask_size;
-    size_t blocks_mask_sets_size = ctx->dfa->mask_size * vec_size(ctx->cfg->blocks);
+    unsigned long blocks_mask_sets_size = ctx->dfa->mask_size * vec_size(ctx->cfg->blocks);
 
     if (vec_size(ctx->dfa->blocks_mask_sets) < blocks_mask_sets_size) {
         vec_resize(ctx->dfa->blocks_mask_sets, blocks_mask_sets_size);
@@ -1279,9 +1280,9 @@ static bool init_data_flow_analysis(Ctx ctx,
 
 #if __OPTIM_LEVEL__ == 1
     if (is_copy_prop) {
-        size_t i = vec_size(ctx->cfg->blocks);
-        for (size_t j = 0; j < vec_size(ctx->cfg->entry_succ_ids); ++j) {
-            size_t succ_id = ctx->cfg->entry_succ_ids[j];
+        unsigned long i = vec_size(ctx->cfg->blocks);
+        for (unsigned long j = 0; j < vec_size(ctx->cfg->entry_succ_ids); ++j) {
+            unsigned long succ_id = ctx->cfg->entry_succ_ids[j];
             if (!ctx->cfg->reaching_code[succ_id]) {
                 dfa_forward_open_block(ctx, succ_id, &i);
             }
@@ -1301,7 +1302,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         if (vec_size(ctx->cfg->reaching_code) < ctx->dfa->set_size) {
             vec_resize(ctx->cfg->reaching_code, ctx->dfa->set_size);
         }
-        for (size_t j = vec_size(ctx->dfa_o1->bak_instrs); j <= ctx->dfa->set_size; ++j) {
+        for (unsigned long j = vec_size(ctx->dfa_o1->bak_instrs); j <= ctx->dfa->set_size; ++j) {
             vec_push_back(ctx->dfa_o1->bak_instrs, uptr_new());
         }
 
@@ -1310,7 +1311,7 @@ static bool init_data_flow_analysis(Ctx ctx,
         if (ctx->dfa->mask_size > 1) {
             i = 0;
             do {
-                for (size_t j = ctx->dfa->mask_size - 1; j-- > 0;) {
+                for (unsigned long j = ctx->dfa->mask_size - 1; j-- > 0;) {
                     ctx->dfa->blocks_mask_sets[i] = MASK_TRUE;
                     i++;
                 }
@@ -1320,16 +1321,16 @@ static bool init_data_flow_analysis(Ctx ctx,
             while (i < blocks_mask_sets_size);
         }
         else {
-            for (size_t j = 0; j < blocks_mask_sets_size; ++j) {
+            for (unsigned long j = 0; j < blocks_mask_sets_size; ++j) {
                 ctx->dfa->blocks_mask_sets[j] = mask_true_back;
             }
         }
     }
     else {
 #endif
-        size_t i = 0;
-        for (size_t j = 0; j < vec_size(ctx->cfg->entry_succ_ids); ++j) {
-            size_t succ_id = ctx->cfg->entry_succ_ids[j];
+        unsigned long i = 0;
+        for (unsigned long j = 0; j < vec_size(ctx->cfg->entry_succ_ids); ++j) {
+            unsigned long succ_id = ctx->cfg->entry_succ_ids[j];
             if (!ctx->cfg->reaching_code[succ_id]) {
                 dfa_backward_open_block(ctx, succ_id, &i);
             }
@@ -1354,7 +1355,7 @@ static bool init_data_flow_analysis(Ctx ctx,
 #endif
         }
 
-        for (size_t i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
+        for (unsigned long i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
             pair_t(TIdentifier, ulong_t)* name_id = &ctx->cfg->identifier_id_map[i];
 #if __OPTIM_LEVEL__ == 1
             if (map_get(ctx->frontend->symbol_table, pair_first(*name_id))->attrs->type == AST_StaticAttr_t) {

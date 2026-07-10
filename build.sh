@@ -46,8 +46,8 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/front_ast.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/front_symt.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/interm_ast.wheelcc"
 
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/optim_tac.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/reg_alloc.c"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/optim_tac.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/reg_alloc.wheelcc"
 
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/errors.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/lexer.wheelcc"

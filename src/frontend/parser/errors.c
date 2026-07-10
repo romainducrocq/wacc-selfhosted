@@ -10,6 +10,24 @@
 #include "frontend/parser/errors.h"
 #include "frontend/parser/lexer.h"
 
+// TODO
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
+#endif
+extern int snprintf(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
+int snprintf2(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4) {
+    snprintf(s, n, format, arg1, arg2, arg3, arg4);
+}
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Errors

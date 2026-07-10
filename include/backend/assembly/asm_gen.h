@@ -3,7 +3,7 @@
 
 #include "util/c_std.h"
 
-typedef struct TacProgram TacProgram;
+struct TacProgram;
 typedef struct AsmProgram AsmProgram;
 struct FrontEndContext;
 struct IdentifierContext;
@@ -13,6 +13,6 @@ struct IdentifierContext;
 // Assembly generation
 
 unique_ptr_t(AsmProgram)
-    generate_assembly(unique_ptr_t(TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
+    generate_assembly(unique_ptr_t(struct TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers);
 
 #endif

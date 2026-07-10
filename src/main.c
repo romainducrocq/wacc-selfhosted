@@ -70,7 +70,7 @@ static error_t compile(Ctx ctx, struct ErrorsContext* errors, struct FileIoConte
     BackEndContext backend;
     vector_t(Token) tokens = vec_new();
     unique_ptr_t(struct CProgram) c_ast = uptr_new();
-    unique_ptr_t(TacProgram) tac_ast = uptr_new();
+    unique_ptr_t(struct TacProgram) tac_ast = uptr_new();
     unique_ptr_t(AsmProgram) asm_ast = uptr_new();
     {
         if (ctx->debug_code > 0 && ctx->debug_code <= 127) {

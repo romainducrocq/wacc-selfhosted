@@ -2,7 +2,6 @@
 #define _UTIL_C_STD_H
 
 #include "c_lib.h"
-
 #include "sds/sds.h"
 #include "stb_ds/stb_ds.h"
 

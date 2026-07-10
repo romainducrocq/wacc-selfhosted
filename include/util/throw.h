@@ -9,13 +9,9 @@ struct FileIoContext;
 
 // Throw
 
-// TODO keep ?
-#ifdef __clang__
-#pragma clang diagnostic ignored "-Wreturn-type"
-#elif defined(__GNUC__)
+#ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wreturn-type"
 #endif
-//
 
 #define hash_t unsigned long
 PairKeyValue(hash_t, ulong_t);

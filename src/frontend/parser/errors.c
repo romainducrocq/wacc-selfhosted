@@ -8,12 +8,6 @@
 #include "frontend/parser/errors.h"
 #include "frontend/parser/lexer.h"
 
-// TODO remove
-int snprintf2(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4) {
-    return snprintf(s, n, format, arg1, arg2, arg3, arg4);
-}
-//
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Errors

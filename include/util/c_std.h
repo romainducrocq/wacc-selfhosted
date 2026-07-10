@@ -30,10 +30,8 @@
     }                       \
     while (0)
 
-// TODO
-extern int snprintf2(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
 #define THROW_PANIC(...) PANIC_FUNC(__VA_ARGS__, __LINE__, __FILE__)
-#define SET_ERROR_MSG(...) snprintf2(ERROR_MSG_BUF, sizeof(char) * ERROR_MSG_SIZE, __VA_ARGS__)
+#define SET_ERROR_MSG(...) snprintf(ERROR_MSG_BUF, sizeof(char) * ERROR_MSG_SIZE, __VA_ARGS__)
 #define THROW_ERROR(X, Y, ...)                                  \
     do {                                                        \
         SET_ERROR_MSG(__VA_ARGS__) > 0 ? (void)Y : THROW_ABORT; \

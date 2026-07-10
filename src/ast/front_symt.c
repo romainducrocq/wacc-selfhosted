@@ -439,7 +439,7 @@ void free_StructTypedef(unique_ptr_t(StructTypedef) * self) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct FrontEndContext* Ctx;
+#define Ctx struct FrontEndContext*
 
 struct StructMember* get_struct_typedef_member(Ctx ctx, TIdentifier tag, TIdentifier member_name) {
     struct StructTypedef* struct_typedef = map_get(ctx->struct_typedef_table, tag);

@@ -1,5 +1,4 @@
-#include <stddef.h>
-#include <sys/types.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/throw.h"
@@ -12,18 +11,18 @@
 #include "assembly/regs.h" // backend
 #include "backend/assembly/symt_cvt.h"
 
-typedef struct SymtCvtContext {
+struct SymtCvtContext {
     struct BackEndContext* backend;
     struct FrontEndContext* frontend;
     // Symbol table conversion
     TIdentifier symbol;
-} SymtCvtContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Symbol table conversion
 
-typedef SymtCvtContext* Ctx;
+#define Ctx struct SymtCvtContext*
 
 static TInt get_scalar_alignment(struct Type* type) {
     switch (type->type) {
@@ -90,7 +89,7 @@ static shared_ptr_t(AssemblyType) arr_asm_type(struct FrontEndContext* ctx, stru
 static shared_ptr_t(AssemblyType) struct_asm_type(struct FrontEndContext* ctx, struct Structure* struct_type) {
     TLong size;
     TInt alignment;
-    ssize_t map_it = map_find(ctx->struct_typedef_table, struct_type->tag);
+    long map_it = map_find(ctx->struct_typedef_table, struct_type->tag);
     if (map_it != map_end()) {
         struct StructTypedef* struct_typedef = pair_second(ctx->struct_typedef_table[map_it]);
         size = struct_typedef->size;
@@ -186,7 +185,7 @@ static void cvt_obj_type(Ctx ctx, struct IdentifierAttr* node) {
 }
 
 static void cvt_program(Ctx ctx, struct AsmProgram* node) {
-    for (size_t i = 0; i < map_size(ctx->frontend->symbol_table); ++i) {
+    for (unsigned long i = 0; i < map_size(ctx->frontend->symbol_table); ++i) {
         pair_t(TIdentifier, UPtrSymbol)* symbol = &ctx->frontend->symbol_table[i];
         ctx->symbol = pair_first(*symbol);
         if (pair_second(*symbol)->type_t->type == AST_FunType_t) {
@@ -197,7 +196,7 @@ static void cvt_program(Ctx ctx, struct AsmProgram* node) {
         }
     }
 
-    for (size_t i = 0; i < vec_size(node->static_const_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_const_toplvls); ++i) {
         cvt_toplvl(ctx, node->static_const_toplvls[i]);
     }
 }
@@ -205,7 +204,7 @@ static void cvt_program(Ctx ctx, struct AsmProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void convert_symbol_table(struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend) {
-    SymtCvtContext ctx;
+    struct SymtCvtContext ctx;
     {
         ctx.backend = backend;
         ctx.frontend = frontend;

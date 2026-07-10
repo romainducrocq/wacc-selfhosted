@@ -166,7 +166,7 @@ REGISTER_KIND register_mask_kind(struct AsmReg* node) {
     }
 }
 
-size_t register_mask_bit(REGISTER_KIND reg_kind) {
+unsigned long register_mask_bit(REGISTER_KIND reg_kind) {
     switch (reg_kind) {
         case REG_Ax:
             return 0;

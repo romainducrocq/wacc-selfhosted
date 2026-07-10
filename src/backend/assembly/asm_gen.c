@@ -1,5 +1,4 @@
-#include <stdlib.h>
-#include <sys/types.h>
+#include "c_lib.h"
 
 #include "util/c_std.h"
 #include "util/str2t.h"
@@ -16,29 +15,28 @@
 #include "backend/assembly/stack_fix.h"
 #include "backend/assembly/symt_cvt.h"
 
-typedef enum ASM_LABEL_KIND {
-    LBL_Lcomisd_nan,
-    LBL_Ldouble,
-    LBL_Lsd2si_after,
-    LBL_Lsd2si_out_of_range,
-    LBL_Lsi2sd_after,
-    LBL_Lsi2sd_out_of_range
-} ASM_LABEL_KIND;
+#define ASM_LABEL_KIND int
+#define LBL_Lcomisd_nan 0
+#define LBL_Ldouble 1
+#define LBL_Lsd2si_after 2
+#define LBL_Lsd2si_out_of_range 3
+#define LBL_Lsi2sd_after 4
+#define LBL_Lsi2sd_out_of_range 5
 
-typedef enum STRUCT8B_CLASS {
-    CLS_integer,
-    CLS_sse,
-    CLS_memory
-} STRUCT8B_CLASS;
+#define STRUCT8B_CLASS int
+#define CLS_integer 0
+#define CLS_sse 1
+#define CLS_memory 2
 
-typedef struct Struct8Bytes {
-    size_t size;
+struct Struct8Bytes {
+    unsigned long size;
     STRUCT8B_CLASS clss[2];
-} Struct8Bytes;
+};
 
-PairKeyValue(TIdentifier, Struct8Bytes);
+#define StStruct8Bytes struct Struct8Bytes
+PairKeyValue(TIdentifier, StStruct8Bytes);
 
-typedef struct AsmGenContext {
+struct AsmGenContext {
     struct FrontEndContext* frontend;
     struct IdentifierContext* identifiers;
     // Assembly generation
@@ -46,16 +44,16 @@ typedef struct AsmGenContext {
     REGISTER_KIND arg_regs[6];
     REGISTER_KIND sse_arg_regs[8];
     hashmap_t(TIdentifier, TIdentifier) dbl_const_table;
-    hashmap_t(TIdentifier, Struct8Bytes) struct_8b_map;
+    hashmap_t(TIdentifier, StStruct8Bytes) struct_8b_map;
     vector_t(unique_ptr_t(AsmInstruction)) * p_instrs;
     vector_t(unique_ptr_t(AsmTopLevel)) * p_static_consts;
-} AsmGenContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Assembly generation
 
-typedef AsmGenContext* Ctx;
+#define Ctx struct AsmGenContext*
 
 static shared_ptr_t(AsmOperand) char_imm_op(struct CConstChar* node) {
     TULong value = (TULong)node->value;
@@ -141,7 +139,7 @@ static shared_ptr_t(AsmOperand) dbl_static_const_op(Ctx ctx, TULong binary, TInt
     TIdentifier dbl_const_label;
     {
         TIdentifier dbl_const = make_binary_identifier(ctx, binary);
-        ssize_t map_it = map_find(ctx->dbl_const_table, dbl_const);
+        long map_it = map_find(ctx->dbl_const_table, dbl_const);
         if (map_it != map_end()) {
             dbl_const_label = pair_second(ctx->dbl_const_table[map_it]);
         }
@@ -476,10 +474,10 @@ static shared_ptr_t(AssemblyType) asm_type_8b(Ctx ctx, struct Structure* struct_
 static void struct_8b_class(Ctx ctx, struct Structure* struct_type);
 
 static void struct_1_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
-    Struct8Bytes struct_8b = {1, {CLS_sse, CLS_memory}};
+    struct Struct8Bytes struct_8b = {1, {CLS_sse, CLS_memory}};
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
-    size_t members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
-    for (size_t i = 0; i < members_front; ++i) {
+    unsigned long members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
+    for (unsigned long i = 0; i < members_front; ++i) {
         if (struct_8b.clss[0] == CLS_integer) {
             break;
         }
@@ -502,10 +500,10 @@ static void struct_1_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
 }
 
 static void struct_2_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
-    Struct8Bytes struct_8b = {2, {CLS_sse, CLS_sse}};
+    struct Struct8Bytes struct_8b = {2, {CLS_sse, CLS_sse}};
     struct StructTypedef* struct_typedef = map_get(ctx->frontend->struct_typedef_table, struct_type->tag);
-    size_t members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
-    for (size_t i = 0; i < members_front; ++i) {
+    unsigned long members_front = struct_type->is_union ? map_size(struct_typedef->members) : 1;
+    for (unsigned long i = 0; i < members_front; ++i) {
         if (struct_8b.clss[0] == CLS_integer && struct_8b.clss[1] == CLS_integer) {
             break;
         }
@@ -529,7 +527,7 @@ static void struct_2_reg_8b_class(Ctx ctx, struct Structure* struct_type) {
             if (member_type->type == AST_Structure_t) {
                 struct Structure* member_struct_type = &member_type->get._Structure;
                 struct_8b_class(ctx, member_struct_type);
-                Struct8Bytes* member_struct_8b = &map_get(ctx->struct_8b_map, member_struct_type->tag);
+                struct Struct8Bytes* member_struct_8b = &map_get(ctx->struct_8b_map, member_struct_type->tag);
                 if (member_struct_8b->size > 1) {
                     if (member_struct_8b->clss[0] == CLS_integer) {
                         struct_8b.clss[0] = CLS_integer;
@@ -584,7 +582,7 @@ static void struct_8b_class(Ctx ctx, struct Structure* struct_type) {
     if (map_find(ctx->struct_8b_map, struct_type->tag) == map_end()) {
         TLong size = map_get(ctx->frontend->struct_typedef_table, struct_type->tag)->size;
         if (size > 16l) {
-            Struct8Bytes struct_8b = {3, {CLS_memory, CLS_memory}};
+            struct Struct8Bytes struct_8b = {3, {CLS_memory, CLS_memory}};
             size -= 24l;
             while (size > 0l) {
                 struct_8b.size++;
@@ -601,13 +599,13 @@ static void struct_8b_class(Ctx ctx, struct Structure* struct_type) {
     }
 }
 
-static void fun_param_reg_mask(Ctx ctx, struct FunType* fun_type, size_t reg_size, size_t sse_size) {
+static void fun_param_reg_mask(Ctx ctx, struct FunType* fun_type, unsigned long reg_size, unsigned long sse_size) {
     if (fun_type->param_reg_mask == NULL_REGISTER_MASK) {
         fun_type->param_reg_mask = REGISTER_MASK_FALSE;
-        for (size_t i = 0; i < reg_size; ++i) {
+        for (unsigned long i = 0; i < reg_size; ++i) {
             register_mask_set(&fun_type->param_reg_mask, ctx->arg_regs[i], true);
         }
-        for (size_t i = 0; i < sse_size; ++i) {
+        for (unsigned long i = 0; i < sse_size; ++i) {
             register_mask_set(&fun_type->param_reg_mask, ctx->sse_arg_regs[i], true);
         }
     }
@@ -720,7 +718,7 @@ static void ret_struct_instr(Ctx ctx, struct TacReturn* node) {
     TIdentifier name = node->val->get._TacVariable.name;
     struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
     struct_8b_class(ctx, struct_type);
-    Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
+    struct Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
     if (struct_8b->clss[0] == CLS_memory) {
         {
             shared_ptr_t(AsmOperand) src = gen_memory(REG_Bp, -8l);
@@ -1290,7 +1288,7 @@ static void bytearr_stack_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset
             }
             vec_move_back(byte_instrs, byte_instr);
         }
-        for (size_t i = vec_size(byte_instrs); i-- > 0;) {
+        for (unsigned long i = vec_size(byte_instrs); i-- > 0;) {
             push_instr(ctx, byte_instrs[i]);
             byte_instrs[i] = uptr_new();
         }
@@ -1322,12 +1320,12 @@ static void stack_8b_arg_call_instr(Ctx ctx, TIdentifier name, TLong offset, str
 }
 
 static TLong arg_call_instr(Ctx ctx, struct TacFunCall* node, struct FunType* fun_type, bool is_ret_memory) {
-    size_t reg_size = is_ret_memory ? 1 : 0;
-    size_t sse_size = 0;
+    unsigned long reg_size = is_ret_memory ? 1 : 0;
+    unsigned long sse_size = 0;
     TLong stack_padding = 0l;
     vector_t(unique_ptr_t(AsmInstruction)) stack_instrs = vec_new();
     vector_t(unique_ptr_t(AsmInstruction))* p_instrs = ctx->p_instrs;
-    for (size_t i = 0; i < vec_size(node->args); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->args); ++i) {
         struct TacValue* arg = node->args[i];
         if (is_value_dbl(ctx, arg)) {
             if (sse_size < 8) {
@@ -1354,16 +1352,16 @@ static TLong arg_call_instr(Ctx ctx, struct TacFunCall* node, struct FunType* fu
             }
         }
         else {
-            size_t struct_reg_size = 7;
-            size_t struct_sse_size = 9;
+            unsigned long struct_reg_size = 7;
+            unsigned long struct_sse_size = 9;
             TIdentifier name = arg->get._TacVariable.name;
             struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
             struct_8b_class(ctx, struct_type);
-            Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
+            struct Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
             if (struct_8b->clss[0] != CLS_memory) {
                 struct_reg_size = 0;
                 struct_sse_size = 0;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     if (struct_8b->clss[j] == CLS_sse) {
                         struct_sse_size++;
                     }
@@ -1374,7 +1372,7 @@ static TLong arg_call_instr(Ctx ctx, struct TacFunCall* node, struct FunType* fu
             }
             if (struct_reg_size + reg_size <= 6 && struct_sse_size + sse_size <= 8) {
                 TLong offset = 0l;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     if (struct_8b->clss[j] == CLS_sse) {
                         reg_8b_arg_call_instr(ctx, name, offset, NULL, ctx->sse_arg_regs[sse_size]);
                         sse_size++;
@@ -1389,7 +1387,7 @@ static TLong arg_call_instr(Ctx ctx, struct TacFunCall* node, struct FunType* fu
             else {
                 TLong offset = 0l;
                 ctx->p_instrs = &stack_instrs;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     stack_8b_arg_call_instr(ctx, name, offset, struct_type);
                     offset += 8l;
                     stack_padding++;
@@ -1404,7 +1402,7 @@ static TLong arg_call_instr(Ctx ctx, struct TacFunCall* node, struct FunType* fu
         stack_padding++;
     }
     stack_padding *= 8l;
-    for (size_t i = vec_size(stack_instrs); i-- > 0;) {
+    for (unsigned long i = vec_size(stack_instrs); i-- > 0;) {
         push_instr(ctx, stack_instrs[i]);
         stack_instrs[i] = uptr_new();
     }
@@ -1529,7 +1527,7 @@ static void call_instr(Ctx ctx, struct TacFunCall* node) {
         bool reg_size = false;
         TIdentifier name = node->dst->get._TacVariable.name;
         struct Structure* struct_type = &map_get(ctx->frontend->symbol_table, name)->type_t->get._Structure;
-        Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
+        struct Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
         switch (struct_8b->clss[0]) {
             case CLS_integer: {
                 ret_8b_call_instr(ctx, name, 0l, struct_type, REG_Ax);
@@ -2009,7 +2007,7 @@ static void getaddr_instr(Ctx ctx, struct TacGetAddress* node) {
         if (node->src->type == AST_TacVariable_t) {
             TIdentifier name = node->src->get._TacVariable.name;
             set_insert(ctx->frontend->addressed_set, name);
-            ssize_t map_it = map_find(ctx->frontend->symbol_table, name);
+            long map_it = map_find(ctx->frontend->symbol_table, name);
             if (map_it != map_end()
                 && pair_second(ctx->frontend->symbol_table[map_it])->attrs->type == AST_ConstantAttr_t) {
                 src = make_AsmData(name, 0l);
@@ -2541,7 +2539,7 @@ static void gen_instr(Ctx ctx, struct TacInstruction* node) {
 //             operand) | Cdq(assembly_type) | Jmp(identifier) | JmpCC(cond_code, identifier) | SetCC(cond_code,
 //             operand) | Label(identifier) | Push(operand) | Pop(reg) | Call(identifier) | Ret
 static void gen_instr_list(Ctx ctx, vector_t(unique_ptr_t(TacInstruction)) node_list) {
-    for (size_t i = 0; i < vec_size(node_list); ++i) {
+    for (unsigned long i = 0; i < vec_size(node_list); ++i) {
         if (node_list[i]) {
             gen_instr(ctx, node_list[i]);
         }
@@ -2612,10 +2610,10 @@ static void stack_8b_fun_param_instr(
 }
 
 static void fun_param_toplvl(Ctx ctx, struct TacFunction* node, struct FunType* fun_type, bool is_ret_memory) {
-    size_t reg_size = is_ret_memory ? 1 : 0;
-    size_t sse_size = 0;
+    unsigned long reg_size = is_ret_memory ? 1 : 0;
+    unsigned long sse_size = 0;
     TLong stack_bytes = 16l;
-    for (size_t i = 0; i < vec_size(node->params); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->params); ++i) {
         TIdentifier param = node->params[i];
         struct Type* param_type = map_get(ctx->frontend->symbol_table, param)->type_t;
         if (param_type->type == AST_Double_t) {
@@ -2639,15 +2637,15 @@ static void fun_param_toplvl(Ctx ctx, struct TacFunction* node, struct FunType* 
             }
         }
         else {
-            size_t struct_reg_size = 7;
-            size_t struct_sse_size = 9;
+            unsigned long struct_reg_size = 7;
+            unsigned long struct_sse_size = 9;
             struct Structure* struct_type = &param_type->get._Structure;
             struct_8b_class(ctx, struct_type);
-            Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
+            struct Struct8Bytes* struct_8b = &map_get(ctx->struct_8b_map, struct_type->tag);
             if (struct_8b->clss[0] != CLS_memory) {
                 struct_reg_size = 0;
                 struct_sse_size = 0;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     if (struct_8b->clss[j] == CLS_sse) {
                         struct_sse_size++;
                     }
@@ -2658,7 +2656,7 @@ static void fun_param_toplvl(Ctx ctx, struct TacFunction* node, struct FunType* 
             }
             if (struct_reg_size + reg_size <= 6 && struct_sse_size + sse_size <= 8) {
                 TLong offset = 0l;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     if (struct_8b->clss[j] == CLS_sse) {
                         reg_8b_fun_param_instr(ctx, param, offset, NULL, ctx->sse_arg_regs[sse_size]);
                         sse_size++;
@@ -2672,7 +2670,7 @@ static void fun_param_toplvl(Ctx ctx, struct TacFunction* node, struct FunType* 
             }
             else {
                 TLong offset = 0l;
-                for (size_t j = 0; j < struct_8b->size; ++j) {
+                for (unsigned long j = 0; j < struct_8b->size; ++j) {
                     stack_8b_fun_param_instr(ctx, param, stack_bytes, offset, struct_type);
                     stack_bytes += 8l;
                     offset += 8l;
@@ -2724,7 +2722,7 @@ static unique_ptr_t(AsmTopLevel) gen_static_var_toplvl(Ctx ctx, struct TacStatic
     TInt alignment = gen_type_alignment(ctx->frontend, node->static_init_type);
     vector_t(shared_ptr_t(StaticInit)) static_inits = vec_new();
     vec_reserve(static_inits, vec_size(node->static_inits));
-    for (size_t i = 0; i < vec_size(node->static_inits); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_inits); ++i) {
         shared_ptr_t(StaticInit) static_init = sptr_new();
         sptr_copy(StaticInit, node->static_inits[i], static_init);
         vec_move_back(static_inits, static_init);
@@ -2770,7 +2768,7 @@ static unique_ptr_t(AsmTopLevel) gen_toplvl(Ctx ctx, struct TacTopLevel* node) {
 static unique_ptr_t(AsmProgram) gen_program(Ctx ctx, struct TacProgram* node) {
     vector_t(unique_ptr_t(AsmTopLevel)) static_const_toplvls = vec_new();
     vec_reserve(static_const_toplvls, vec_size(node->static_const_toplvls));
-    for (size_t i = 0; i < vec_size(node->static_const_toplvls); ++i) {
+    for (unsigned long i = 0; i < vec_size(node->static_const_toplvls); ++i) {
         unique_ptr_t(AsmTopLevel) static_const_toplvl = gen_toplvl(ctx, node->static_const_toplvls[i]);
         vec_move_back(static_const_toplvls, static_const_toplvl);
     }
@@ -2780,11 +2778,11 @@ static unique_ptr_t(AsmProgram) gen_program(Ctx ctx, struct TacProgram* node) {
     {
         ctx->p_static_consts = &static_const_toplvls;
 
-        for (size_t i = 0; i < vec_size(node->static_var_toplvls); ++i) {
+        for (unsigned long i = 0; i < vec_size(node->static_var_toplvls); ++i) {
             unique_ptr_t(AsmTopLevel) static_var_toplvl = gen_toplvl(ctx, node->static_var_toplvls[i]);
             vec_move_back(top_levels, static_var_toplvl);
         }
-        for (size_t i = 0; i < vec_size(node->fun_toplvls); ++i) {
+        for (unsigned long i = 0; i < vec_size(node->fun_toplvls); ++i) {
             unique_ptr_t(AsmTopLevel) fun_toplvl = gen_toplvl(ctx, node->fun_toplvls[i]);
             vec_move_back(top_levels, fun_toplvl);
         }
@@ -2798,7 +2796,7 @@ static unique_ptr_t(AsmProgram) gen_program(Ctx ctx, struct TacProgram* node) {
 
 unique_ptr_t(AsmProgram) generate_assembly(
     unique_ptr_t(TacProgram) * tac_ast, struct FrontEndContext* frontend, struct IdentifierContext* identifiers) {
-    AsmGenContext ctx;
+    struct AsmGenContext ctx;
     {
         ctx.frontend = frontend;
         ctx.identifiers = identifiers;

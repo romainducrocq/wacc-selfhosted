@@ -12,11 +12,11 @@
 
 #include "optimization/optim_tac.h"
 
-typedef struct ControlFlowGraph ControlFlowGraph;
-typedef struct DataFlowAnalysis DataFlowAnalysis;
-typedef struct DataFlowAnalysisO1 DataFlowAnalysisO1;
+struct ControlFlowGraph;
+struct DataFlowAnalysis;
+struct DataFlowAnalysisO1;
 
-typedef struct OptimTacContext {
+struct OptimTacContext {
     struct FrontEndContext* frontend;
     // Constant folding
     // Unreachable code elimination
@@ -24,11 +24,11 @@ typedef struct OptimTacContext {
     // Dead store elimination
     bool is_fixed_point;
     bool enabled_optims[5];
-    unique_ptr_t(ControlFlowGraph) cfg;
-    unique_ptr_t(DataFlowAnalysis) dfa;
-    unique_ptr_t(DataFlowAnalysisO1) dfa_o1;
+    unique_ptr_t(struct ControlFlowGraph) cfg;
+    unique_ptr_t(struct DataFlowAnalysis) dfa;
+    unique_ptr_t(struct DataFlowAnalysisO1) dfa_o1;
     vector_t(unique_ptr_t(struct TacInstruction)) * p_instrs;
-} OptimTacContext;
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -2669,7 +2669,7 @@ static void optim_program(Ctx ctx, struct TacProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void optimize_three_address_code(struct TacProgram* node, struct FrontEndContext* frontend, uint8_t optim_1_mask) {
-    OptimTacContext ctx;
+    struct OptimTacContext ctx;
     {
         ctx.frontend = frontend;
         ctx.is_fixed_point = true;

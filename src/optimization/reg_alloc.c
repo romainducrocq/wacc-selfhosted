@@ -13,52 +13,53 @@
 
 #include "optimization/reg_alloc.h"
 
-typedef TULong mask_t;
+#define mask_t TULong
 
-typedef struct ControlFlowGraph ControlFlowGraph;
-typedef struct DataFlowAnalysis DataFlowAnalysis;
-typedef struct DataFlowAnalysisO2 DataFlowAnalysisO2;
+struct ControlFlowGraph;
+struct DataFlowAnalysis;
+struct DataFlowAnalysisO2;
 
-typedef struct InferenceRegister {
+struct InferenceRegister {
     REGISTER_KIND color;
     REGISTER_KIND reg_kind;
     size_t degree;
     size_t spill_cost;
     mask_t linked_hard_mask;
     vector_t(TIdentifier) linked_pseudo_names;
-} InferenceRegister;
+};
 
-PairKeyValue(TIdentifier, InferenceRegister);
+#define StInferenceRegister struct InferenceRegister
+PairKeyValue(TIdentifier, StInferenceRegister);
 
-typedef struct InferenceGraph {
+struct InferenceGraph {
     size_t k;
     size_t offset;
     mask_t hard_reg_mask;
     vector_t(size_t) unpruned_hard_mask_bits;
     vector_t(TIdentifier) unpruned_pseudo_names;
-    hashmap_t(TIdentifier, InferenceRegister) pseudo_reg_map;
-} InferenceGraph;
+    hashmap_t(TIdentifier, StInferenceRegister) pseudo_reg_map;
+};
 
-typedef struct RegAllocContext {
+struct RegAllocContext {
     struct BackEndContext* backend;
     struct FrontEndContext* frontend;
     // Register allocation
     mask_t callee_saved_reg_mask;
     struct BackendFun* p_backend_fun;
-    InferenceGraph* p_infer_graph;
+    struct InferenceGraph* p_infer_graph;
     REGISTER_KIND reg_color_map[26];
-    InferenceRegister hard_regs[26];
-    unique_ptr_t(ControlFlowGraph) cfg;
-    unique_ptr_t(DataFlowAnalysis) dfa;
-    unique_ptr_t(DataFlowAnalysisO2) dfa_o2;
-    unique_ptr_t(InferenceGraph) infer_graph;
-    unique_ptr_t(InferenceGraph) sse_infer_graph;
+    struct InferenceRegister hard_regs[26];
+    unique_ptr_t(struct ControlFlowGraph) cfg;
+    unique_ptr_t(struct DataFlowAnalysis) dfa;
+    unique_ptr_t(struct DataFlowAnalysisO2) dfa_o2;
+    unique_ptr_t(struct InferenceGraph) infer_graph;
+    unique_ptr_t(struct InferenceGraph) sse_infer_graph;
     vector_t(unique_ptr_t(struct AsmInstruction)) * p_instrs;
     // Register coalescing
     bool is_with_coal;
-} RegAllocContext;
+};
 
-static void free_InferenceGraph(unique_ptr_t(InferenceGraph) * self) {
+static void free_InferenceGraph(unique_ptr_t(struct InferenceGraph) * self) {
     uptr_delete(*self);
     vec_delete((*self)->unpruned_hard_mask_bits);
     vec_delete((*self)->unpruned_pseudo_names);
@@ -69,8 +70,8 @@ static void free_InferenceGraph(unique_ptr_t(InferenceGraph) * self) {
     uptr_free(*self);
 }
 
-static unique_ptr_t(InferenceGraph) make_InferenceGraph(bool is_sse) {
-    unique_ptr_t(InferenceGraph) self = uptr_new();
+static unique_ptr_t(struct InferenceGraph) make_InferenceGraph(bool is_sse) {
+    unique_ptr_t(struct InferenceGraph) self = uptr_new();
     uptr_alloc(InferenceGraph, self);
     self->hard_reg_mask = REGISTER_MASK_FALSE;
     self->unpruned_hard_mask_bits = vec_new();
@@ -348,14 +349,14 @@ static void set_p_infer_graph(Ctx ctx, bool is_dbl) {
 
 static void infer_add_pseudo_edges(Ctx ctx, TIdentifier name_1, TIdentifier name_2) {
     {
-        InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name_1);
+        struct InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name_1);
         if (!find_identifier(infer->linked_pseudo_names, name_2)) {
             vec_push_back(infer->linked_pseudo_names, name_2);
             infer->degree++;
         }
     }
     {
-        InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name_2);
+        struct InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name_2);
         if (!find_identifier(infer->linked_pseudo_names, name_1)) {
             vec_push_back(infer->linked_pseudo_names, name_1);
             infer->degree++;
@@ -365,14 +366,14 @@ static void infer_add_pseudo_edges(Ctx ctx, TIdentifier name_1, TIdentifier name
 
 static void infer_add_reg_edge(Ctx ctx, REGISTER_KIND reg_kind, TIdentifier name) {
     {
-        InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name);
+        struct InferenceRegister* infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, name);
         if (!register_mask_get(infer->linked_hard_mask, reg_kind)) {
             register_mask_set(&infer->linked_hard_mask, reg_kind, true);
             infer->degree++;
         }
     }
     {
-        InferenceRegister* infer = &ctx->hard_regs[register_mask_bit(reg_kind)];
+        struct InferenceRegister* infer = &ctx->hard_regs[register_mask_bit(reg_kind)];
         if (!find_identifier(infer->linked_pseudo_names, name)) {
             vec_push_back(infer->linked_pseudo_names, name);
             infer->degree++;
@@ -380,7 +381,7 @@ static void infer_add_reg_edge(Ctx ctx, REGISTER_KIND reg_kind, TIdentifier name
     }
 }
 
-static void infer_rm_pseudo_edge(InferenceRegister* infer, TIdentifier name) {
+static void infer_rm_pseudo_edge(struct InferenceRegister* infer, TIdentifier name) {
     for (size_t i = vec_size(infer->linked_pseudo_names); i-- > 0;) {
         if (infer->linked_pseudo_names[i] == name) {
             vec_remove_swap(infer->linked_pseudo_names, i);
@@ -700,7 +701,7 @@ static bool init_inference_graph(Ctx ctx, TIdentifier fun_name) {
 
     for (size_t i = 0; i < map_size(ctx->cfg->identifier_id_map); ++i) {
         TIdentifier name = pair_first(ctx->cfg->identifier_id_map[i]);
-        InferenceRegister infer = {REG_Sp, REG_Sp, 0, 0, REGISTER_MASK_FALSE, vec_new()};
+        struct InferenceRegister infer = {REG_Sp, REG_Sp, 0, 0, REGISTER_MASK_FALSE, vec_new()};
         if (map_get(ctx->frontend->symbol_table, name)->type_t->type == AST_Double_t) {
             vec_push_back(ctx->sse_infer_graph->unpruned_pseudo_names, name);
             map_add(ctx->sse_infer_graph->pseudo_reg_map, name, infer);
@@ -774,7 +775,7 @@ static bool is_reg_callee_saved(REGISTER_KIND reg_kind) {
     }
 }
 
-static void alloc_prune_infer_reg(Ctx ctx, InferenceRegister* infer, size_t pruned_idx) {
+static void alloc_prune_infer_reg(Ctx ctx, struct InferenceRegister* infer, size_t pruned_idx) {
     if (infer->reg_kind == REG_Sp) {
         vec_remove_swap(ctx->p_infer_graph->unpruned_pseudo_names, pruned_idx);
     }
@@ -783,7 +784,7 @@ static void alloc_prune_infer_reg(Ctx ctx, InferenceRegister* infer, size_t prun
     }
     if (infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(infer->linked_hard_mask, linked_infer->reg_kind)) {
                 linked_infer->degree--;
             }
@@ -794,7 +795,7 @@ static void alloc_prune_infer_reg(Ctx ctx, InferenceRegister* infer, size_t prun
     }
 }
 
-static void alloc_unprune_infer_reg(Ctx ctx, InferenceRegister* infer, TIdentifier pruned_name) {
+static void alloc_unprune_infer_reg(Ctx ctx, struct InferenceRegister* infer, TIdentifier pruned_name) {
     if (infer->reg_kind == REG_Sp) {
         THROW_ABORT_IF(find_identifier(ctx->p_infer_graph->unpruned_pseudo_names, pruned_name));
         vec_push_back(ctx->p_infer_graph->unpruned_pseudo_names, pruned_name);
@@ -806,7 +807,7 @@ static void alloc_unprune_infer_reg(Ctx ctx, InferenceRegister* infer, TIdentifi
     }
     if (infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(infer->linked_hard_mask, linked_infer->reg_kind)) {
                 linked_infer->degree++;
             }
@@ -826,9 +827,9 @@ static void alloc_next_color_infer_graph(Ctx ctx) {
     }
 }
 
-static InferenceRegister* alloc_prune_infer_graph(Ctx ctx, TIdentifier* pruned_name) {
+static struct InferenceRegister* alloc_prune_infer_graph(Ctx ctx, TIdentifier* pruned_name) {
     size_t pruned_idx;
-    InferenceRegister* infer = NULL;
+    struct InferenceRegister* infer = NULL;
     for (size_t i = 0; i < vec_size(ctx->p_infer_graph->unpruned_pseudo_names); ++i) {
         *pruned_name = ctx->p_infer_graph->unpruned_pseudo_names[i];
         infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, *pruned_name);
@@ -864,7 +865,7 @@ static InferenceRegister* alloc_prune_infer_graph(Ctx ctx, TIdentifier* pruned_n
         double min_spill_metric = ((double)infer->spill_cost) / infer->degree;
         for (; i < vec_size(ctx->p_infer_graph->unpruned_pseudo_names); ++i) {
             TIdentifier spill_name = ctx->p_infer_graph->unpruned_pseudo_names[i];
-            InferenceRegister* spill_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, spill_name);
+            struct InferenceRegister* spill_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, spill_name);
             if (spill_infer->degree > 0) {
                 double spill_metric = ((double)spill_infer->spill_cost) / spill_infer->degree;
                 if (spill_metric < min_spill_metric) {
@@ -880,11 +881,11 @@ static InferenceRegister* alloc_prune_infer_graph(Ctx ctx, TIdentifier* pruned_n
     return infer;
 }
 
-static void alloc_unprune_infer_graph(Ctx ctx, InferenceRegister* infer, TIdentifier pruned_name) {
+static void alloc_unprune_infer_graph(Ctx ctx, struct InferenceRegister* infer, TIdentifier pruned_name) {
     mask_t color_reg_mask = ctx->p_infer_graph->hard_reg_mask;
     if (infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(infer->linked_hard_mask, linked_infer->reg_kind)) {
                 if (linked_infer->color != REG_Sp) {
                     register_mask_set(&color_reg_mask, linked_infer->color, false);
@@ -893,7 +894,7 @@ static void alloc_unprune_infer_graph(Ctx ctx, InferenceRegister* infer, TIdenti
         }
     }
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        struct InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         if (linked_infer->color != REG_Sp) {
             register_mask_set(&color_reg_mask, linked_infer->color, false);
         }
@@ -923,14 +924,14 @@ static void alloc_unprune_infer_graph(Ctx ctx, InferenceRegister* infer, TIdenti
 
 static void alloc_color_infer_graph(Ctx ctx) {
     TIdentifier pruned_name = 0;
-    InferenceRegister* infer = alloc_prune_infer_graph(ctx, &pruned_name);
+    struct InferenceRegister* infer = alloc_prune_infer_graph(ctx, &pruned_name);
     alloc_next_color_infer_graph(ctx);
     alloc_unprune_infer_graph(ctx, infer, pruned_name);
 }
 
 static void alloc_color_reg_map(Ctx ctx) {
     for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-        InferenceRegister* infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+        struct InferenceRegister* infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
         if (infer->color != REG_Sp) {
             ctx->reg_color_map[register_mask_bit(infer->color)] = infer->reg_kind;
         }
@@ -1281,7 +1282,7 @@ static size_t get_coalesced_idx(Ctx ctx, struct AsmOperand* node) {
 }
 
 static bool get_coalescable_infer_regs(
-    Ctx ctx, InferenceRegister** src_infer, InferenceRegister** dst_infer, size_t src_idx, size_t dst_idx) {
+    Ctx ctx, struct InferenceRegister** src_infer, struct InferenceRegister** dst_infer, size_t src_idx, size_t dst_idx) {
     if (src_idx != dst_idx && (src_idx >= REGISTER_MASK_SIZE || dst_idx >= REGISTER_MASK_SIZE)
         && src_idx < ctx->dfa->set_size && dst_idx < ctx->dfa->set_size) {
         if (src_idx < REGISTER_MASK_SIZE) {
@@ -1321,12 +1322,12 @@ static bool get_coalescable_infer_regs(
     return false;
 }
 
-static bool coal_briggs_test(Ctx ctx, InferenceRegister* src_infer, InferenceRegister* dst_infer) {
+static bool coal_briggs_test(Ctx ctx, struct InferenceRegister* src_infer, struct InferenceRegister* dst_infer) {
     size_t degree = 0;
 
     if (src_infer->linked_hard_mask != REGISTER_MASK_FALSE || dst_infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(src_infer->linked_hard_mask, linked_infer->reg_kind)) {
                 if (register_mask_get(dst_infer->linked_hard_mask, linked_infer->reg_kind)) {
                     if (linked_infer->degree > ctx->p_infer_graph->k) {
@@ -1353,7 +1354,7 @@ static bool coal_briggs_test(Ctx ctx, InferenceRegister* src_infer, InferenceReg
     }
     for (size_t i = 0; i < vec_size(src_infer->linked_pseudo_names); ++i) {
         size_t j = map_get(ctx->cfg->identifier_id_map, src_infer->linked_pseudo_names[i]);
-        InferenceRegister* linked_infer =
+        struct InferenceRegister* linked_infer =
             &map_get(ctx->p_infer_graph->pseudo_reg_map, src_infer->linked_pseudo_names[i]);
         if (GET_DFA_INSTR_SET_AT(ctx->dfa->incoming_idx, j)) {
             if (linked_infer->degree > ctx->p_infer_graph->k) {
@@ -1368,7 +1369,7 @@ static bool coal_briggs_test(Ctx ctx, InferenceRegister* src_infer, InferenceReg
     for (size_t i = 0; i < vec_size(dst_infer->linked_pseudo_names); ++i) {
         size_t j = map_get(ctx->cfg->identifier_id_map, dst_infer->linked_pseudo_names[i]);
         if (GET_DFA_INSTR_SET_AT(ctx->dfa->incoming_idx, j)) {
-            InferenceRegister* linked_infer =
+            struct InferenceRegister* linked_infer =
                 &map_get(ctx->p_infer_graph->pseudo_reg_map, dst_infer->linked_pseudo_names[i]);
             if (linked_infer->degree >= ctx->p_infer_graph->k) {
                 degree++;
@@ -1379,9 +1380,9 @@ static bool coal_briggs_test(Ctx ctx, InferenceRegister* src_infer, InferenceReg
     return degree < ctx->p_infer_graph->k;
 }
 
-static bool coal_george_test(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegister* infer) {
+static bool coal_george_test(Ctx ctx, REGISTER_KIND reg_kind, struct InferenceRegister* infer) {
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        struct InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         if (!register_mask_get(linked_infer->linked_hard_mask, reg_kind)
             && linked_infer->degree >= ctx->p_infer_graph->k) {
             return false;
@@ -1390,7 +1391,7 @@ static bool coal_george_test(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegister*
     return true;
 }
 
-static bool coal_conservative_tests(Ctx ctx, InferenceRegister* src_infer, InferenceRegister* dst_infer) {
+static bool coal_conservative_tests(Ctx ctx, struct InferenceRegister* src_infer, struct InferenceRegister* dst_infer) {
     if (coal_briggs_test(ctx, src_infer, dst_infer)) {
         return true;
     }
@@ -1405,12 +1406,12 @@ static bool coal_conservative_tests(Ctx ctx, InferenceRegister* src_infer, Infer
     }
 }
 
-static void coal_pseudo_infer_reg(Ctx ctx, InferenceRegister* infer, size_t merge_idx, size_t keep_idx) {
+static void coal_pseudo_infer_reg(Ctx ctx, struct InferenceRegister* infer, size_t merge_idx, size_t keep_idx) {
     TIdentifier merge_name = ctx->dfa_o2->data_name_map[merge_idx - REGISTER_MASK_SIZE];
     TIdentifier keep_name = ctx->dfa_o2->data_name_map[keep_idx - REGISTER_MASK_SIZE];
     if (infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(infer->linked_hard_mask, linked_infer->reg_kind)) {
                 infer_rm_pseudo_edge(linked_infer, merge_name);
                 infer_add_reg_edge(ctx, linked_infer->reg_kind, keep_name);
@@ -1418,25 +1419,25 @@ static void coal_pseudo_infer_reg(Ctx ctx, InferenceRegister* infer, size_t merg
         }
     }
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        struct InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         infer_rm_pseudo_edge(linked_infer, merge_name);
         infer_add_pseudo_edges(ctx, keep_name, infer->linked_pseudo_names[i]);
     }
     infer_rm_unpruned_pseudo_name(ctx, merge_name);
 }
 
-static void coal_hard_infer_reg(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegister* infer, size_t merge_idx) {
+static void coal_hard_infer_reg(Ctx ctx, REGISTER_KIND reg_kind, struct InferenceRegister* infer, size_t merge_idx) {
     TIdentifier merge_name = ctx->dfa_o2->data_name_map[merge_idx - REGISTER_MASK_SIZE];
     if (infer->linked_hard_mask != REGISTER_MASK_FALSE) {
         for (size_t i = 0; i < ctx->p_infer_graph->k; ++i) {
-            InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
+            struct InferenceRegister* linked_infer = &ctx->hard_regs[i + ctx->p_infer_graph->offset];
             if (register_mask_get(infer->linked_hard_mask, linked_infer->reg_kind)) {
                 infer_rm_pseudo_edge(linked_infer, merge_name);
             }
         }
     }
     for (size_t i = 0; i < vec_size(infer->linked_pseudo_names); ++i) {
-        InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
+        struct InferenceRegister* linked_infer = &map_get(ctx->p_infer_graph->pseudo_reg_map, infer->linked_pseudo_names[i]);
         infer_rm_pseudo_edge(linked_infer, merge_name);
         infer_add_reg_edge(ctx, reg_kind, infer->linked_pseudo_names[i]);
     }
@@ -1444,8 +1445,8 @@ static void coal_hard_infer_reg(Ctx ctx, REGISTER_KIND reg_kind, InferenceRegist
 }
 
 static bool coal_infer_regs(Ctx ctx, struct AsmMov* node) {
-    InferenceRegister* src_infer = NULL;
-    InferenceRegister* dst_infer = NULL;
+    struct InferenceRegister* src_infer = NULL;
+    struct InferenceRegister* dst_infer = NULL;
     size_t src_idx = get_coalesced_idx(ctx, node->src);
     size_t dst_idx = get_coalesced_idx(ctx, node->dst);
     if (get_coalescable_infer_regs(ctx, &src_infer, &dst_infer, src_idx, dst_idx)
@@ -1813,7 +1814,7 @@ static void alloc_program(Ctx ctx, struct AsmProgram* node) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void allocate_registers(struct AsmProgram* node, struct BackEndContext* backend, struct FrontEndContext* frontend, uint8_t optim_2_code) {
-    RegAllocContext ctx;
+    struct RegAllocContext ctx;
     {
         ctx.backend = backend;
         ctx.frontend = frontend;

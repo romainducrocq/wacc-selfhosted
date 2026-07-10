@@ -8,37 +8,37 @@
 #define GET_CFG_BLOCK(X) ctx->cfg->blocks[X]
 
 #if __OPTIM_LEVEL__ == 1
-typedef TULong mask_t;
-typedef struct TacInstruction AstInstruction;
-typedef OptimTacContext* Ctx;
+#define mask_t TULong
+#define AstInstruction struct TacInstruction
+#define Ctx struct OptimTacContext*
 #define free_AstInstruction(X) free_TacInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(TacInstruction, X, Y)
 #elif __OPTIM_LEVEL__ == 2
-typedef struct AsmInstruction AstInstruction;
-typedef RegAllocContext* Ctx;
+#define AstInstruction struct AsmInstruction
+#define Ctx struct RegAllocContext*
 #define free_AstInstruction(X) free_AsmInstruction(X)
 #define uptr_move_AstInstruction(X, Y) uptr_move(AsmInstruction, X, Y)
 #endif
 
-typedef struct ControlFlowBlock {
+struct ControlFlowBlock {
     size_t size;
     size_t instrs_front_idx;
     size_t instrs_back_idx;
     vector_t(size_t) pred_ids;
     vector_t(size_t) succ_ids;
-} ControlFlowBlock;
+};
 
-typedef struct ControlFlowGraph {
+struct ControlFlowGraph {
     size_t entry_id;
     size_t exit_id;
     vector_t(size_t) entry_succ_ids;
     vector_t(size_t) exit_pred_ids;
     vector_t(bool) reaching_code;
-    vector_t(ControlFlowBlock) blocks;
+    vector_t(struct ControlFlowBlock) blocks;
     hashmap_t(TIdentifier, ulong_t) identifier_id_map;
-} ControlFlowGraph;
+};
 
-typedef struct DataFlowAnalysis {
+struct DataFlowAnalysis {
     size_t set_size;
     size_t mask_size;
     size_t incoming_idx;
@@ -47,24 +47,24 @@ typedef struct DataFlowAnalysis {
     vector_t(size_t) instr_idx_map;
     vector_t(mask_t) blocks_mask_sets;
     vector_t(mask_t) instrs_mask_sets;
-} DataFlowAnalysis;
+};
 
 #if __OPTIM_LEVEL__ == 1
-typedef struct DataFlowAnalysisO1 {
+struct DataFlowAnalysisO1 {
     // Copy propagation
     vector_t(size_t) data_idx_map;
     vector_t(unique_ptr_t(struct TacInstruction)) bak_instrs;
     // Dead store elimination
     size_t addressed_idx;
-} DataFlowAnalysisO1;
+};
 #elif __OPTIM_LEVEL__ == 2
-typedef struct DataFlowAnalysisO2 {
+struct DataFlowAnalysisO2 {
     // Register allocation
     vector_t(TIdentifier) data_name_map;
-} DataFlowAnalysisO2;
+};
 #endif
 
-static void free_ControlFlowGraph(unique_ptr_t(ControlFlowGraph) * self) {
+static void free_ControlFlowGraph(unique_ptr_t(struct ControlFlowGraph) * self) {
     uptr_delete(*self);
     vec_delete((*self)->entry_succ_ids);
     vec_delete((*self)->exit_pred_ids);
@@ -78,8 +78,8 @@ static void free_ControlFlowGraph(unique_ptr_t(ControlFlowGraph) * self) {
     uptr_free(*self);
 }
 
-static unique_ptr_t(ControlFlowGraph) make_ControlFlowGraph(void) {
-    unique_ptr_t(ControlFlowGraph) self = uptr_new();
+static unique_ptr_t(struct ControlFlowGraph) make_ControlFlowGraph(void) {
+    unique_ptr_t(struct ControlFlowGraph) self = uptr_new();
     uptr_alloc(ControlFlowGraph, self);
     self->entry_id = 0;
     self->exit_id = 0;
@@ -91,7 +91,7 @@ static unique_ptr_t(ControlFlowGraph) make_ControlFlowGraph(void) {
     return self;
 }
 
-static void free_DataFlowAnalysis(unique_ptr_t(DataFlowAnalysis) * self) {
+static void free_DataFlowAnalysis(unique_ptr_t(struct DataFlowAnalysis) * self) {
     uptr_delete(*self);
     vec_delete((*self)->open_data_map);
     vec_delete((*self)->instr_idx_map);
@@ -100,8 +100,8 @@ static void free_DataFlowAnalysis(unique_ptr_t(DataFlowAnalysis) * self) {
     uptr_free(*self);
 }
 
-static unique_ptr_t(DataFlowAnalysis) make_DataFlowAnalysis(void) {
-    unique_ptr_t(DataFlowAnalysis) self = uptr_new();
+static unique_ptr_t(struct DataFlowAnalysis) make_DataFlowAnalysis(void) {
+    unique_ptr_t(struct DataFlowAnalysis) self = uptr_new();
     uptr_alloc(DataFlowAnalysis, self);
     self->set_size = 0;
     self->mask_size = 0;
@@ -115,7 +115,7 @@ static unique_ptr_t(DataFlowAnalysis) make_DataFlowAnalysis(void) {
 }
 
 #if __OPTIM_LEVEL__ == 1
-static void free_DataFlowAnalysisO1(unique_ptr_t(DataFlowAnalysisO1) * self) {
+static void free_DataFlowAnalysisO1(unique_ptr_t(struct DataFlowAnalysisO1) * self) {
     uptr_delete(*self);
     vec_delete((*self)->data_idx_map);
     for (size_t i = 0; i < vec_size((*self)->bak_instrs); ++i) {
@@ -125,8 +125,8 @@ static void free_DataFlowAnalysisO1(unique_ptr_t(DataFlowAnalysisO1) * self) {
     uptr_free(*self);
 }
 
-static unique_ptr_t(DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
-    unique_ptr_t(DataFlowAnalysisO1) self = uptr_new();
+static unique_ptr_t(struct DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
+    unique_ptr_t(struct DataFlowAnalysisO1) self = uptr_new();
     uptr_alloc(DataFlowAnalysisO1, self);
     self->addressed_idx = 0;
     self->data_idx_map = vec_new();
@@ -134,14 +134,14 @@ static unique_ptr_t(DataFlowAnalysisO1) make_DataFlowAnalysisO1(void) {
     return self;
 }
 #elif __OPTIM_LEVEL__ == 2
-static void free_DataFlowAnalysisO2(unique_ptr_t(DataFlowAnalysisO2) * self) {
+static void free_DataFlowAnalysisO2(unique_ptr_t(struct DataFlowAnalysisO2) * self) {
     uptr_delete(*self);
     vec_delete((*self)->data_name_map);
     uptr_free(*self);
 }
 
-static unique_ptr_t(DataFlowAnalysisO2) make_DataFlowAnalysisO2(void) {
-    unique_ptr_t(DataFlowAnalysisO2) self = uptr_new();
+static unique_ptr_t(struct DataFlowAnalysisO2) make_DataFlowAnalysisO2(void) {
+    unique_ptr_t(struct DataFlowAnalysisO2) self = uptr_new();
     uptr_alloc(DataFlowAnalysisO2, self);
     self->data_name_map = vec_new();
     return self;
@@ -323,7 +323,7 @@ static void cfg_init_block(Ctx ctx, size_t instr_idx, size_t* instrs_back_idx) {
         {
             if (*instrs_back_idx != vec_size(*ctx->p_instrs)) {
                 vec_back(ctx->cfg->blocks).instrs_back_idx = *instrs_back_idx;
-                ControlFlowBlock block = {0, instr_idx, 0, vec_new(), vec_new()};
+                struct ControlFlowBlock block = {0, instr_idx, 0, vec_new(), vec_new()};
                 vec_push_back(ctx->cfg->blocks, block);
             }
 #if __OPTIM_LEVEL__ == 1
@@ -427,7 +427,7 @@ static void init_control_flow_graph(Ctx ctx) {
         for (size_t instr_idx = 0; instr_idx < vec_size(*ctx->p_instrs); ++instr_idx) {
             if (GET_INSTR(instr_idx)) {
                 if (instrs_back_idx == vec_size(*ctx->p_instrs)) {
-                    ControlFlowBlock block = {0, instr_idx, 0, vec_new(), vec_new()};
+                    struct ControlFlowBlock block = {0, instr_idx, 0, vec_new(), vec_new()};
                     vec_push_back(ctx->cfg->blocks, block);
                 }
                 cfg_init_block(ctx, instr_idx, &instrs_back_idx);

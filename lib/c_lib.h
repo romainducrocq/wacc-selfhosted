@@ -42,22 +42,11 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define NULL 0
 #define FOPEN_MAX 8
 struct FILE;
-// TODO remove
-#ifdef __clang__
-extern struct FILE* __stdoutp;
-extern struct FILE* __stderrp;
-#define stdout __stdoutp
-#define stderr __stderrp
-#else
-extern struct FILE* stdout;
-extern struct FILE* stderr;
-#endif
 extern int fclose(struct FILE* stream);
 extern int fflush(struct FILE* stream);
 extern struct FILE* fopen(char* filename, char* mode);
 extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, struct FILE* stream);
 /* printf */
-extern int fprintf(struct FILE* stream, char* format, char* arg1, char* arg2, char* arg3, char* arg4, char* arg5);
 extern int printf(char* format, char* arg1);
 extern int snprintf(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
 extern int sprintf(char* s, char* format, unsigned char arg1);

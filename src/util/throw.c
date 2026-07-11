@@ -14,11 +14,11 @@ static char esc_bold[5] = {ESC, '[', '1', 'm', 0};
 static char esc_red[8] = {ESC, '[', '0', ';', '3', '1', 'm', 0};
 
 void panic_sigabrt(char* msg, int line, char* file) {
-    fflush(stdout);
+    fflush(NULL);
     {
         string_t strto_line = str_to_string(line);
-        fprintf(stderr, "%*s%*s:%*s:%*s\n%*s", 0, esc_bold, 0, file, 0, strto_line, 0, esc_reset, 0, "");
-        fprintf(stderr, "%*sinternal error:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, msg, 0, "", 0, "");
+        fprintf(stderr, "%s%s:%s:%s\n%s", esc_bold, file, strto_line, esc_reset, "");
+        fprintf(stderr, "%sinternal error:%s %s\n%s%s", esc_red, esc_reset, msg, "", "");
         str_delete(strto_line);
     }
     abort();
@@ -27,9 +27,9 @@ void panic_sigabrt(char* msg, int line, char* file) {
 void raise_init_error(Ctx ctx) {
     if (ctx->is_stdout) {
         printf("%s", "\n");
-        fflush(stdout);
+        fflush(NULL);
     }
-    fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
+    fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
 }
 
 void raise_base_error(Ctx ctx) {
@@ -37,10 +37,10 @@ void raise_base_error(Ctx ctx) {
     char* filename = get_filename(ctx->fileio);
     if (ctx->is_stdout) {
         printf("%s", "\n");
-        fflush(stdout);
+        fflush(NULL);
     }
-    fprintf(stderr, "%*s%*s:%*s\n%*s%*s", 0, esc_bold, 0, filename, 0, esc_reset, 0, "", 0, "");
-    fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
+    fprintf(stderr, "%s%s:%s\n%s%s", esc_bold, filename, esc_reset, "", "");
+    fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
 }
 
 static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {
@@ -91,11 +91,10 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
     }
     if (ctx->is_stdout) {
         printf("%s", "\n");
-        fflush(stdout);
+        fflush(NULL);
     }
     {
         string_t tok_overline = str_new("");
-        string_t strto_linenum = str_to_string(tok_linenum);
 
         int tok_pos = 1;
         if (token_info->tok_pos >= 0) {
@@ -107,22 +106,36 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
                 }
             }
         }
-        int pad_tok = tok_pos - 1;
-        int pad_linenum = (int)str_size(strto_linenum);
-        if (pad_linenum < 0) {
-            pad_linenum = 0;
-        }
+
+        string_t pad_tok = str_new("");
+        string_t pad_linenum = str_new("");
         string_t strto_pos = str_to_string(tok_pos);
+        string_t strto_linenum = str_to_string(tok_linenum);
 
-        fprintf(stderr, "%*s%*s:%*s:%*s:%*s\n", 0, esc_bold, 0, filename, 0, strto_linenum, 0, strto_pos, 0, esc_reset);
-        fprintf(stderr, "%*serror:%*s %*s\n%*s%*s", 0, esc_red, 0, esc_reset, 0, ctx->msg, 0, "", 0, "");
-        fprintf(stderr, "at line %*s: %*s%*sv%*s%*s\n", 0, strto_linenum, 0, esc_red, pad_tok, "", 0, tok_overline, 0,
-            esc_reset);
-        fprintf(stderr, "        %*s| %*s%*s%*s\n%*s", pad_linenum, "", 0, esc_bold, 0, line, 0, esc_reset, 0, "");
+        str_resize(pad_tok, tok_pos - 1);
+        for (unsigned long i = 0; i < str_size(pad_tok); ++i) {
+            pad_tok[i] = ' ';
+        }
+        str_resize(pad_linenum, str_size(strto_linenum));
+        for (unsigned long i = 0; i < str_size(pad_linenum); ++i) {
+            pad_linenum[i] = ' ';
+        }
 
-        str_delete(tok_overline);
+        // string_t stderr_buf = str_new("");
+
+        fprintf(stderr, "%s%s:%s:%s:%s\n", esc_bold, filename, strto_linenum, strto_pos, esc_reset);
+        fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
+        fprintf(stderr, "at line %s: %s%sv%s%s\n", strto_linenum, esc_red, pad_tok, tok_overline, esc_reset);
+        fprintf(stderr, "        %s| %s%s%s\n%s", pad_linenum, esc_bold, line, esc_reset, "");
+
+        // write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
+
+        str_delete(pad_tok);
+        str_delete(pad_linenum);
         str_delete(strto_linenum);
         str_delete(strto_pos);
+        str_delete(tok_overline);
+        // str_delete(stderr_buf);
     }
     str_delete(line);
 }

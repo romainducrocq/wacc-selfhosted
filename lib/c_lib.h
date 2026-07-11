@@ -42,6 +42,7 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define NULL 0
 #define FOPEN_MAX 8
 struct FILE;
+// TODO remove
 #ifdef __clang__
 extern struct FILE* __stdoutp;
 extern struct FILE* __stderrp;
@@ -56,13 +57,14 @@ extern int fflush(struct FILE* stream);
 extern struct FILE* fopen(char* filename, char* mode);
 extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, struct FILE* stream);
 /* printf */
-extern int fprintf(struct FILE* stream, char* format, int prec1, char* arg1, int prec2, char* arg2, int prec3,
-    char* arg3, int prec4, char* arg4, int prec5, char* arg5);
+extern int fprintf(struct FILE* stream, char* format, char* arg1, char* arg2, char* arg3, char* arg4, char* arg5);
 extern int printf(char* format, char* arg1);
 extern int snprintf(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
 extern int sprintf(char* s, char* format, unsigned char arg1);
 /* _POSIX_C_SOURCE 200809L */
+#define STDERR_FILENO 2
 extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);
+extern long write(int fildes, void* buf, unsigned long nbyte);
 
 /* stdlib.h */
 extern double strtod(char* nptr, char** endptr);

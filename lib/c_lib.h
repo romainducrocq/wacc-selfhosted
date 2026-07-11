@@ -42,8 +42,15 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define NULL 0
 #define FOPEN_MAX 8
 struct FILE;
+#ifdef __FreeBSD__
+extern struct FILE* __stdoutp;
+extern struct FILE* __stderrp;
+#define stdout __stdoutp
+#define stderr __stderrp
+#else
 extern struct FILE* stdout;
 extern struct FILE* stderr;
+#endif
 extern int fclose(struct FILE* stream);
 extern int fflush(struct FILE* stream);
 extern struct FILE* fopen(char* filename, char* mode);

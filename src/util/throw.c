@@ -20,9 +20,31 @@ void panic_sigabrt(char* msg, int line, char* file) {
     fflush(NULL);
     {
         string_t strto_line = str_to_string(line);
-        fprintf(stderr, "%s%s:%s:%s\n%s", esc_bold, file, strto_line, esc_reset, "");
-        fprintf(stderr, "%sinternal error:%s %s\n%s%s", esc_red, esc_reset, msg, "", "");
+
+        string_t stderr_buf = str_new("");
+        unsigned long stderr_buf_size = strlen("::\ninternal error: \n") + ESC_BOLD_SIZE + strlen(file)
+                                        + str_size(strto_line) + ESC_RESET_SIZE + ESC_RED_SIZE + ESC_RESET_SIZE
+                                        + strlen(msg);
+        str_reserve(stderr_buf, stderr_buf_size);
+
+        str_append(stderr_buf, esc_bold);
+        str_append(stderr_buf, file);
+        str_append(stderr_buf, ":");
+        str_append(stderr_buf, strto_line);
+        str_append(stderr_buf, ":");
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, "\n");
+        str_append(stderr_buf, esc_red);
+        str_append(stderr_buf, "internal error:");
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, " ");
+        str_append(stderr_buf, msg);
+        str_append(stderr_buf, "\n");
+
+        write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
+
         str_delete(strto_line);
+        str_delete(stderr_buf);
     }
     abort();
 }
@@ -32,18 +54,56 @@ void raise_init_error(Ctx ctx) {
         printf("%s", "\n");
         fflush(NULL);
     }
-    fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
+
+    string_t stderr_buf = str_new("");
+    unsigned long stderr_buf_size = strlen("error: \n") + ESC_RED_SIZE + ESC_RESET_SIZE + strlen(ctx->msg);
+    str_reserve(stderr_buf, stderr_buf_size);
+
+    str_append(stderr_buf, esc_red);
+    str_append(stderr_buf, "error:");
+    str_append(stderr_buf, esc_reset);
+    str_append(stderr_buf, " ");
+    str_append(stderr_buf, ctx->msg);
+    str_append(stderr_buf, "\n");
+    THROW_ABORT_IF(str_size(stderr_buf) != stderr_buf_size);
+
+    write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
+
+    str_delete(stderr_buf);
 }
 
 void raise_base_error(Ctx ctx) {
     free_fileio(ctx->fileio);
     char* filename = get_filename(ctx->fileio);
+    if (!filename) {
+        filename = "";
+    }
     if (ctx->is_stdout) {
         printf("%s", "\n");
         fflush(NULL);
     }
-    fprintf(stderr, "%s%s:%s\n%s%s", esc_bold, filename, esc_reset, "", "");
-    fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
+
+    string_t stderr_buf = str_new("");
+    unsigned long stderr_buf_size = strlen(":\nerror: \n") + ESC_BOLD_SIZE + strlen(filename) + ESC_RESET_SIZE
+                                    + ESC_RED_SIZE + ESC_RESET_SIZE + strlen(ctx->msg);
+    str_reserve(stderr_buf, stderr_buf_size);
+
+    str_append(stderr_buf, esc_bold);
+    str_append(stderr_buf, filename);
+    str_append(stderr_buf, ":");
+    str_append(stderr_buf, esc_reset);
+    str_append(stderr_buf, "\n");
+    str_append(stderr_buf, esc_red);
+    str_append(stderr_buf, "error:");
+    str_append(stderr_buf, esc_reset);
+    str_append(stderr_buf, " ");
+    str_append(stderr_buf, ctx->msg);
+    str_append(stderr_buf, "\n");
+    THROW_ABORT_IF(str_size(stderr_buf) != stderr_buf_size);
+
+    write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
+
+    str_delete(stderr_buf);
 }
 
 static unsigned long get_token_linenum(Ctx ctx, unsigned long total_linenum) {

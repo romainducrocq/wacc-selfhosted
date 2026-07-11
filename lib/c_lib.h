@@ -42,7 +42,7 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define NULL 0
 #define FOPEN_MAX 8
 struct FILE;
-#ifdef __FreeBSD__
+#ifdef __clang__
 extern struct FILE* __stdoutp;
 extern struct FILE* __stderrp;
 #define stdout __stdoutp

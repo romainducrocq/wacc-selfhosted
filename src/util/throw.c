@@ -9,6 +9,9 @@
 #define Ctx struct ErrorsContext*
 
 #define ESC 27
+#define ESC_RESET_SIZE 4
+#define ESC_BOLD_SIZE 4
+#define ESC_RED_SIZE 7
 static char esc_reset[5] = {ESC, '[', '0', 'm', 0};
 static char esc_bold[5] = {ESC, '[', '1', 'm', 0};
 static char esc_red[8] = {ESC, '[', '0', ';', '3', '1', 'm', 0};
@@ -121,7 +124,13 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
             pad_linenum[i] = ' ';
         }
 
-        // string_t stderr_buf = str_new("");
+        string_t stderr_buf = str_new("");
+        unsigned long stderr_buf_size =
+            strlen(":::\nerror: \nat line : v\n        | \n") + ESC_BOLD_SIZE + strlen(filename)
+            + str_size(strto_linenum) + str_size(strto_pos) + ESC_RESET_SIZE + ESC_RED_SIZE + ESC_RESET_SIZE
+            + strlen(ctx->msg) + str_size(strto_linenum) + ESC_RED_SIZE + str_size(pad_tok) + str_size(tok_overline)
+            + ESC_RESET_SIZE + str_size(pad_linenum) + ESC_BOLD_SIZE + str_size(line) + ESC_RESET_SIZE;
+        str_resize(stderr_buf, stderr_buf_size);
 
         fprintf(stderr, "%s%s:%s:%s:%s\n", esc_bold, filename, strto_linenum, strto_pos, esc_reset);
         fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");

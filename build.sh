@@ -76,6 +76,7 @@ fi
 mkdir ${BUILD_CACHE}/
 if [ ${?} -ne 0 ]; then exit 1; fi
 
+IS_WHEELCC=0
 OBJECT_FILES=""
 LINK_CC="${CC}"
 echo "-- Build objects ..."
@@ -88,6 +89,7 @@ for FILE in ${SOURCE_FILES}; do
         "c")
             ;;
         "wheelcc")
+            IS_WHEELCC=1
             FILE="${FILE%.*}"
             wheelcc -v -E -c ${INCLUDE_DIRS} ${FILE}.c
             if [ ${?} -ne 0 ]; then exit 1; fi
@@ -105,6 +107,12 @@ for FILE in ${SOURCE_FILES}; do
     if [ ${?} -ne 0 ]; then exit 1; fi
 done
 echo "OK"
+
+if [ ${IS_WHEELCC} -ne 0 ]; then
+    if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
+        LINK_CC="${LINK_CC} -arch x86_64"
+    fi
+fi
 
 echo "-- Linking executable ..."
 echo "${BUILD_CACHE}/*.o -> ${PROJECT_NAME}"

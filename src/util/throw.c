@@ -130,21 +130,49 @@ void raise_error_at_token(Ctx ctx, unsigned long info_at) {
             + str_size(strto_linenum) + str_size(strto_pos) + ESC_RESET_SIZE + ESC_RED_SIZE + ESC_RESET_SIZE
             + strlen(ctx->msg) + str_size(strto_linenum) + ESC_RED_SIZE + str_size(pad_tok) + str_size(tok_overline)
             + ESC_RESET_SIZE + str_size(pad_linenum) + ESC_BOLD_SIZE + str_size(line) + ESC_RESET_SIZE;
-        str_resize(stderr_buf, stderr_buf_size);
+        str_reserve(stderr_buf, stderr_buf_size);
 
-        fprintf(stderr, "%s%s:%s:%s:%s\n", esc_bold, filename, strto_linenum, strto_pos, esc_reset);
-        fprintf(stderr, "%serror:%s %s\n%s%s", esc_red, esc_reset, ctx->msg, "", "");
-        fprintf(stderr, "at line %s: %s%sv%s%s\n", strto_linenum, esc_red, pad_tok, tok_overline, esc_reset);
-        fprintf(stderr, "        %s| %s%s%s\n%s", pad_linenum, esc_bold, line, esc_reset, "");
+        str_append(stderr_buf, esc_bold);
+        str_append(stderr_buf, filename);
+        str_append(stderr_buf, ":");
+        str_append(stderr_buf, strto_linenum);
+        str_append(stderr_buf, ":");
+        str_append(stderr_buf, strto_pos);
+        str_append(stderr_buf, ":");
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, "\n");
+        str_append(stderr_buf, esc_red);
+        str_append(stderr_buf, "error:");
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, " ");
+        str_append(stderr_buf, ctx->msg);
+        str_append(stderr_buf, "\n");
+        str_append(stderr_buf, "at line ");
+        str_append(stderr_buf, strto_linenum);
+        str_append(stderr_buf, ": ");
+        str_append(stderr_buf, esc_red);
+        str_append(stderr_buf, pad_tok);
+        str_append(stderr_buf, "v");
+        str_append(stderr_buf, tok_overline);
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, "\n");
+        str_append(stderr_buf, "        ");
+        str_append(stderr_buf, pad_linenum);
+        str_append(stderr_buf, "| ");
+        str_append(stderr_buf, esc_bold);
+        str_append(stderr_buf, line);
+        str_append(stderr_buf, esc_reset);
+        str_append(stderr_buf, "\n");
+        THROW_ABORT_IF(str_size(stderr_buf) != stderr_buf_size);
 
-        // write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
+        write(STDERR_FILENO, stderr_buf, str_size(stderr_buf));
 
         str_delete(pad_tok);
         str_delete(pad_linenum);
         str_delete(strto_linenum);
         str_delete(strto_pos);
         str_delete(tok_overline);
-        // str_delete(stderr_buf);
+        str_delete(stderr_buf);
     }
     str_delete(line);
 }

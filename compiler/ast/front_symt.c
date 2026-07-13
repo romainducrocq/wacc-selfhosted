@@ -1,10 +1,11 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "ast.h"
+#include "front_symt.h"
 
-#include "ast/ast.h"
-#include "ast/front_symt.h"
+#include "../lib/c_std.h"
 
-#include "assembly/regs.h" // backend
+#include "../util/throw.h"
+
+#include "../backend/regs.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

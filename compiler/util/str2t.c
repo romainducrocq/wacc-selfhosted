@@ -1,8 +1,9 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "str2t.h"
+#include "throw.h"
 
-#include "frontend/parser/errors.h"
+#include "../lib/c_std.h"
+
+#include "../frontend/errors.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -1,7 +1,7 @@
 #ifndef _BACK_EMITTER_GAS_CODE_H
 #define _BACK_EMITTER_GAS_CODE_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
 struct AsmProgram;
 struct BackEndContext;

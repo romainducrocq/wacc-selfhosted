@@ -1,11 +1,11 @@
 #ifndef _BACK_ASSEMBLY_REGISTERS_H
 #define _BACK_ASSEMBLY_REGISTERS_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
-#include "ast_t.h" // ast
+#include "../ast/ast_t.h"
 
-#include "assembly/regs.h" // backend
+#include "../backend/regs.h"
 
 struct AsmReg;
 struct AsmOperand;

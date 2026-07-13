@@ -1,12 +1,13 @@
-#include "util/c_std.h"
-#include "util/fileio.h"
-#include "util/throw.h"
+#include "gas_code.h"
 
-#include "ast/ast.h"
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
+#include "../lib/c_std.h"
 
-#include "backend/emitter/gas_code.h"
+#include "../util/fileio.h"
+#include "../util/throw.h"
+
+#include "../ast/ast.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
 
 struct GasCodeContext {
     struct BackEndContext* backend;

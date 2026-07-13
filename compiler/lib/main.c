@@ -1,29 +1,28 @@
-#include "util/c_std.h"
-#include "util/fileio.h"
-#include "util/throw.h"
+#include "c_std.h"
 
-#include "ast/ast.h"
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast/front_ast.h"
-#include "ast/front_symt.h"
-#include "ast/interm_ast.h"
+#include "../util/fileio.h"
+#include "../util/throw.h"
 
-#include "frontend/parser/errors.h"
-#include "frontend/parser/lexer.h"
-#include "frontend/parser/parser.h"
+#include "../ast/ast.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
+#include "../ast/front_ast.h"
+#include "../ast/front_symt.h"
+#include "../ast/interm_ast.h"
 
-#include "frontend/intermediate/semantic.h"
-#include "frontend/intermediate/tac_repr.h"
+#include "../frontend/errors.h"
+#include "../frontend/lexer.h"
+#include "../frontend/parser.h"
+#include "../frontend/semantic.h"
+#include "../frontend/tac_repr.h"
 
-#include "backend/assembly/asm_gen.h"
-#include "backend/assembly/stack_fix.h"
-#include "backend/assembly/symt_cvt.h"
+#include "../backend/asm_gen.h"
+#include "../backend/gas_code.h"
+#include "../backend/stack_fix.h"
+#include "../backend/symt_cvt.h"
 
-#include "backend/emitter/gas_code.h"
-
-#include "optimization/optim_tac.h"
-#include "optimization/reg_alloc.h"
+#include "../optimizer/optim_tac.h"
+#include "../optimizer/reg_alloc.h"
 
 struct MainContext {
     struct ErrorsContext* errors;

@@ -1,10 +1,11 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "ast.h"
+#include "back_ast.h"
+#include "back_symt.h"
+#include "front_symt.h"
 
-#include "ast/ast.h"
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast/front_symt.h"
+#include "../lib/c_std.h"
+
+#include "../util/throw.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

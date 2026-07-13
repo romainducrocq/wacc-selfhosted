@@ -1,12 +1,13 @@
 #ifndef _FRONT_PARSER_LEXER_H
 #define _FRONT_PARSER_LEXER_H
 
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "../lib/c_std.h"
 
-#include "ast_t.h" // ast
+#include "../util/throw.h"
 
-#include "parser/tokens.h" // frontend
+#include "../ast/ast_t.h"
+
+#include "../frontend/tokens.h"
 
 struct ErrorsContext;
 struct FileIoContext;

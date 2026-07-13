@@ -1,8 +1,9 @@
 #ifndef _UTIL_STR2T_H
 #define _UTIL_STR2T_H
 
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "../lib/c_std.h"
+
+#include "../util/throw.h"
 
 struct ErrorsContext;
 

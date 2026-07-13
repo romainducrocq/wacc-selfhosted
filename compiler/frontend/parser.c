@@ -1,16 +1,16 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "errors.h"
+#include "idents.h"
+#include "lexer.h"
+#include "parser.h"
 
-#include "ast/ast.h"
-#include "ast/front_ast.h"
-#include "ast/front_symt.h"
+#include "../lib/c_std.h"
 
-#include "frontend/parser/errors.h"
-#include "frontend/parser/lexer.h"
-#include "frontend/parser/parser.h"
+#include "../util/str2t.h"
+#include "../util/throw.h"
 
-#include "frontend/intermediate/idents.h"
+#include "../ast/ast.h"
+#include "../ast/front_ast.h"
+#include "../ast/front_symt.h"
 
 struct AbstractDeclarator {
     shared_ptr_t(Type) derived_type;

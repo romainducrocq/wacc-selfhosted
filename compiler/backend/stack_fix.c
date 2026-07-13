@@ -1,12 +1,13 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "registers.h"
+#include "stack_fix.h"
 
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast_t.h" // ast
+#include "../lib/c_std.h"
 
-#include "backend/assembly/registers.h"
-#include "backend/assembly/stack_fix.h"
+#include "../util/throw.h"
+
+#include "../ast/ast_t.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
 
 PairKeyValue(TIdentifier, TLong);
 

@@ -1,9 +1,9 @@
 #ifndef _FRONT_INTERMEDIATE_IDENTS_H
 #define _FRONT_INTERMEDIATE_IDENTS_H
 
-#include "ast_t.h" // ast
+#include "../ast/ast_t.h"
 
-#include "intermediate/labels.h" // frontend
+#include "../frontend/labels.h"
 
 struct CExp;
 struct IdentifierContext;

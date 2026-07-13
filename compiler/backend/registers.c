@@ -1,9 +1,10 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "registers.h"
 
-#include "ast/back_ast.h"
+#include "../lib/c_std.h"
 
-#include "backend/assembly/registers.h"
+#include "../util/throw.h"
+
+#include "../ast/back_ast.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

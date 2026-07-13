@@ -1,14 +1,15 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "idents.h"
+#include "tac_repr.h"
 
-#include "ast/ast.h"
-#include "ast/front_ast.h"
-#include "ast/front_symt.h"
-#include "ast/interm_ast.h"
+#include "../lib/c_std.h"
 
-#include "frontend/intermediate/idents.h"
-#include "frontend/intermediate/tac_repr.h"
+#include "../util/str2t.h"
+#include "../util/throw.h"
+
+#include "../ast/ast.h"
+#include "../ast/front_ast.h"
+#include "../ast/front_symt.h"
+#include "../ast/interm_ast.h"
 
 struct TacReprContext {
     struct FrontEndContext* frontend;

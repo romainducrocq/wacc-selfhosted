@@ -1,14 +1,15 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "reg_alloc.h"
 
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast/front_symt.h"
-#include "ast_t.h" // ast
+#include "../lib/c_std.h"
 
-#include "backend/assembly/registers.h"
+#include "../util/throw.h"
 
-#include "optimization/reg_alloc.h"
+#include "../ast/ast_t.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
+#include "../ast/front_symt.h"
+
+#include "../backend/registers.h"
 
 #define mask_t TULong
 
@@ -118,7 +119,7 @@ static unique_ptr_t(InferenceGraph) make_InferenceGraph(bool is_sse) {
 #ifndef __OPTIM_LEVEL__
 #define __OPTIM_LEVEL__ 2
 #undef _OPTIMIZATION_IMPL_OLVL_H
-#include "impl_olvl.h" // optimization
+#include "impl_olvl.h"
 #undef __OPTIM_LEVEL__
 #endif
 

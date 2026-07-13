@@ -1,10 +1,10 @@
 #ifndef _AST_FRONT_AST_H
 #define _AST_FRONT_AST_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
-#include "ast/ast.h"
-#include "ast/front_symt.h"
+#include "../ast/ast.h"
+#include "../ast/front_symt.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

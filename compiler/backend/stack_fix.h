@@ -1,9 +1,9 @@
 #ifndef _BACK_ASSEMBLY_STACK_FIX_H
 #define _BACK_ASSEMBLY_STACK_FIX_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
-#include "ast_t.h" // ast
+#include "../ast/ast_t.h"
 
 struct AsmInstruction;
 struct AsmProgram;

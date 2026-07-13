@@ -1,7 +1,7 @@
 #ifndef _BACK_ASSEMBLY_ASM_GEN_H
 #define _BACK_ASSEMBLY_ASM_GEN_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
 struct TacProgram;
 struct AsmProgram;

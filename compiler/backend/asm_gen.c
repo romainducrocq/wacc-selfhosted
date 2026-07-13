@@ -1,17 +1,18 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "asm_gen.h"
+#include "registers.h"
+#include "stack_fix.h"
+#include "symt_cvt.h"
 
-#include "ast/ast.h"
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast/front_symt.h"
-#include "ast/interm_ast.h"
+#include "../lib/c_std.h"
 
-#include "backend/assembly/asm_gen.h"
-#include "backend/assembly/registers.h"
-#include "backend/assembly/stack_fix.h"
-#include "backend/assembly/symt_cvt.h"
+#include "../util/str2t.h"
+#include "../util/throw.h"
+
+#include "../ast/ast.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
+#include "../ast/front_symt.h"
+#include "../ast/interm_ast.h"
 
 #define ASM_LABEL_KIND int
 #define LBL_Lcomisd_nan 0

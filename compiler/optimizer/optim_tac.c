@@ -1,13 +1,14 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "optim_tac.h"
 
-#include "ast/front_ast.h"
-#include "ast/front_symt.h"
-#include "ast/interm_ast.h"
-#include "ast_t.h" // ast
+#include "../lib/c_std.h"
 
-#include "optimization/optim_tac.h"
+#include "../util/str2t.h"
+#include "../util/throw.h"
+
+#include "../ast/ast_t.h"
+#include "../ast/front_ast.h"
+#include "../ast/front_symt.h"
+#include "../ast/interm_ast.h"
 
 struct ControlFlowGraph;
 struct DataFlowAnalysis;
@@ -34,7 +35,7 @@ struct OptimTacContext {
 #ifndef __OPTIM_LEVEL__
 #define __OPTIM_LEVEL__ 1
 #undef _OPTIMIZATION_IMPL_OLVL_H
-#include "impl_olvl.h" // optimization
+#include "impl_olvl.h"
 #undef __OPTIM_LEVEL__
 #endif
 

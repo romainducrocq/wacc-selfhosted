@@ -1,8 +1,9 @@
 #ifndef _FRONT_PARSER_PARSER_H
 #define _FRONT_PARSER_PARSER_H
 
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "../lib/c_std.h"
+
+#include "../util/throw.h"
 
 struct Token;
 struct CProgram;

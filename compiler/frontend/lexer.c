@@ -1,11 +1,12 @@
-#include "util/c_std.h"
-#include "util/fileio.h"
-#include "util/throw.h"
+#include "errors.h"
+#include "lexer.h"
 
-#include "ast/ast.h"
+#include "../lib/c_std.h"
 
-#include "frontend/parser/errors.h"
-#include "frontend/parser/lexer.h"
+#include "../util/fileio.h"
+#include "../util/throw.h"
+
+#include "../ast/ast.h"
 
 ElementKey(hash_t);
 

@@ -1,9 +1,9 @@
 #ifndef _BACK_ASSEMBLY_SYMT_CVT_H
 #define _BACK_ASSEMBLY_SYMT_CVT_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
-#include "ast_t.h" // ast
+#include "../ast/ast_t.h"
 
 struct Type;
 struct AssemblyType;

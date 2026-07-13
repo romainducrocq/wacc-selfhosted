@@ -1,7 +1,7 @@
 #ifndef _FRONT_INTERMEDIATE_TAC_REPR_H
 #define _FRONT_INTERMEDIATE_TAC_REPR_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
 struct CProgram;
 struct TacProgram;

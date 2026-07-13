@@ -1,9 +1,10 @@
 #ifndef _UTIL_C_STD_H
 #define _UTIL_C_STD_H
 
-#include "c_lib.h"
-#include "sds/sds.h"
-#include "stb_ds/stb_ds.h"
+#include "../lib/c_lib.h"
+
+#include "../3rdparty/sds.h"
+#include "../3rdparty/stb_ds.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -41,8 +41,9 @@
  * ------------------------------------------------------------------------------
  */
 
-#include "c_lib.h"
 #include "stb_ds.h"
+
+#include "../lib/c_lib.h"
 
 #define STBDS_SH_DEFAULT 1
 #define STBDS_SH_STRDUP 2

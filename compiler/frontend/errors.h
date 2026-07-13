@@ -1,12 +1,12 @@
 #ifndef _FRONT_PARSER_ERRORS_H
 #define _FRONT_PARSER_ERRORS_H
 
-#include "util/c_std.h"
+#include "../lib/c_std.h"
 
-#include "ast_t.h" // ast
+#include "../ast/ast_t.h"
 
-#include "parser/messages.h" // frontend
-#include "parser/tokens.h"   // frontend
+#include "../frontend/messages.h"
+#include "../frontend/tokens.h"
 
 struct Token;
 struct FunType;

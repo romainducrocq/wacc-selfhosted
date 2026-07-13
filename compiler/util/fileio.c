@@ -1,8 +1,9 @@
-#include "util/c_std.h"
-#include "util/fileio.h"
-#include "util/throw.h"
+#include "fileio.h"
+#include "throw.h"
 
-#include "frontend/parser/errors.h"
+#include "../lib/c_std.h"
+
+#include "../frontend/errors.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

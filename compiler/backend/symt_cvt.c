@@ -1,13 +1,14 @@
-#include "util/c_std.h"
-#include "util/throw.h"
+#include "regs.h"
+#include "symt_cvt.h"
 
-#include "ast/back_ast.h"
-#include "ast/back_symt.h"
-#include "ast/front_symt.h"
-#include "ast_t.h" // ast
+#include "../lib/c_std.h"
 
-#include "assembly/regs.h" // backend
-#include "backend/assembly/symt_cvt.h"
+#include "../util/throw.h"
+
+#include "../ast/ast_t.h"
+#include "../ast/back_ast.h"
+#include "../ast/back_symt.h"
+#include "../ast/front_symt.h"
 
 struct SymtCvtContext {
     struct BackEndContext* backend;

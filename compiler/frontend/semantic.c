@@ -1,15 +1,15 @@
-#include "util/c_std.h"
-#include "util/str2t.h"
-#include "util/throw.h"
+#include "errors.h"
+#include "idents.h"
+#include "semantic.h"
 
-#include "ast/ast.h"
-#include "ast/front_ast.h"
-#include "ast/front_symt.h"
+#include "../lib/c_std.h"
 
-#include "frontend/parser/errors.h"
+#include "../util/str2t.h"
+#include "../util/throw.h"
 
-#include "frontend/intermediate/idents.h"
-#include "frontend/intermediate/semantic.h"
+#include "../ast/ast.h"
+#include "../ast/front_ast.h"
+#include "../ast/front_symt.h"
 
 #define StStructure struct Structure
 PairKeyValue(TIdentifier, StStructure);

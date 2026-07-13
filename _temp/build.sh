@@ -60,8 +60,8 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/util/fileio.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/util/str2t.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/util/throw.wheelcc"
 
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/3rdparty/sds/sds.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/3rdparty/stb_ds/stb_ds.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/3rdparty/sds.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/3rdparty/stb_ds.wheelcc"
 
 BUILD_CACHE="${PROJECT_DIR}/build/build_cache"
 if [ -d "${BUILD_CACHE}/" ]; then

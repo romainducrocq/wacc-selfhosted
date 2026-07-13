@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 KERNEL_NAME="$(uname -s)"
-PACKAGE_DIR="$(dirname $(readlink -f ${0}))"
-PACKAGE_NAME="$(cat ${PACKAGE_DIR}/config.name)"
+PROJECT_DIR="$(dirname $(readlink -f ${0}))"
+EXEC_NAME="$(cat ${PROJECT_DIR}/config.name)"
 CC="gcc"
 AS_FLAGS="--64"
 LD_LIB_64=""
@@ -25,7 +25,7 @@ function verbose () {
 }
 
 function usage () {
-    echo "Usage: ${PACKAGE_NAME} [Help] [Debug] [Optimize...] [Preprocess] [Defval...] [Link] [Include...] [Linkdir...] [Linklib...] [Output] FILES"
+    echo "Usage: ./wacc-selfhosted [Help] [Debug] [Optimize...] [Preprocess] [Defval...] [Link] [Include...] [Linkdir...] [Linklib...] [Output] FILES"
     echo ""
     echo -e "\033[1;34mwarning:\033[0m 1. optional arguments must be passed in this order only"
     echo -e "\033[1;34mwarning:\033[0m 2. whitespaces are not supported in paths and file names"
@@ -112,8 +112,8 @@ function clean_exit () {
             fi
         fi
     done
-    if [ -f "${PACKAGE_DIR}/crt.o" ]; then
-        rm ${PACKAGE_DIR}/crt.o
+    if [ -f "${PROJECT_DIR}/crt.o" ]; then
+        rm ${PROJECT_DIR}/crt.o
     fi
     exit ${EXIT_CODE}
 }
@@ -124,7 +124,7 @@ function em() {
 
 function raise_error () {
     ERROR_MESSAGE="${1}"
-    echo -e "${PACKAGE_NAME}: \033[0;31merror:\033[0m ${ERROR_MESSAGE}, see $(em "--help")" 1>&2
+    echo -e "${EXEC_NAME}: \033[0;31merror:\033[0m ${ERROR_MESSAGE}, see $(em "--help")" 1>&2
     clean_exit 1
 }
 
@@ -520,8 +520,8 @@ function compile () {
         if [ ${?} -eq 0 ]; then
             SOURCE_DIR=""
         fi
-        verbose "Compile (${PACKAGE_NAME}) -> ${FILE}.${EXT_OUT}"
-        ${PACKAGE_DIR}/${PACKAGE_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} ${SOURCE_DIR} ${INCLUDE_DIRS}
+        verbose "Compile (${EXEC_NAME}) -> ${FILE}.${EXT_OUT}"
+        ${PROJECT_DIR}/${EXEC_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} ${SOURCE_DIR} ${INCLUDE_DIRS}
         if [ ${?} -ne 0 ]; then
             raise_error "compilation failed"
         fi
@@ -548,13 +548,13 @@ function link () {
                     LD_LIB_64=""
                 fi
                 if [ ! -z "${LD_LIB_64}" ]; then
-                    verbose "Assemble (as) -> ${PACKAGE_DIR}/crt.o"
-                    as ${AS_FLAGS} ${PACKAGE_DIR}/crt.${EXT_OUT} -o ${PACKAGE_DIR}/crt.o
+                    verbose "Assemble (as) -> ${PROJECT_DIR}/crt.o"
+                    as ${AS_FLAGS} ${PROJECT_DIR}/crt.${EXT_OUT} -o ${PROJECT_DIR}/crt.o
                     if [ ${?} -ne 0 ]; then
                         raise_error "assembling failed"
                     fi
                     verbose "Link (ld) -> ${NAME_OUT}"
-                    ld --build-id -m elf_x86_64 --hash-style=gnu -dynamic-linker ${LD_LIB_64} -pie -lc ${PACKAGE_DIR}/crt.o \
+                    ld --build-id -m elf_x86_64 --hash-style=gnu -dynamic-linker ${LD_LIB_64} -pie -lc ${PROJECT_DIR}/crt.o \
                         ${FILES// /.o }.o ${LINK_DIRS} ${LINK_LIBS} -o ${NAME_OUT}
                     if [ ${?} -ne 0 ]; then
                         LD_LIB_64=""
@@ -582,9 +582,6 @@ function link () {
 
 EXT_IN="c"
 EXT_OUT="s"
-if [ -f "${PACKAGE_DIR}/fileext.cfg" ]; then
-    EXT_IN="$(cat ${PACKAGE_DIR}/fileext.cfg)"
-fi
 
 IS_VERBOSE=0
 IS_PREPROC=0

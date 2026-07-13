@@ -8,8 +8,6 @@
 #include "parser/messages.h" // frontend
 #include "parser/tokens.h"   // frontend
 
-#include "intermediate/messages.h" // frontend
-
 struct Token;
 struct FunType;
 struct Pointer;
@@ -25,34 +23,6 @@ struct IdentifierContext;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Errors
-
-#define MESSAGE_FATAL int
-#define MSG_unhandled_fatal_error 0
-#define MSG_unsupported_os 1
-#define MSG_unsupported_arch 2
-#define MSG_unsupported_compiler 3
-#define MSG_unsupported_cc_ver 4
-
-#define MESSAGE_ARG int
-#define MSG_unhandled_arg_error 100
-#define MSG_print_help 101
-#define MSG_no_debug_arg 102
-#define MSG_invalid_debug_arg 103
-#define MSG_no_optim_1_arg 104
-#define MSG_invalid_optim_1_arg 105
-#define MSG_no_optim_2_arg 106
-#define MSG_invalid_optim_2_arg 107
-#define MSG_no_input_files_arg 108
-#define MSG_no_stdlib_dir_arg 109
-#define MSG_no_include_dir_arg 110
-
-#define MESSAGE_UTIL int
-#define MSG_unhandled_util_error 200
-#define MSG_failed_fread 201
-#define MSG_failed_fwrite 202
-#define MSG_failed_strtoi 203
-#define MSG_failed_strtou 204
-#define MSG_failed_strtod 205
 
 char* get_tok_kind_fmt(TOKEN_KIND tok_kind);
 char* get_tok_fmt(struct IdentifierContext* ctx, struct Token* token);

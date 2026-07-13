@@ -2,7 +2,7 @@
 
 KERNEL_NAME="$(uname -s)"
 PACKAGE_DIR="$(dirname $(readlink -f ${0}))"
-PACKAGE_NAME="$(cat ${PACKAGE_DIR}/pkgname.cfg)"
+PACKAGE_NAME="$(cat ${PACKAGE_DIR}/config.name)"
 CC="gcc"
 AS_FLAGS="--64"
 LD_LIB_64=""
@@ -14,8 +14,6 @@ elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
 else
     LD_LIB_64="/lib64/ld-linux-x86-64.so.2"
 fi
-LIBC_DIR="${PACKAGE_DIR}/libc/"
-PP="${CC}"
 
 ARGC=${#}
 ARGV=(${@})
@@ -37,12 +35,11 @@ function usage () {
     echo ""
     echo "[Debug]:"
     echo "    -v          enable verbose mode"
-    echo "    (Test|Debug build only):"
-    echo "    --lex       print  lexing    stage and exit"
-    echo "    --parse     print  parsing   stage and exit"
-    echo "    --validate  print  semantic  stage and exit"
-    echo "    --tacky     print  interm    stage and exit"
-    echo "    --codegen   print  assembly  stage and exit"
+    echo "    --lex       exit after  lexing    stage"
+    echo "    --parse     exit after  parsing   stage"
+    echo "    --validate  exit after  semantic  stage"
+    echo "    --tacky     exit after  interm    stage"
+    echo "    --codegen   exit after  assembly  stage"
     echo ""
     echo "[Optimize...]:"
     echo "    (Level 0):"
@@ -63,7 +60,7 @@ function usage () {
     echo "    -O3                           alias    for -O1 -O2"
     echo ""
     echo "[Preprocess]:"
-    echo "    -E  enable macro expansion with ${PP}"
+    echo "    -E  enable macro expansion with ${CC}"
     echo ""
     echo "[Defval...]:"
     echo "    -D<define>[=<value>]  add a list of macro definitions"
@@ -492,9 +489,6 @@ function add_linkdirs () {
     if [ ! -z "${LINK_DIRS}" ]; then
         LINK_DIRS=$(echo "${LINK_DIRS}" | tr ' ' '\n' | sort --uniq | tr '\n' ' ')
     fi
-    if [ -d "${LIBC_DIR}" ]; then
-        LINK_DIRS="${LINK_DIRS} -L${LIBC_DIR}"
-    fi
     return 0
 }
 
@@ -502,28 +496,16 @@ function add_linklibs () {
     if [ ! -z "${LINK_LIBS}" ]; then
         LINK_LIBS=$(echo "${LINK_LIBS}" | tr ' ' '\n' | sort --uniq | tr '\n' ' ')
     fi
-    if [ -d "${LIBC_DIR}" ]; then
-        if [ -f "${LIBC_DIR}/lib${PACKAGE_NAME}.so" ]; then
-            LINK_LIBS="${LINK_LIBS} -l${PACKAGE_NAME}"
-        fi
-    fi
     return 0
 }
 
 function preprocess () {
     if [ ${IS_PREPROC} -eq 1 ]; then
         for FILE in ${FILES}; do
-            verbose "Preprocess (${PP}) -> ${FILE}.i"
-            if [ "${PP}" = "m4" ]; then
-                m4 -E -P -I${LIBC_DIR} -I$(dirname ${FILE})/ ${PREPROC_DIRS} ${DEF_VALS} ${FILE}.${EXT_IN} > ${FILE}.i
-                if [ ${?} -ne 0 ]; then
-                    raise_error "preprocessing failed"
-                fi
-            else
-                ${CC} -E -P -I${LIBC_DIR} -I$(dirname ${FILE})/ ${PREPROC_DIRS} ${DEF_VALS} ${FILE}.${EXT_IN} -o ${FILE}.i
-                if [ ${?} -ne 0 ]; then
-                    raise_error "preprocessing failed"
-                fi
+            verbose "Preprocess (${CC}) -> ${FILE}.i"
+            ${CC} -E -P -I$(dirname ${FILE})/ ${PREPROC_DIRS} ${DEF_VALS} ${FILE}.${EXT_IN} -o ${FILE}.i
+            if [ ${?} -ne 0 ]; then
+                raise_error "preprocessing failed"
             fi
         done
         EXT_IN="i"
@@ -539,7 +521,7 @@ function compile () {
             SOURCE_DIR=""
         fi
         verbose "Compile (${PACKAGE_NAME}) -> ${FILE}.${EXT_OUT}"
-        ${PACKAGE_DIR}/${PACKAGE_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} ${LIBC_DIR} ${SOURCE_DIR} ${INCLUDE_DIRS}
+        ${PACKAGE_DIR}/${PACKAGE_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} ${SOURCE_DIR} ${INCLUDE_DIRS}
         if [ ${?} -ne 0 ]; then
             raise_error "compilation failed"
         fi
@@ -602,9 +584,6 @@ EXT_IN="c"
 EXT_OUT="s"
 if [ -f "${PACKAGE_DIR}/fileext.cfg" ]; then
     EXT_IN="$(cat ${PACKAGE_DIR}/fileext.cfg)"
-    if [[ "${EXT_IN}" != "c"* ]]; then
-        PP="m4"
-    fi
 fi
 
 IS_VERBOSE=0

@@ -2,12 +2,14 @@
 
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 
-EXEC_NAME="$(basename ${1})"
+EXEC_NAME="$(basename "${1}")"
 echo -e "-- Set executable name ..."
 if [ ! -f "${PROJECT_DIR}/${EXEC_NAME}" ]; then
     echo -e "\033[0;31merror:\033[0m \033[1m‘${EXEC_NAME}’\033[0m is not a valid executable name" 1>&2
     exit 1
 fi
+
+# TODO check that EXEC_NAME is not {build.sh, crt.s, driver.sh, exec.name, wacc-selfhosted, ...}
 
 echo "${PROJECT_DIR}/exec.name = ${EXEC_NAME}"
 echo -n "${EXEC_NAME}" > ${PROJECT_DIR}/exec.name

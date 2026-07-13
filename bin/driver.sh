@@ -2,7 +2,7 @@
 
 KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
-EXEC_NAME="$(cat ${PROJECT_DIR}/config.name)"
+EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 CC="gcc"
 AS_FLAGS="--64"
 LD_LIB_64=""

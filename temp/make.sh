@@ -12,7 +12,7 @@ if [ -f "build/build.sh" ]; then rm build/build.sh; fi; if [ ${?} -ne 0 ]; then 
 if [ -f "bin/pkgname.cfg" ]; then rm bin/pkgname.cfg; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -f "test/tools/print_errors.in" ]; then rm test/tools/print_errors.in; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 
-cp -r ../temp/src ../temp/include ../temp/lib .
+cp -r ../src ../include ../lib .
 if [ ${?} -ne 0 ]; then exit 1; fi
 cp ../temp/build.sh build/
 if [ ${?} -ne 0 ]; then exit 1; fi

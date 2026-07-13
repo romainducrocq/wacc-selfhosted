@@ -15,11 +15,11 @@ if [ -f "test/tools/print_errors.in" ]; then rm test/tools/print_errors.in; fi; 
 
 cp -r ../compiler .
 if [ ${?} -ne 0 ]; then exit 1; fi
-cp ../temp/build.sh build/
+cp ../_temp/build.sh build/
 if [ ${?} -ne 0 ]; then exit 1; fi
-cp ../temp/pkgname.cfg bin/
+cp ../_temp/pkgname.cfg bin/
 if [ ${?} -ne 0 ]; then exit 1; fi
-cp ../temp/print_errors.in test/tools/
+cp ../_temp/print_errors.in test/tools/
 if [ ${?} -ne 0 ]; then exit 1; fi
 
 # sed -i "s|IS_PREPROC=0|IS_PREPROC=1|g" bin/driver.sh

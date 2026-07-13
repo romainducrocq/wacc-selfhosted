@@ -1,104 +1,77 @@
 #!/usr/bin/env bash
 
 KERNEL_NAME="$(uname -s)"
-PACKAGE_NAME="$(cat ../bin/pkgname.cfg)"
+PROJECT_DIR="$(dirname $(readlink -f ${0}))"
+# EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 CC="gcc"
-CXX="g++"
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
-    CC="clang"
-    CXX="clang++"
+    CC="clang -arch x86_64"
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
     CC="clang"
-    CXX="clang++"
 fi
+CC_FLAGS="-std=c17 -Wall -Wextra -Wpedantic"
+CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__GCC_STDINT__"
+CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 
-./build_preset.sh ${CC}
-if [ ${?} -ne 0 ]; then exit 1; fi
+# ./build_preset.sh ${CC}
+# if [ ${?} -ne 0 ]; then exit 1; fi
 
-BUILD_RELEASE=0
-PROJECT_DIR="$(dirname $(dirname $(readlink -f ${0})))"
+PROJECT_NAME="${PROJECT_DIR}/wacc-selfhosted-1"
+COMPILER_DIR="$(dirname ${PROJECT_DIR})/compiler"
 
-CC="${CC} -std=c17"
-CXX="${CXX} -std=c++17"
-CC_FLAGS="-Wall -Wextra -Wpedantic"
-CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__NDEBUG__"
-CC_FLAGS_DEBUG="-ggdb3 -O0"
-if [ ${BUILD_RELEASE} -eq 0 ]; then
-    CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
-else
-    CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_DEBUG}"
-fi
+SOURCE_FILES="${COMPILER_DIR}/lib/main.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/3rdparty/sds.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/3rdparty/stb_ds.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/ast.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/back_ast.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/back_symt.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/front_ast.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/front_symt.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/ast/interm_ast.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/backend/asm_gen.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/backend/gas_code.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/backend/registers.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/backend/stack_fix.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/backend/symt_cvt.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/errors.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/idents.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/lexer.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/parser.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/semantic.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/frontend/tac_repr.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/optimizer/optim_tac.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/optimizer/reg_alloc.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/util/fileio.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/util/str2t.c"
+SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/util/throw.c"
 
-PROJECT_NAME="${PROJECT_DIR}/bin/${PACKAGE_NAME}"
-
-INCLUDE_DIRS="-I${PROJECT_DIR}/include/"
-INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/ast/"
-INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/optimization/"
-INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/frontend/"
-INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/src/backend/"
-INCLUDE_DIRS="${INCLUDE_DIRS} -I${PROJECT_DIR}/lib/"
-
-SOURCE_FILES="${PROJECT_DIR}/src/main.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/ast.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/back_ast.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/back_symt.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/front_ast.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/front_symt.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/ast/interm_ast.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/optim_tac.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/optimization/reg_alloc.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/errors.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/lexer.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/parser/parser.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/idents.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/semantic.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/frontend/intermediate/tac_repr.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/asm_gen.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/registers.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/stack_fix.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/assembly/symt_cvt.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/backend/emitter/gas_code.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/fileio.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/pprint.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/str2t.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/src/util/throw.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/lib/sds/sds.c"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/lib/stb_ds/stb_ds.c"
-
-BUILD_CACHE="${PROJECT_DIR}/build/build_cache"
-if [ -d "${BUILD_CACHE}/" ]; then
-    rm -r ${BUILD_CACHE}/
+BUILD_DIR="$(dirname ${PROJECT_DIR})/build"
+if [ -d "${BUILD_DIR}/" ]; then
+    rm -r ${BUILD_DIR}/
     if [ ${?} -ne 0 ]; then exit 1; fi
 fi
-mkdir ${BUILD_CACHE}/
+mkdir ${BUILD_DIR}/
 if [ ${?} -ne 0 ]; then exit 1; fi
 
 OBJECT_FILES=""
-LINK_CC="${CC}"
 echo "-- Build objects ..."
 for FILE in ${SOURCE_FILES}; do
-    OBJECT="${BUILD_CACHE}/$(basename ${FILE%.*}).o"
+    OBJECT="${BUILD_DIR}/$(basename ${FILE%.*}).o"
     OBJECT_FILES="${OBJECT_FILES} ${OBJECT}"
-    echo "${FILE} -> ${OBJECT}"
-    BUILD_CC="${CC}"
-    case "${FILE##*.}" in
-        "c")
-            ;;
-        "cpp")
-            BUILD_CC="${CXX}"
-            LINK_CC="${CXX}"
-            ;;
-        *)
-            exit 1
-    esac
-    ${BUILD_CC} -c ${FILE} ${CC_FLAGS} ${INCLUDE_DIRS} -o ${OBJECT}
+    echo "(${CC}) ${FILE} -> ${OBJECT}"
+
+    # wheelcc -v -E -c ${FILE}.c
+    # if [ ${?} -ne 0 ]; then exit 1; fi
+    # mv -v ${FILE}.o ${OBJECT}
+
+    ${CC} -c ${FILE} ${CC_FLAGS} -o ${OBJECT}
     if [ ${?} -ne 0 ]; then exit 1; fi
 done
 echo "OK"
 
 echo "-- Linking executable ..."
-echo "${BUILD_CACHE}/*.o -> ${PROJECT_NAME}"
-${LINK_CC} ${OBJECT_FILES} ${CC_FLAGS} -o ${PROJECT_NAME}
+echo "${BUILD_DIR}/*.o -> ${PROJECT_NAME}"
+${CC} ${OBJECT_FILES} ${CC_FLAGS} -o ${PROJECT_NAME}
 if [ ${?} -ne 0 ]; then exit 1; fi
 echo "OK"
 

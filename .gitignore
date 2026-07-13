@@ -13,4 +13,4 @@ perf.data
 /bin/wacc-bootstrap-*
 /bin/wacc-selfhosted-*
 /bin/wacc-selfhosted
-/bin/exec.config
+/bin/exec.name

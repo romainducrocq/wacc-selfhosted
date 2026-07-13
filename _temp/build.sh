@@ -31,7 +31,7 @@ fi
 
 PROJECT_NAME="${PROJECT_DIR}/bin/${PACKAGE_NAME}"
 
-SOURCE_FILES="${PROJECT_DIR}/compiler/main.wheelcc"
+SOURCE_FILES="${PROJECT_DIR}/compiler/lib/main.wheelcc"
 
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/ast/ast.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/ast/back_ast.wheelcc"
@@ -40,21 +40,21 @@ SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/ast/front_ast.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/ast/front_symt.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/ast/interm_ast.wheelcc"
 
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/optimization/optim_tac.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/optimization/reg_alloc.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/optimizer/optim_tac.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/optimizer/reg_alloc.wheelcc"
 
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/parser/errors.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/parser/lexer.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/parser/parser.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/intermediate/idents.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/intermediate/semantic.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/intermediate/tac_repr.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/errors.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/lexer.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/parser.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/idents.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/semantic.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/frontend/tac_repr.wheelcc"
 
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/assembly/asm_gen.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/assembly/registers.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/assembly/stack_fix.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/assembly/symt_cvt.wheelcc"
-SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/emitter/gas_code.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/asm_gen.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/registers.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/stack_fix.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/symt_cvt.wheelcc"
+SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/backend/gas_code.wheelcc"
 
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/util/fileio.wheelcc"
 SOURCE_FILES="${SOURCE_FILES} ${PROJECT_DIR}/compiler/util/str2t.wheelcc"

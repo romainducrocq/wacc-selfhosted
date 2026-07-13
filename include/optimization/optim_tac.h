@@ -1,6 +1,8 @@
 #ifndef _OPTIMIZATION_OPTIM_TAC_H
 #define _OPTIMIZATION_OPTIM_TAC_H
 
+#include "util/c_std.h"
+
 struct TacProgram;
 struct FrontEndContext;
 

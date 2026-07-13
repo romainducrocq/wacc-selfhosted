@@ -1,6 +1,8 @@
 #ifndef _OPTIMIZATION_REG_ALLOC_H
 #define _OPTIMIZATION_REG_ALLOC_H
 
+#include "util/c_std.h"
+
 struct AsmProgram;
 struct BackEndContext;
 struct FrontEndContext;

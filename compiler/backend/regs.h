@@ -1,5 +1,5 @@
-#ifndef _BACK_ASSEMBLY_REGS_H
-#define _BACK_ASSEMBLY_REGS_H
+#ifndef _BACKEND_REGS_H
+#define _BACKEND_REGS_H
 
 #include "../lib/c_std.h"
 

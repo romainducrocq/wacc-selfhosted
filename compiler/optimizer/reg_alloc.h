@@ -1,5 +1,5 @@
-#ifndef _OPTIMIZATION_REG_ALLOC_H
-#define _OPTIMIZATION_REG_ALLOC_H
+#ifndef _OPTIMIZER_REG_ALLOC_H
+#define _OPTIMIZER_REG_ALLOC_H
 
 #include "../lib/c_std.h"
 

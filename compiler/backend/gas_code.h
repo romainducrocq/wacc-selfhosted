@@ -1,5 +1,5 @@
-#ifndef _BACK_EMITTER_GAS_CODE_H
-#define _BACK_EMITTER_GAS_CODE_H
+#ifndef _BACKEND_GAS_CODE_H
+#define _BACKEND_GAS_CODE_H
 
 #include "../lib/c_std.h"
 

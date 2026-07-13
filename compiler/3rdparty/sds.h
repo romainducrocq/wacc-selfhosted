@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __SDS_H
-#define __SDS_H
+#ifndef _LIB_SDS_H
+#define _LIB_SDS_H
 
 #define sds char*
 

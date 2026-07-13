@@ -1,5 +1,5 @@
-#ifndef _FRONT_INTERMEDIATE_SEMANTIC_H
-#define _FRONT_INTERMEDIATE_SEMANTIC_H
+#ifndef _FRONTEND_SEMANTIC_H
+#define _FRONTEND_SEMANTIC_H
 
 #include "../util/throw.h"
 

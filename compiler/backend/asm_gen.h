@@ -1,5 +1,5 @@
-#ifndef _BACK_ASSEMBLY_ASM_GEN_H
-#define _BACK_ASSEMBLY_ASM_GEN_H
+#ifndef _BACKEND_ASM_GEN_H
+#define _BACKEND_ASM_GEN_H
 
 #include "../lib/c_std.h"
 

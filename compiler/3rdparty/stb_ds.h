@@ -41,8 +41,8 @@
  * ------------------------------------------------------------------------------
  */
 
-#ifndef INCLUDE_STB_DS_H
-#define INCLUDE_STB_DS_H
+#ifndef _LIB_STB_DS_H
+#define _LIB_STB_DS_H
 
 #define arrlenu stbds_arrlenu
 #define arrput stbds_arrput
@@ -146,4 +146,4 @@ extern void* stbds_hmput_key(void* a, unsigned long elemsize, void* key, unsigne
 extern void* stbds_hmdel_key(
     void* a, unsigned long elemsize, void* key, unsigned long keysize, unsigned long keyoffset, int mode);
 
-#endif // INCLUDE_STB_DS_H
+#endif

@@ -118,7 +118,7 @@ static unique_ptr_t(InferenceGraph) make_InferenceGraph(bool is_sse) {
 
 #ifndef __OPTIM_LEVEL__
 #define __OPTIM_LEVEL__ 2
-#undef _OPTIMIZATION_IMPL_OLVL_H
+#undef _OPTIMIZER_IMPL_OLVL_H
 #include "impl_olvl.h"
 #undef __OPTIM_LEVEL__
 #endif

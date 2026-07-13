@@ -1,5 +1,5 @@
-#ifndef _FRONT_PARSER_ERRORS_H
-#define _FRONT_PARSER_ERRORS_H
+#ifndef _FRONTEND_ERRORS_H
+#define _FRONTEND_ERRORS_H
 
 #include "../lib/c_std.h"
 

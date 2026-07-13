@@ -1,5 +1,5 @@
-#ifndef _FRONT_PARSER_PARSER_H
-#define _FRONT_PARSER_PARSER_H
+#ifndef _FRONTEND_PARSER_H
+#define _FRONTEND_PARSER_H
 
 #include "../lib/c_std.h"
 

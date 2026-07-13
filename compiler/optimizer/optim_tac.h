@@ -1,5 +1,5 @@
-#ifndef _OPTIMIZATION_OPTIM_TAC_H
-#define _OPTIMIZATION_OPTIM_TAC_H
+#ifndef _OPTIMIZER_OPTIM_TAC_H
+#define _OPTIMIZER_OPTIM_TAC_H
 
 #include "../lib/c_std.h"
 

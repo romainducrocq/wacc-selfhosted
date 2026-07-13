@@ -1,5 +1,5 @@
-#ifndef _FRONT_INTERMEDIATE_IDENTS_H
-#define _FRONT_INTERMEDIATE_IDENTS_H
+#ifndef _FRONTEND_IDENTS_H
+#define _FRONTEND_IDENTS_H
 
 #include "../ast/ast_t.h"
 

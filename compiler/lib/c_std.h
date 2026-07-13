@@ -1,5 +1,5 @@
-#ifndef _UTIL_C_STD_H
-#define _UTIL_C_STD_H
+#ifndef _LIB_C_STD_H
+#define _LIB_C_STD_H
 
 #include "../lib/c_lib.h"
 

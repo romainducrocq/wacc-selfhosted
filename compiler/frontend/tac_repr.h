@@ -1,5 +1,5 @@
-#ifndef _FRONT_INTERMEDIATE_TAC_REPR_H
-#define _FRONT_INTERMEDIATE_TAC_REPR_H
+#ifndef _FRONTEND_TAC_REPR_H
+#define _FRONTEND_TAC_REPR_H
 
 #include "../lib/c_std.h"
 

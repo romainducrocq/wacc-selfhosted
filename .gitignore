@@ -9,3 +9,8 @@ perf.data
 /wheelcc/
 /nqcc2/
 /writing-a-c-compiler-tests/
+
+/bin/wacc-bootstrap-*
+/bin/wacc-selfhosted-*
+/bin/wacc-selfhosted
+/bin/name.config

@@ -4,6 +4,7 @@ sudo -v
 
 cd ../wheelcc/
 find . -name "*.o" -type f -delete; if [ ${?} -ne 0 ]; then exit 1; fi
+if [ -d "compiler/" ]; then rm -r compiler/; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -d "src/" ]; then rm -r src/; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -d "include/" ]; then rm -r include/; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -d "lib/" ]; then rm -r lib/; fi; if [ ${?} -ne 0 ]; then exit 1; fi
@@ -12,7 +13,7 @@ if [ -f "build/build.sh" ]; then rm build/build.sh; fi; if [ ${?} -ne 0 ]; then 
 if [ -f "bin/pkgname.cfg" ]; then rm bin/pkgname.cfg; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 if [ -f "test/tools/print_errors.in" ]; then rm test/tools/print_errors.in; fi; if [ ${?} -ne 0 ]; then exit 1; fi
 
-cp -r ../src ../include ../lib .
+cp -r ../compiler .
 if [ ${?} -ne 0 ]; then exit 1; fi
 cp ../temp/build.sh build/
 if [ ${?} -ne 0 ]; then exit 1; fi

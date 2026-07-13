@@ -539,8 +539,6 @@ char* get_arg_msg(MESSAGE_ARG msg) {
             RET_ERR(0) "no input file passed in fourth argument, see " EM_CSTR("--help");
         case MSG_no_stdlib_dir_arg:
             RET_ERR(0) "no standard lib directory passed in fifth argument, see " EM_CSTR("--help");
-        case MSG_no_include_dir_arg:
-            RET_ERR(0) "no include directories passed in sixth argument, see " EM_CSTR("--help");
         default:
             THROW_ABORT;
     }

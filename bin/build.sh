@@ -12,6 +12,7 @@ fi
 CC_FLAGS="-std=c17 -Wall -Wextra -Wpedantic"
 CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__GCC_STDINT__"
 CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
+LD="${CC}"
 
 # ./build_preset.sh ${CC}
 # if [ ${?} -ne 0 ]; then exit 1; fi
@@ -71,10 +72,23 @@ echo "OK"
 
 echo "-- Linking executable ..."
 echo "${BUILD_DIR}/*.o -> ${PROJECT_NAME}"
-${CC} ${OBJECT_FILES} ${CC_FLAGS} -o ${PROJECT_NAME}
+${LD} ${OBJECT_FILES} ${CC_FLAGS} -o ${PROJECT_NAME}
 if [ ${?} -ne 0 ]; then exit 1; fi
 echo "OK"
 
+EXEC_NAME="$(basename ${PROJECT_NAME})"
+bash ${PROJECT_DIR}/set-exec.sh ${EXEC_NAME}
+if [ ${?} -ne 0 ]; then exit 1; fi
+
 echo "-- Created target ${PROJECT_NAME}"
+
+find ${PROJECT_DIR}/ -maxdepth 1 -name wacc-selfhosted -type l -delete
+if [ ${?} -ne 0 ]; then exit 1; fi
+
+ln -s ${PROJECT_DIR}/driver.sh ${PROJECT_DIR}/wacc-selfhosted
+if [ ${?} -ne 0 ]; then exit 1; fi
+
+echo -e "-- Created symlink \033[1;36m${PROJECT_DIR}/wacc-selfhosted\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
+echo -e "See usage with command \033[1m‘./wacc-selfhosted --help’\033[0m"
 
 exit 0

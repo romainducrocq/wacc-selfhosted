@@ -5,7 +5,7 @@
 [submodule "nqcc2"]
     path = nqcc2
     url = https://github.com/nlsandler/nqcc2
-    branch = main
+    branch = extra-credit
 [submodule "writing-a-c-compiler-tests"]
     path = writing-a-c-compiler-tests
     url = https://github.com/nlsandler/writing-a-c-compiler-tests

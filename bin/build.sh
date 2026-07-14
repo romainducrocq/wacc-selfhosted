@@ -121,7 +121,7 @@ function configure () {
                 CC_NAME="${CC}"
                 ;;
             "nqcc2")
-                CC="nqcc2/_build/default/bin/main.exe"
+                CC="${NQCC2_DIR}/_build/default/bin/main.exe"
                 CC_NAME="nqcc2"
                 if [ ! -f "${CC}" ]; then
                 # TODO

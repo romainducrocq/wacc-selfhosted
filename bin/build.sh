@@ -8,9 +8,9 @@ if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
     CC="clang"
 fi
-CC_FLAGS="-std=c17 -Wall -Wextra -Wpedantic"
-CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__GCC_STDINT__"
-CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
+CC_FLAGS="-Wall -Wextra -Wpedantic -D__GCC_STDINT__"
+CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors"
+CC_FLAGS="-std=c17 ${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 LD="${CC}"
 
 ARG1="${1}"
@@ -18,6 +18,8 @@ ARG2="${2}"
 
 BUILD_DIR="$(dirname ${PROJECT_DIR})/build"
 COMPILER_DIR="$(dirname ${PROJECT_DIR})/compiler"
+NQCC2_DIR="$(dirname ${PROJECT_DIR})/nqcc2"
+WHEELCC_DIR="$(dirname ${PROJECT_DIR})/wheelcc"
 
 SOURCE_FILES="${COMPILER_DIR}/lib/main.c"
 SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/3rdparty/sds.c"
@@ -90,6 +92,15 @@ function check_setup () {
     return 0
 }
 
+function build_wheelcc () {
+    echo "-- Build bootstrapping compiler wheelcc ..."
+    echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
+    if [ ${?} -ne 0 ]; then return 1; fi
+    (cd ${WHEELCC_DIR}/build/ && bash build.sh; cd ${PROJECT_DIR})
+    if [ ${?} -ne 0 ]; then return 1; fi
+    return 0
+}
+
 function configure () {
     if [ "${ARG1}" = "--bootstrap" ]; then
         case "${ARG2}" in
@@ -101,8 +112,12 @@ function configure () {
                 CC_NAME="nqcc2"
                 ;;
             "wheelcc")
-                # TODO build wheelcc
+                CC="${WHEELCC_DIR}/bin/driver.sh"
                 CC_NAME="wheelcc"
+                if [ ! -f "${CC}" ]; then
+                    build_wheelcc
+                    raise_error "build $(em "wheelcc") failed"
+                fi
                 ;;
             *)
                 CC="$(readlink -f "${ARG2}")"
@@ -110,7 +125,7 @@ function configure () {
                 ;;
         esac
         EXEC_NAME="wacc-bootstrap-${CC_NAME}"
-        echo "-- Bootstraping with ${CC_NAME} ..."
+        echo "-- Bootstrapping with ${CC_NAME} ..."
     else
         CC="$(readlink -f "${ARG1}")"
         CC_NAME="$(basename "${ARG1}")"
@@ -125,6 +140,7 @@ function configure () {
         bash ${PROJECT_DIR}/set-exec.sh ${CC_NAME}
         if [ ${?} -ne 0 ]; then exit 1; fi
     fi
+    return 0
 }
 
 function build_exec () {

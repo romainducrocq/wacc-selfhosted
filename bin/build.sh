@@ -107,6 +107,7 @@ function build_wheelcc () {
     bash build.sh
     if [ ${?} -ne 0 ]; then return 1; fi
     cd ${PROJECT_DIR}
+    echo "---"
     return 0
 }
 
@@ -122,7 +123,9 @@ function configure () {
                 # TODO check for ocaml here
                 if [ ! -f "${CC}" ]; then
                     build_nqcc2
-                    raise_error "build $(em "nqcc2") failed"
+                    if [ ${?} -ne 0 ]; then
+                        raise_error "build $(em "nqcc2") failed"
+                    fi
                 fi
                 ;;
             "wheelcc")
@@ -130,7 +133,9 @@ function configure () {
                 CC_NAME="wheelcc"
                 if [ ! -f "${WHEELCC_DIR}/bin/wheelcc" ]; then
                     build_wheelcc
-                    raise_error "build $(em "wheelcc") failed"
+                    if [ ${?} -ne 0 ]; then
+                        raise_error "build $(em "wheelcc") failed"
+                    fi
                 fi
                 ;;
             *)
@@ -248,5 +253,7 @@ if [ ${?} -ne 0 ]; then raise_error "configure failed"; fi
 build_exec ${@:3}
 if [ ${?} -ne 0 ]; then raise_error "build executable failed"; fi
 
-echo -e "See usage with command $(em "./wacc-selfhosted --help")"
+echo "---"
+echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, see usage with command $(em "./wacc-selfhosted --help")"
+echo "---"
 exit 0

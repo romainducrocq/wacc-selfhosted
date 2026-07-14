@@ -27,7 +27,7 @@ function reset_exec () {
 function run_tests () {
     echo ""
     echo "----------------------------------------------------------------------"
-    echo "(${EXEC_NAME}) ${@}"
+    echo "(${TEST_EXEC}) ${@}"
     ./test_compiler ${PROJECT_DIR}/driver.sh ${@}
     if [ ${?} -ne 0 ]; then reset_exec; exit 1; fi
     return 0
@@ -41,6 +41,7 @@ fi
 
 bash ${PROJECT_DIR}/set-exec.sh ${1}
 if [ ${?} -ne 0 ]; then exit 1; fi
+TEST_EXEC="$(cat ${PROJECT_DIR}/exec.name)"
 
 cd ${TEST_SUITE}
 ./test_compiler --check-setup

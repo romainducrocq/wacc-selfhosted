@@ -18,13 +18,17 @@ function raise_error () {
     exit 1
 }
 
+if [ ${#} -ne 1 ]; then
+    help
+fi
+
 echo -e "-- Set executable name ..."
 if [ ! -f "${PROJECT_DIR}/${EXEC_NAME}" ]; then
     raise_error "$(em "${EXEC_NAME}") is not a valid executable name"
 fi
 
-for FILE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh wacc-selfhosted; do
-    if [ "${EXEC_NAME}" = "${FILE}" ]; then
+for IGNORE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh wacc-selfhosted; do
+    if [ "${EXEC_NAME}" = "${IGNORE}" ]; then
         raise_error "$(em "${EXEC_NAME}") is not a valid executable name"
     fi
 done

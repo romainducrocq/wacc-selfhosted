@@ -34,6 +34,10 @@ function run_tests () {
     return 0
 }
 
+if [ ${#} -lt 1 ]; then
+    help
+fi
+
 bash ${PROJECT_DIR}/set-exec.sh ${1}
 if [ ${?} -ne 0 ]; then exit 1; fi
 

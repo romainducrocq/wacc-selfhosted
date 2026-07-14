@@ -2,7 +2,6 @@
 
 KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
-# EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 CC="gcc"
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
     CC="clang -arch x86_64"
@@ -13,6 +12,9 @@ CC_FLAGS="-std=c17 -Wall -Wextra -Wpedantic"
 CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__GCC_STDINT__"
 CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 LD="${CC}"
+
+ARG1="${1}"
+ARG2="${2}"
 
 BUILD_DIR="$(dirname ${PROJECT_DIR})/build"
 COMPILER_DIR="$(dirname ${PROJECT_DIR})/compiler"
@@ -58,7 +60,7 @@ function raise_error () {
     exit 1
 }
 
-function build_preset () {
+function check_setup () {
     case "${LD}" in
         "clang"*)
             CLANG_MAJOR_VERSION=$(clang -dumpversion | cut -d"." -f1)
@@ -88,7 +90,51 @@ function build_preset () {
     return 0
 }
 
+function configure () {
+    if [ "${ARG1}" = "--bootstrap" ]; then
+        case "${ARG2}" in
+            "gcc")
+                CC_NAME="${CC}"
+                ;;
+            "nqcc2")
+                # TODO build nqcc2
+                CC_NAME="nqcc2"
+                ;;
+            "wheelcc")
+                # TODO build wheelcc
+                CC_NAME="wheelcc"
+                ;;
+            *)
+                CC="$(readlink -f "${ARG2}")"
+                CC_NAME="$(basename "${ARG2}")"
+                ;;
+        esac
+        EXEC_NAME="wacc-bootstrap-${CC_NAME}"
+        echo "-- Bootstraping with ${CC_NAME} ..."
+    else
+        CC="$(readlink -f "${ARG1}")"
+        CC_NAME="$(basename "${ARG1}")"
+        EXEC_NAME="$(basename "${ARG2}")"
+        for IGNORE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh wacc-selfhosted; do
+            if [ "${EXEC_NAME}" = "${IGNORE}" ]; then
+                raise_error "$(em "${EXEC_NAME}") is not a valid executable name"
+            fi
+        done
+
+        echo "-- Building with ${CC_NAME} ..."
+        bash ${PROJECT_DIR}/set-exec.sh ${CC_NAME}
+        if [ ${?} -ne 0 ]; then exit 1; fi
+    fi
+}
+
 function build_exec () {
+    ARG1="${1}"
+    PROJECT_NAME="${PROJECT_DIR}/${EXEC_NAME}"
+    if [ -f "${PROJECT_NAME}" ]; then
+        rm ${PROJECT_NAME}
+        if [ ${?} -ne 0 ]; then return 1; fi
+    fi
+
     if [ -d "${BUILD_DIR}/" ]; then
         rm -r ${BUILD_DIR}/
         if [ ${?} -ne 0 ]; then return 1; fi
@@ -101,7 +147,9 @@ function build_exec () {
     for FILE in ${SOURCE_FILES}; do
         OBJECT="${BUILD_DIR}/$(basename ${FILE%.*}).o"
         OBJECT_FILES="${OBJECT_FILES} ${OBJECT}"
-        echo "(${CC}) ${FILE} -> ${OBJECT}"
+        echo "(${CC_NAME}) ${FILE} -> ${OBJECT}"
+
+        # TODO
 
         # wheelcc -E -c ${FILE}
         # if [ ${?} -ne 0 ]; then return 1; fi
@@ -119,7 +167,6 @@ function build_exec () {
     if [ ${?} -ne 0 ]; then return 1; fi
     echo "OK"
 
-    EXEC_NAME="$(basename ${PROJECT_NAME})"
     bash ${PROJECT_DIR}/set-exec.sh ${EXEC_NAME}
     if [ ${?} -ne 0 ]; then exit 1; fi
 
@@ -135,19 +182,21 @@ function build_exec () {
     return 0
 }
 
-# TODO resolve project name
-PROJECT_NAME="${PROJECT_DIR}/wacc-selfhosted-1"
-if [ -f "${PROJECT_NAME}" ]; then
-    rm ${PROJECT_NAME}
-    if [ ${?} -ne 0 ]; then return 1; fi
+if [ ${#} -lt 2 ]; then
+    help
 fi
 
-# TODO build wheelcc/nqcc2
+CC_NAME=""
+EXEC_NAME=""
 
-build_preset
-if [ ${?} -ne 0 ]; then exit 1; fi
-build_exec
-if [ ${?} -ne 0 ]; then raise_error "build failed"; fi
+check_setup
+if [ ${?} -ne 0 ]; then raise_error "check setup failed"; fi
+
+configure
+if [ ${?} -ne 0 ]; then raise_error "configure failed"; fi
+
+build_exec ${@:3}
+if [ ${?} -ne 0 ]; then raise_error "build executable failed"; fi
 
 echo -e "See usage with command $(em "./wacc-selfhosted --help")"
 exit 0

@@ -185,7 +185,7 @@ function build_exec () {
                     # TODO bootstrap with nqcc2
                     ;;
                 "wheelcc")
-                    ${CC} -O2 -E -c ${FILE}
+                    bash ${CC} -O2 -E -c ${FILE}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     mv ${FILE%.*}.o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi
@@ -198,7 +198,7 @@ function build_exec () {
                     ;;
             esac
         else
-            ${CC} -O2 -E -c ${FILE}
+            ${PROJECT_DIR}/wacc-selfhosted -O2 -E -c ${FILE}
             if [ ${?} -ne 0 ]; then return 1; fi
             mv ${FILE%.*}.o ${OBJECT}
             if [ ${?} -ne 0 ]; then return 1; fi

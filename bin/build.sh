@@ -16,6 +16,9 @@ LD="${CC}"
 ARG1="${1}"
 ARG2="${2}"
 
+WACC_NAME="wacc-selfhosted"
+WACC_EXEC="${PROJECT_DIR}/${WACC_NAME}"
+
 BUILD_DIR="$(dirname ${PROJECT_DIR})/build"
 COMPILER_DIR="$(dirname ${PROJECT_DIR})/compiler"
 NQCC2_DIR="$(dirname ${PROJECT_DIR})/nqcc2"
@@ -207,7 +210,7 @@ function build_exec () {
                     ;;
             esac
         else
-            ${PROJECT_DIR}/wacc-selfhosted -O2 -E -c ${FILE}
+            ${WACC_EXEC} -O2 -E -c ${FILE}
             if [ ${?} -ne 0 ]; then return 1; fi
             mv ${FILE%.*}.o ${OBJECT}
             if [ ${?} -ne 0 ]; then return 1; fi
@@ -229,10 +232,10 @@ function build_exec () {
     find ${PROJECT_DIR}/ -maxdepth 1 -name ${WACC_NAME} -type l -delete
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    ln -s ${PROJECT_DIR}/driver.sh ${PROJECT_DIR}/${WACC_NAME}
+    ln -s ${PROJECT_DIR}/driver.sh ${WACC_EXEC}
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    echo -e "-- Created symlink \033[1;36m${PROJECT_DIR}/${WACC_NAME}\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
+    echo -e "-- Created symlink \033[1;36m${WACC_EXEC}\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
     return 0
 }
 
@@ -244,7 +247,6 @@ fi
 
 CC_NAME=""
 EXEC_NAME=""
-WACC_NAME="wacc-selfhosted"
 
 check_setup
 if [ ${?} -ne 0 ]; then raise_error "check setup failed"; fi

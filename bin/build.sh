@@ -14,10 +14,59 @@ CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors -D__GCC_STDINT__"
 CC_FLAGS="${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 LD="${CC}"
 
-# ./build_preset.sh ${CC}
-# if [ ${?} -ne 0 ]; then exit 1; fi
+function help () {
+    # TODO
+    exit 0
+}
+
+function em() {
+    echo "\033[1m‘${1}’\033[0m"
+}
+
+function raise_error () {
+    ERROR_MESSAGE="${1}"
+    echo -e "build: \033[0;31merror:\033[0m ${ERROR_MESSAGE}, see $(em "--help")" 1>&2
+    exit 1
+}
+
+function build_preset () {
+    case "${LD}" in
+        "clang"*)
+            CLANG_MAJOR_VERSION=$(clang -dumpversion | cut -d"." -f1)
+            if [ ${CLANG_MAJOR_VERSION} -lt 5 ]; then
+                raise_error "requires $(em "clang") >= 5.0.0"
+            fi
+            ;;
+        "gcc")
+            GCC_MAJOR_VERSION=$(gcc -dumpversion | cut -d"." -f1)
+            if [ ${GCC_MAJOR_VERSION} -lt 8 ]; then
+                raise_error "requires $(em "gcc") >= 8.1.0"
+            elif [ ${GCC_MAJOR_VERSION} -eq 8 ]; then
+                GCC_MINOR_VERSION=$(gcc -dumpfullversion | cut -d"." -f2)
+                if [ ${GCC_MINOR_VERSION} -eq 0 ]; then
+                    raise_error "requires $(em "gcc") >= 8.1.0"
+                fi
+            fi
+            ;;
+        *)
+            return 1
+    esac
+
+    as --help > /dev/null 2>&1
+    if [ ${?} -ne 0 ]; then
+        raise_error "requires package $(em "binutils")"
+    fi
+    return 0
+}
+
+build_preset
 
 PROJECT_NAME="${PROJECT_DIR}/wacc-selfhosted-1"
+if [ -f "${PROJECT_NAME}" ]; then
+    rm ${PROJECT_NAME}
+    if [ ${?} -ne 0 ]; then exit 1; fi
+fi
+
 COMPILER_DIR="$(dirname ${PROJECT_DIR})/compiler"
 
 SOURCE_FILES="${COMPILER_DIR}/lib/main.c"

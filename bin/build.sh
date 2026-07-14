@@ -153,7 +153,7 @@ function configure () {
         CC="$(readlink -f "${ARG1}")"
         CC_NAME="$(basename "${ARG1}")"
         EXEC_NAME="$(basename "${ARG2}")"
-        for IGNORE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh ${WACC_NAME}; do
+        for IGNORE in $(cat ${PROJECT_DIR}/.ignore); do
             if [ "${EXEC_NAME}" = "${IGNORE}" ]; then
                 raise_error "$(em "${EXEC_NAME}") is not a valid executable name"
             fi

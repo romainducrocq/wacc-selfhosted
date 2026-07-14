@@ -100,7 +100,7 @@ function build_nqcc2 () {
 
 function build_wheelcc () {
     echo "-- Build wheelcc for bootstrapping ..."
-    echo -n "${CC_NAME}" > ${WHEELCC_DIR}/bin/pkgname.cfg
+    echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
     if [ ${?} -ne 0 ]; then return 1; fi
     (cd ${WHEELCC_DIR}/build/ && bash build.sh; cd ${PROJECT_DIR})
     if [ ${?} -ne 0 ]; then return 1; fi
@@ -125,7 +125,7 @@ function configure () {
             "wheelcc")
                 CC="${WHEELCC_DIR}/bin/driver.sh"
                 CC_NAME="wheelcc"
-                if [ ! -f "${CC}" ]; then
+                if [ ! -f "${WHEELCC_DIR}/bin/wheelcc" ]; then
                     build_wheelcc
                     raise_error "build $(em "wheelcc") failed"
                 fi

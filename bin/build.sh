@@ -215,7 +215,8 @@ function build_exec () {
     ln -s ${PROJECT_DIR}/driver.sh ${WACC_LINK}
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    echo -e "-- Created symlink \033[1;36m${WACC_LINK}\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
+    echo -e "-- Created symlink \033[1;36m${WACC_LINK}\033[0m -> \
+\033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
     return 0
 }
 
@@ -238,6 +239,7 @@ build_exec ${@:3}
 if [ ${?} -ne 0 ]; then raise_error "build executable failed"; fi
 
 echo "---"
-echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, see usage with command $(em "./${WACC_NAME} --help")"
+echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, \
+see usage with command $(em "./${WACC_NAME} --help")"
 echo "---"
 exit 0

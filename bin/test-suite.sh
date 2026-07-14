@@ -6,9 +6,11 @@ EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 TEST_SUITE="${PROJECT_DIR}/../writing-a-c-compiler-tests"
 
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
-    echo -e "\033[1;34mwarning:\033[0m run \033[1m‘arch -x86_64 zsh’\033[0m first to start Rosetta 2 on aarch64 MacOS"
+    echo -e "\033[1;34mwarning:\033[0m run \033[1m‘arch -x86_64 zsh’\033[0m first \
+to start Rosetta 2 on aarch64 MacOS"
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
-    echo -e "test-suite: \033[0;31merror:\033[0m the test suite does not support FreeBSD, try to selfhost the compiler instead!" 1>&2
+    echo -e "test-suite: \033[0;31merror:\033[0m the test suite does not support FreeBSD, \
+try to selfhost the compiler instead!" 1>&2
     exit 1
 fi
 

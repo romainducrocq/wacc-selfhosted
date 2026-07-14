@@ -95,25 +95,6 @@ function check_setup () {
     return 0
 }
 
-function build_nqcc2 () {
-    echo "-- Build nqcc2 for bootstrapping ..."
-    # TODO
-    return 0
-}
-
-function build_wheelcc () {
-    echo "-- Build wheelcc for bootstrapping ..."
-    cd ${WHEELCC_DIR}/build
-    if [ ${?} -ne 0 ]; then return 1; fi
-    echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
-    if [ ${?} -ne 0 ]; then return 1; fi
-    bash build.sh
-    if [ ${?} -ne 0 ]; then return 1; fi
-    cd ${PROJECT_DIR}
-    echo "---"
-    return 0
-}
-
 function configure () {
     if [ "${ARG1}" = "--bootstrap" ]; then
         case "${ARG2}" in
@@ -124,21 +105,17 @@ function configure () {
                 CC="${NQCC2_DIR}/_build/default/bin/main.exe"
                 CC_NAME="nqcc2"
                 if [ ! -f "${CC}" ]; then
-                # TODO
-                    build_nqcc2
-                    if [ ${?} -ne 0 ]; then
-                        raise_error "build $(em "nqcc2") failed"
-                    fi
+                    cat ${PROJECT_DIR}/build-nqcc2.md
+                    raise_error "build $(em "nqcc2") for bootstrapping"
                 fi
                 ;;
             "wheelcc")
                 CC="${WHEELCC_DIR}/bin/driver.sh"
                 CC_NAME="wheelcc"
                 if [ ! -f "${WHEELCC_DIR}/bin/wheelcc" ]; then
-                    build_wheelcc
-                    if [ ${?} -ne 0 ]; then
-                        raise_error "build $(em "wheelcc") failed"
-                    fi
+                    bash ${PROJECT_DIR}/build-wheelcc.sh
+                    if [ ${?} -ne 0 ]; then exit 1; fi
+                    echo "---"
                 fi
                 ;;
             *)

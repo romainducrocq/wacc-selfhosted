@@ -9,8 +9,10 @@ struct FileIoContext;
 
 // Throw
 
+#ifdef __GCC_BOOTSTRAP__
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wreturn-type"
+#endif
 #endif
 
 #define hash_t unsigned long

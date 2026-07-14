@@ -9,12 +9,14 @@
 
 // Bindings
 
+#ifdef __GCC_BOOTSTRAP__
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wincompatible-library-redeclaration"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wbuiltin-declaration-mismatch"
+#endif
 #endif
 
 /* inttypes.h */
@@ -27,7 +29,7 @@ extern unsigned long strtoumax(char* nptr, char** endptr, int base);
 #define true 1
 
 /* stdint.h */
-#ifdef __GCC_STDINT__
+#ifdef __GCC_BOOTSTRAP__
 #include <stdint.h>
 #else
 #define int8_t signed char
@@ -71,10 +73,12 @@ extern int strcmp(char* s1, char* s2);
 extern void* memset(void* s, int c, unsigned long n);
 extern unsigned long strlen(char* s);
 
+#ifdef __GCC_BOOTSTRAP__
 #ifdef __clang__
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
+#endif
 #endif
 
 #endif

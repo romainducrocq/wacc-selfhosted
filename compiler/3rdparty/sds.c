@@ -364,9 +364,11 @@ static sds sdscatlen(sds s, void* t, unsigned long len) {
  * references must be substituted with the new pointer returned by the call. */
 sds sdscat(sds s, char* t) { return sdscatlen(s, t, strlen(t)); }
 
+#ifdef __GCC_BOOTSTRAP__
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-overflow"
+#endif
 #endif
 
 /* Helper for sdscatlonglong() doing the actual number -> string
@@ -454,8 +456,10 @@ static int sdsull2str(char* s, unsigned long v) {
     return l;
 }
 
+#ifdef __GCC_BOOTSTRAP__
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
+#endif
 #endif
 
 /* Create an sds string from a long value. It is much faster than:

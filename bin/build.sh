@@ -8,7 +8,7 @@ if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
     CC="clang"
 fi
-CC_FLAGS="-Wall -Wextra -Wpedantic -D__GCC_STDINT__"
+CC_FLAGS="-Wall -Wextra -Wpedantic -D__GCC_BOOTSTRAP__"
 CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors"
 CC_FLAGS="-std=c17 ${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 LD="${CC}"

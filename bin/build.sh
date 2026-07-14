@@ -143,13 +143,14 @@ function configure () {
                 CC_NAME="$(basename "${ARG2}")"
                 ;;
         esac
+
         EXEC_NAME="wacc-bootstrap-${CC_NAME}"
         echo "-- Bootstrapping with ${CC_NAME} ..."
     else
         CC="$(readlink -f "${ARG1}")"
         CC_NAME="$(basename "${ARG1}")"
         EXEC_NAME="$(basename "${ARG2}")"
-        for IGNORE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh wacc-selfhosted; do
+        for IGNORE in build.sh crt.s crt.o driver.sh exec.name set-exec.sh test-suite.sh ${WACC_NAME}; do
             if [ "${EXEC_NAME}" = "${IGNORE}" ]; then
                 raise_error "$(em "${EXEC_NAME}") is not a valid executable name"
             fi
@@ -225,13 +226,13 @@ function build_exec () {
 
     echo "-- Created target ${PROJECT_NAME}"
 
-    find ${PROJECT_DIR}/ -maxdepth 1 -name wacc-selfhosted -type l -delete
+    find ${PROJECT_DIR}/ -maxdepth 1 -name ${WACC_NAME} -type l -delete
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    ln -s ${PROJECT_DIR}/driver.sh ${PROJECT_DIR}/wacc-selfhosted
+    ln -s ${PROJECT_DIR}/driver.sh ${PROJECT_DIR}/${WACC_NAME}
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    echo -e "-- Created symlink \033[1;36m${PROJECT_DIR}/wacc-selfhosted\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
+    echo -e "-- Created symlink \033[1;36m${PROJECT_DIR}/${WACC_NAME}\033[0m -> \033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
     return 0
 }
 
@@ -243,6 +244,7 @@ fi
 
 CC_NAME=""
 EXEC_NAME=""
+WACC_NAME="wacc-selfhosted"
 
 check_setup
 if [ ${?} -ne 0 ]; then raise_error "check setup failed"; fi
@@ -254,6 +256,6 @@ build_exec ${@:3}
 if [ ${?} -ne 0 ]; then raise_error "build executable failed"; fi
 
 echo "---"
-echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, see usage with command $(em "./wacc-selfhosted --help")"
+echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, see usage with command $(em "./${WACC_NAME} --help")"
 echo "---"
 exit 0

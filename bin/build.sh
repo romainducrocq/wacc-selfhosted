@@ -121,10 +121,10 @@ function configure () {
                 CC_NAME="${CC}"
                 ;;
             "nqcc2")
-                # TODO CC = ...
+                CC="nqcc2/_build/default/bin/main.exe"
                 CC_NAME="nqcc2"
-                # TODO check for ocaml here
                 if [ ! -f "${CC}" ]; then
+                # TODO
                     build_nqcc2
                     if [ ${?} -ne 0 ]; then
                         raise_error "build $(em "nqcc2") failed"
@@ -194,7 +194,10 @@ function build_exec () {
                     if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 "nqcc2")
-                    # TODO bootstrap with nqcc2
+                    ${CC} -c ${FILE}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    mv ${FILE%.*}.o ${OBJECT}
+                    if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 "wheelcc")
                     bash ${CC} -O2 -E -c ${FILE}

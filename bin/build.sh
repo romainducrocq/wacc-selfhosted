@@ -92,8 +92,14 @@ function check_setup () {
     return 0
 }
 
+function build_nqcc2 () {
+    echo "-- Build nqcc2 for bootstrapping ..."
+    # TODO
+    return 0
+}
+
 function build_wheelcc () {
-    echo "-- Build bootstrapping compiler wheelcc ..."
+    echo "-- Build wheelcc for bootstrapping ..."
     echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
     if [ ${?} -ne 0 ]; then return 1; fi
     (cd ${WHEELCC_DIR}/build/ && bash build.sh; cd ${PROJECT_DIR})
@@ -109,7 +115,12 @@ function configure () {
                 ;;
             "nqcc2")
                 # TODO build nqcc2
+                # CC = ...
                 CC_NAME="nqcc2"
+                if [ ! -f "${CC}" ]; then
+                    build_nqcc2
+                    raise_error "build $(em "nqcc2") failed"
+                fi
                 ;;
             "wheelcc")
                 CC="${WHEELCC_DIR}/bin/driver.sh"
@@ -164,15 +175,34 @@ function build_exec () {
         OBJECT_FILES="${OBJECT_FILES} ${OBJECT}"
         echo "(${CC_NAME}) ${FILE} -> ${OBJECT}"
 
-        # TODO
-
-        # wheelcc -E -c ${FILE}
-        # if [ ${?} -ne 0 ]; then return 1; fi
-        # mv -v ${FILE%.*}.o ${OBJECT}
-        # if [ ${?} -ne 0 ]; then return 1; fi
-
-        ${CC} -c ${FILE} ${CC_FLAGS} -o ${OBJECT}
-        if [ ${?} -ne 0 ]; then return 1; fi
+        if [ "${ARG1}" = "--bootstrap" ]; then
+            case "${ARG2}" in
+                "gcc")
+                    ${CC} -c ${FILE} ${CC_FLAGS} -o ${OBJECT}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    ;;
+                "nqcc2")
+                    # TODO bootstrap with nqcc2
+                    ;;
+                "wheelcc")
+                    ${CC} -O2 -E -c ${FILE}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    mv ${FILE%.*}.o ${OBJECT}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    ;;
+                *)
+                    ${CC} -c ${FILE} ${@}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    mv ${FILE%.*}.o ${OBJECT}
+                    if [ ${?} -ne 0 ]; then return 1; fi
+                    ;;
+            esac
+        else
+            ${CC} -O2 -E -c ${FILE}
+            if [ ${?} -ne 0 ]; then return 1; fi
+            mv ${FILE%.*}.o ${OBJECT}
+            if [ ${?} -ne 0 ]; then return 1; fi
+        fi
     done
     echo "OK"
 

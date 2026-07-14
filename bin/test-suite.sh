@@ -3,7 +3,6 @@
 KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
-TEST_SUITE="${PROJECT_DIR}/../writing-a-c-compiler-tests"
 
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
     echo -e "\033[1;34mwarning:\033[0m run \033[1m‘arch -x86_64 zsh’\033[0m first \
@@ -14,8 +13,15 @@ try to selfhost the compiler instead!" 1>&2
     exit 1
 fi
 
+TEST_SUITE="$(dirname ${PROJECT_DIR})/writing-a-c-compiler-tests"
+
 function help () {
-    # TODO
+    echo "Usage: ./test-suite.sh <compiler> [test_options ...]"
+    echo ""
+    echo "<compiler>          compiler executable passed to test_compiler"
+    echo "[test_options ...]  optional list of arguments passed to test_compiler"
+    echo ""
+    echo "see ${TEST_SUITE}/test_compiler"
     exit 0
 }
 

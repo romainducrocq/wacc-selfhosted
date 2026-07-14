@@ -4,7 +4,9 @@ PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 EXEC_NAME="$(basename "${1}")"
 
 function help () {
-    # TODO
+    echo "Usage: ./set-exec.sh <compiler>"
+    echo ""
+    echo "<compiler>  set the compiler executable used by wacc-selfhosted -> ./driver.sh"
     exit 0
 }
 

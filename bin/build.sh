@@ -100,10 +100,13 @@ function build_nqcc2 () {
 
 function build_wheelcc () {
     echo "-- Build wheelcc for bootstrapping ..."
+    cd ${WHEELCC_DIR}/build
+    if [ ${?} -ne 0 ]; then return 1; fi
     echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
     if [ ${?} -ne 0 ]; then return 1; fi
-    (cd ${WHEELCC_DIR}/build/ && bash build.sh; cd ${PROJECT_DIR})
+    bash build.sh
     if [ ${?} -ne 0 ]; then return 1; fi
+    cd ${PROJECT_DIR}
     return 0
 }
 

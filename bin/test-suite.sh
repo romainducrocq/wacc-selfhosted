@@ -5,13 +5,15 @@ PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 TEST_SUITE="${PROJECT_DIR}/../writing-a-c-compiler-tests"
 
-if [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
-    echo -e "\033[0;31merror:\033[0m the test suite does not support FreeBSD" 1>&2
+if [[ "${KERNEL_NAME}" != "FreeBSD"* ]]; then
+    echo -e "test-suite: \033[0;31merror:\033[0m the test suite does not support FreeBSD, try to selfhost the compiler instead!" 1>&2
     exit 1
 fi
 
-bash ${PROJECT_DIR}/set-exec.sh ${1}
-if [ ${?} -ne 0 ]; then exit 1; fi
+function help () {
+    # TODO
+    exit 0
+}
 
 function reset_exec () {
     cd ${PROJECT_DIR}
@@ -31,6 +33,9 @@ function run_tests () {
     fi
     return 0
 }
+
+bash ${PROJECT_DIR}/set-exec.sh ${1}
+if [ ${?} -ne 0 ]; then exit 1; fi
 
 cd ${TEST_SUITE}
 if [ ${#} -gt 1 ]; then

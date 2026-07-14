@@ -18,7 +18,9 @@ function raise_error () {
     exit 1
 }
 
-if [ ${#} -ne 1 ]; then
+if [ "${1}" = "--help" ]; then
+    help
+elif [ ${#} -ne 1 ]; then
     help
 fi
 

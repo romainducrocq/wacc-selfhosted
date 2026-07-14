@@ -34,7 +34,9 @@ function run_tests () {
     return 0
 }
 
-if [ ${#} -lt 1 ]; then
+if [ "${1}" = "--help" ]; then
+    help
+elif [ ${#} -lt 1 ]; then
     help
 fi
 

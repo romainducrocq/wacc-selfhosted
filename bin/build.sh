@@ -128,7 +128,6 @@ function configure () {
 }
 
 function build_exec () {
-    ARG1="${1}"
     PROJECT_NAME="${PROJECT_DIR}/${EXEC_NAME}"
     if [ -f "${PROJECT_NAME}" ]; then
         rm ${PROJECT_NAME}
@@ -182,7 +181,9 @@ function build_exec () {
     return 0
 }
 
-if [ ${#} -lt 2 ]; then
+if [ "${1}" = "--help" ]; then
+    help
+elif [ ${#} -lt 2 ]; then
     help
 fi
 

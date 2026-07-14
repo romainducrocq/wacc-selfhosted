@@ -100,7 +100,7 @@ function build_nqcc2 () {
 
 function build_wheelcc () {
     echo "-- Build wheelcc for bootstrapping ..."
-    echo -n "wheelcc" > ${WHEELCC_DIR}/bin/pkgname.cfg
+    echo -n "${CC_NAME}" > ${WHEELCC_DIR}/bin/pkgname.cfg
     if [ ${?} -ne 0 ]; then return 1; fi
     (cd ${WHEELCC_DIR}/build/ && bash build.sh; cd ${PROJECT_DIR})
     if [ ${?} -ne 0 ]; then return 1; fi
@@ -114,9 +114,9 @@ function configure () {
                 CC_NAME="${CC}"
                 ;;
             "nqcc2")
-                # TODO build nqcc2
-                # CC = ...
+                # TODO CC = ...
                 CC_NAME="nqcc2"
+                # TODO check for ocaml here
                 if [ ! -f "${CC}" ]; then
                     build_nqcc2
                     raise_error "build $(em "nqcc2") failed"

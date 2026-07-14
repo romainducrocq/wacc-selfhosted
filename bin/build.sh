@@ -194,7 +194,7 @@ function build_exec () {
                     if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 "nqcc2")
-                    ${CC} -c ${FILE}
+                    ${CC} -c ${FILE} --bitwise --compound --increment --goto --switch --nan --union
                     if [ ${?} -ne 0 ]; then return 1; fi
                     mv ${FILE%.*}.o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi

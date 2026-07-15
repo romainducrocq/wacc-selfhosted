@@ -11,6 +11,7 @@ perf.data
 /writing-a-c-compiler-tests/
 
 /bin/wacc-bootstrap-*
+/bin/wacc-executable-*
 /bin/wacc-selfhosted-*
 /bin/wacc-selfhosted
 /bin/exec.name

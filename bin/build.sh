@@ -51,8 +51,16 @@ SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/util/str2t.c"
 SOURCE_FILES="${SOURCE_FILES} ${COMPILER_DIR}/util/throw.c"
 
 function help () {
-    # TODO
-    exit 0
+   echo "Usage 1: ./build.sh --bootstrap <compiler> [cc_options ...]"
+   echo ""
+   echo "<compiler>        compiler used for bootstrapping wacc executable"
+   echo "[cc_options ...]  optional list of arguments passed to a custom cc"
+   echo ""
+   echo "Usage 2: ./build.sh <in-compiler> <out-compiler>"
+   echo ""
+   echo "<in-compiler>     input compiler executable used for rebuilding"
+   echo "<out-compiler>    output compiler executable target to build"
+   exit 0
 }
 
 function em() {

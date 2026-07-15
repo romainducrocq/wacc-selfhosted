@@ -3,17 +3,18 @@
 KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
-CC="gcc"
+LD="gcc"
 AS_FLAGS="--64"
 LD_LIB_64=""
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
-    CC="clang -arch x86_64"
+    LD="clang -arch x86_64"
     AS_FLAGS="-arch x86_64"
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
-    CC="clang"
+    LD="clang"
 else
     LD_LIB_64="/lib64/ld-linux-x86-64.so.2"
 fi
+PP="${LD}"
 
 ARGC=${#}
 ARGV=(${@})
@@ -25,7 +26,8 @@ function verbose () {
 }
 
 function usage () {
-    echo "Usage: ./wacc-selfhosted [Help] [Debug] [Optimize...] [Preprocess] [Defval...] [Link] [Include...] [Linkdir...] [Linklib...] [Output] FILES"
+    echo "Usage: ./wacc-selfhosted [Help] [Debug] [Optimize...] [Preprocess] [Defval...] [Link] \
+[Include...] [Linkdir...] [Linklib...] [Output] FILES"
     echo ""
     echo -e "\033[1;34mwarning:\033[0m 1. optional arguments must be passed in this order only"
     echo -e "\033[1;34mwarning:\033[0m 2. whitespaces are not supported in paths and file names"
@@ -60,7 +62,7 @@ function usage () {
     echo "    -O3                           alias    for -O1 -O2"
     echo ""
     echo "[Preprocess]:"
-    echo "    -E  enable macro expansion with ${CC}"
+    echo "    -E  enable macro expansion with ${PP}"
     echo ""
     echo "[Defval...]:"
     echo "    -D<define>[=<value>]  add a list of macro definitions"
@@ -502,8 +504,8 @@ function add_linklibs () {
 function preprocess () {
     if [ ${IS_PREPROC} -eq 1 ]; then
         for FILE in ${FILES}; do
-            verbose "Preprocess (${CC}) -> ${FILE}.i"
-            ${CC} -E -P -I$(dirname ${FILE})/ ${PREPROC_DIRS} ${DEF_VALS} ${FILE}.${EXT_IN} -o ${FILE}.i
+            verbose "Preprocess (${PP}) -> ${FILE}.i"
+            ${PP} -E -P -I$(dirname ${FILE})/ ${PREPROC_DIRS} ${DEF_VALS} ${FILE}.${EXT_IN} -o ${FILE}.i
             if [ ${?} -ne 0 ]; then
                 raise_error "preprocessing failed"
             fi
@@ -521,7 +523,8 @@ function compile () {
             SOURCE_DIR=""
         fi
         verbose "Compile (${EXEC_NAME}) -> ${FILE}.${EXT_OUT}"
-        ${PROJECT_DIR}/${EXEC_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} ${SOURCE_DIR} ${INCLUDE_DIRS}
+        ${PROJECT_DIR}/${EXEC_NAME} ${DEBUG_ENUM} ${OPTIM_L1_MASK} ${OPTIM_L2_ENUM} ${FILE}.${EXT_IN} \
+            ${SOURCE_DIR} ${INCLUDE_DIRS}
         if [ ${?} -ne 0 ]; then
             raise_error "compilation failed"
         fi
@@ -554,15 +557,15 @@ function link () {
                         raise_error "assembling failed"
                     fi
                     verbose "Link (ld) -> ${NAME_OUT}"
-                    ld --build-id -m elf_x86_64 --hash-style=gnu -dynamic-linker ${LD_LIB_64} -pie -lc ${PROJECT_DIR}/crt.o \
-                        ${FILES// /.o }.o ${LINK_DIRS} ${LINK_LIBS} -o ${NAME_OUT}
+                    ld --build-id -m elf_x86_64 --hash-style=gnu -dynamic-linker ${LD_LIB_64} -pie -lc \
+                        ${PROJECT_DIR}/crt.o ${FILES// /.o }.o ${LINK_DIRS} ${LINK_LIBS} -o ${NAME_OUT}
                     if [ ${?} -ne 0 ]; then
                         LD_LIB_64=""
                     fi
                 fi
                 if [ -z "${LD_LIB_64}" ]; then
-                    verbose "Link (${CC}) -> ${NAME_OUT}"
-                    ${CC} ${FILES// /.o }.o ${LINK_DIRS} ${LINK_LIBS} -o ${NAME_OUT}
+                    verbose "Link (${LD}) -> ${NAME_OUT}"
+                    ${LD} ${FILES// /.o }.o ${LINK_DIRS} ${LINK_LIBS} -o ${NAME_OUT}
                     if [ ${?} -ne 0 ]; then
                         raise_error "linking failed"
                     fi

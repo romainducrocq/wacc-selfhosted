@@ -2,16 +2,15 @@
 
 KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
-CC="gcc"
+LD="gcc"
 if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
-    CC="clang -arch x86_64"
+    LD="clang -arch x86_64"
 elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
-    CC="clang"
+    LD="clang"
 fi
 CC_FLAGS="-Wall -Wextra -Wpedantic -D__GCC_BOOTSTRAP__"
 CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors"
 CC_FLAGS="-std=c17 ${CC_FLAGS} ${CC_FLAGS_RELEASE}"
-LD="${CC}"
 
 ARG1="${1}"
 ARG2="${2}"
@@ -107,18 +106,16 @@ function configure () {
     if [ "${ARG1}" = "--bootstrap" ]; then
         case "${ARG2}" in
             "gcc")
-                CC_NAME="${CC}"
+                CC_NAME="${LD}"
                 ;;
             "nqcc2")
-                CC="${NQCC2_DIR}/_build/default/bin/main.exe"
                 CC_NAME="nqcc2"
-                if [ ! -f "${CC}" ]; then
+                if [ ! -f "${NQCC2_DIR}/_build/default/bin/main.exe" ]; then
                     cat ${PROJECT_DIR}/build-nqcc2.md
                     raise_error "build $(em "nqcc2") for bootstrapping"
                 fi
                 ;;
             "wheelcc")
-                CC="${WHEELCC_DIR}/bin/driver.sh"
                 CC_NAME="wheelcc"
                 if [ ! -f "${WHEELCC_DIR}/bin/wheelcc" ]; then
                     bash ${PROJECT_DIR}/build-wheelcc.sh
@@ -127,7 +124,6 @@ function configure () {
                 fi
                 ;;
             *)
-                CC="$(readlink -f "${ARG2}")"
                 CC_NAME="$(basename "${ARG2}")"
                 ;;
         esac
@@ -135,7 +131,6 @@ function configure () {
         EXEC_NAME="wacc-bootstrap-${CC_NAME}"
         echo "-- Bootstrapping with ${CC_NAME} ..."
     else
-        CC="$(readlink -f "${ARG1}")"
         CC_NAME="$(basename "${ARG1}")"
         EXEC_NAME="$(basename "${ARG2}")"
         for IGNORE in $(cat ${PROJECT_DIR}/.ignore); do
@@ -175,23 +170,24 @@ function build_exec () {
         if [ "${ARG1}" = "--bootstrap" ]; then
             case "${ARG2}" in
                 "gcc")
-                    ${CC} -c ${FILE} ${CC_FLAGS} -o ${OBJECT}
+                    ${LD} -c ${FILE} ${CC_FLAGS} -o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 "nqcc2")
-                    ${CC} -c ${FILE} --bitwise --compound --increment --goto --switch --nan --union
+                    ${NQCC2_DIR}/_build/default/bin/main.exe -c ${FILE} \
+                        --bitwise --compound --increment --goto --switch --nan --union
                     if [ ${?} -ne 0 ]; then return 1; fi
                     mv ${FILE%.*}.o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 "wheelcc")
-                    bash ${CC} -O2 -E -c ${FILE}
+                    bash ${WHEELCC_DIR}/bin/driver.sh -O2 -E -c ${FILE}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     mv ${FILE%.*}.o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     ;;
                 *)
-                    ${CC} -c ${FILE} ${@}
+                    $(readlink -f "${ARG2}") -c ${FILE} ${@}
                     if [ ${?} -ne 0 ]; then return 1; fi
                     mv ${FILE%.*}.o ${OBJECT}
                     if [ ${?} -ne 0 ]; then return 1; fi

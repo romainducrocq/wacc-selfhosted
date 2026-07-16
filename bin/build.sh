@@ -127,8 +127,9 @@ function configure () {
                 CC_NAME="$(basename "${ARG2}")"
                 ;;
         esac
+        EXEC_NAME="wacc-bootstrap-${CC_NAME// /}"
+        EXEC_NAME="${EXEC_NAME%.*}"
 
-        EXEC_NAME="wacc-bootstrap-${CC_NAME}"
         echo "-- Bootstrapping with ${CC_NAME} ..."
     else
         CC_NAME="$(basename "${ARG1}")"

@@ -17,7 +17,7 @@ eval $(opam env)
 
 3. Build the NQCC2 compiler on branch extra-credit in this repo's submodule.
 ```sh
-# https://github.com/nlsandler/nqcc2/tree/extra-credit
+# https://github.com/nlsandler/nqcc2/tree/extra-credit#building-the-compiler
 cd nqcc2
 opam install . --deps-only
 dune build

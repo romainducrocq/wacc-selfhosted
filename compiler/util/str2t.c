@@ -111,7 +111,7 @@ static long hex_string_to_long(char* str_hex) {
 
 static void string_literal_byte_to_hex(int8_t value, string_t* str_hex) {
     char byte_hex[3];
-    sprintf(byte_hex, "%.2x", (uint8_t)value);
+    sprintf(byte_hex, "%.2x", (unsigned int)value);
     str_append(*str_hex, byte_hex);
 }
 

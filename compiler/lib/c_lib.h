@@ -51,7 +51,7 @@ extern unsigned long fwrite(void* ptr, unsigned long size, unsigned long nmemb, 
 /* printf */
 extern int printf(char* format, char* arg1);
 extern int snprintf(char* s, unsigned long n, char* format, char* arg1, char* arg2, char* arg3, char* arg4);
-extern int sprintf(char* s, char* format, unsigned char arg1);
+extern int sprintf(char* s, char* format, unsigned int arg1);
 /* _POSIX_C_SOURCE 200809L */
 #define STDERR_FILENO 2
 extern long getline(char** lineptr, unsigned long* n, struct FILE* stream);

@@ -584,7 +584,7 @@ static void struct_8b_class(Ctx ctx, struct Structure* struct_type) {
             struct Struct8Bytes struct_8b = {3, {CLS_memory, CLS_memory}};
             size -= 24l;
             while (size > 0l) {
-                struct_8b.size++;
+                struct_8b.size += 1;
                 size -= 8l;
             }
             map_add(ctx->struct_8b_map, struct_type->tag, struct_8b);

@@ -25,7 +25,7 @@ You can now go through this guide to install the selfhosted compiler locally at 
 
 ## Project requirements
 
-The project is self-contained and the build+runtime requires only libc with POSIX, bash >= 3 and the C toolchain. Make sure that your system has:  
+The project is self-contained and the build+runtime requires only libc with POSIX 2008, bash >= 3 and the C toolchain. Make sure that your system has:  
 - GNU/Linux: `binutils`, `gcc` >= 8.1.0
 - MacOS: `clang` >= 5.0.0
 - FreeBSD: `bash`, `binutils`, `clang` >= 5.0.0 (install bash with `$ sudo pkg install bash`)
@@ -64,8 +64,6 @@ The compiler first needs to be bootsrapped with `./build.sh --bootstrap <compile
     ```
   
 The bootstrapping step produces two outputs: (1) `wacc-bootstrap-<compiler>`, the bootstrap compiler executable (for example _wacc-bootstrap-gcc_), it should not be run directly! and (2) `wacc-selfhosted`, a symlink to the driver which consumes the latest compiler executable. This is the actual user program, see `./wacc-selfhosted --help`.  
-<!---->
-> **Known issue**: When bootstrapping with nqcc2, _wacc-bootstrap-nqcc2_ fails 15 tests (25 on MacOS) in the test suite due to segfaults. It can however still recompile itself, and the subsequent selfhosted builts then pass the full test suite. As this does not occur with gcc or wheelcc, it is likely a bug in nqcc2 not covered in the tests.
 
 ## Selfhost the compiler
 
@@ -109,7 +107,7 @@ Let's sum up and put everything together in a complete example!
 $ ./build.sh --bootstrap gcc
 
 # selfhost the compiler with the bootstrap
-$ ./build.sh wacc-bootstrap-{gcc,clang*} wacc-executable-1
+$ ./build.sh wacc-bootstrap-* wacc-executable-1
 
 # rebuild itself multiple times
 $ ./build.sh wacc-executable-1 wacc-executable-2
@@ -122,7 +120,7 @@ $ ./test-suite.sh wacc-executable-5 --chapter 20 --extra-credit
 ----------------------------------------------------------------------
 (wacc-executable-5) --chapter 20 --extra-credit
 ----------------------------------------------------------------------
-Ran 1617 tests in 51.547s
+Ran 1617 tests in 29.685s
 
 OK
 

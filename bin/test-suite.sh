@@ -4,15 +4,6 @@ KERNEL_NAME="$(uname -s)"
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 EXEC_NAME="$(cat ${PROJECT_DIR}/exec.name)"
 
-if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
-    echo -e "\033[1;34mwarning:\033[0m run \033[1m‘arch -x86_64 zsh’\033[0m first \
-to start Rosetta 2 on aarch64 MacOS"
-elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
-    echo -e "test-suite: \033[0;31merror:\033[0m the test suite does not support FreeBSD, \
-try to selfhost the compiler instead!" 1>&2
-    exit 1
-fi
-
 TEST_SUITE="$(dirname ${PROJECT_DIR})/writing-a-c-compiler-tests"
 
 function help () {
@@ -24,6 +15,27 @@ function help () {
     echo "see ${TEST_SUITE}/test_compiler"
     exit 0
 }
+
+function em () {
+    echo "\033[1m‘${1}’\033[0m"
+}
+
+function log_warning () {
+    WARN_MESSAGE="${1}"
+    echo -e "\033[1;34mwarning:\033[0m ${WARN_MESSAGE}"
+}
+
+function raise_error () {
+    ERROR_MESSAGE="${1}"
+    echo -e "test-suite: \033[0;31merror:\033[0m ${ERROR_MESSAGE}" 1>&2
+    exit 1
+}
+
+if [[ "${KERNEL_NAME}" == "Darwin"* ]]; then
+    log_warning "run $(em "arch -x86_64 zsh") first to start Rosetta 2 on aarch64 MacOS"
+elif [[ "${KERNEL_NAME}" == "FreeBSD"* ]]; then
+    raise_error "the test suite does not support FreeBSD, try to selfhost the compiler instead!"
+fi
 
 function reset_exec () {
     cd ${PROJECT_DIR}

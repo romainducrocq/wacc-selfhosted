@@ -25,12 +25,17 @@ function verbose () {
     fi
 }
 
+function log_warning () {
+    WARN_MESSAGE="${1}"
+    echo -e "\033[1;34mwarning:\033[0m ${WARN_MESSAGE}"
+}
+
 function usage () {
     echo "Usage: ./wacc-selfhosted [Help] [Debug] [Optimize...] [Preprocess] [Defval...] [Link] \
 [Include...] [Linkdir...] [Linklib...] [Output] FILES"
     echo ""
-    echo -e "\033[1;34mwarning:\033[0m 1. optional arguments must be passed in this order only"
-    echo -e "\033[1;34mwarning:\033[0m 2. whitespaces are not supported in paths and file names"
+    log_warning "1. optional arguments must be passed in this order only"
+    log_warning "2. whitespaces are not supported in paths and file names"
     echo ""
     echo "[Help]:"
     echo "    --help  print help and exit"
@@ -120,7 +125,7 @@ function clean_exit () {
     exit ${EXIT_CODE}
 }
 
-function em() {
+function em () {
     echo "\033[1m‘${1}’\033[0m"
 }
 

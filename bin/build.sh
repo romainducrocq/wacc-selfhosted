@@ -12,6 +12,10 @@ CC_FLAGS="-Wall -Wextra -Wpedantic -D__GCC_BOOTSTRAP__"
 CC_FLAGS_RELEASE="-O3 -DNDEBUG -Werror -pedantic-errors"
 CC_FLAGS="-std=c17 ${CC_FLAGS} ${CC_FLAGS_RELEASE}"
 
+LIGHT_BLUE='\033[1;36m'
+LIGHT_GREEN='\033[1;32m'
+NC='\033[0m'
+
 ARG1="${1}"
 ARG2="${2}"
 
@@ -62,7 +66,7 @@ function help () {
    exit 0
 }
 
-function em() {
+function em () {
     echo "\033[1m‘${1}’\033[0m"
 }
 
@@ -112,7 +116,7 @@ function configure () {
                 CC_NAME="nqcc2"
                 if [ ! -f "${NQCC2_DIR}/_build/default/bin/main.exe" ]; then
                     cat ${PROJECT_DIR}/build-nqcc2.md
-                    raise_error "build $(em "nqcc2") for bootstrapping"
+                    raise_error "build $(em "nqcc2") bootstrap first and try again"
                 fi
                 ;;
             "wheelcc")
@@ -220,8 +224,7 @@ function build_exec () {
     ln -s ${PROJECT_DIR}/driver.sh ${WACC_LINK}
     if [ ${?} -ne 0 ]; then return 1; fi
 
-    echo -e "-- Created symlink \033[1;36m${WACC_LINK}\033[0m -> \
-\033[1;32m${PROJECT_DIR}/driver.sh\033[0m"
+    echo -e "-- Created symlink ${LIGHT_BLUE}${WACC_LINK}${NC} -> ${LIGHT_GREEN}${PROJECT_DIR}/driver.sh${NC}"
     return 0
 }
 
@@ -235,16 +238,16 @@ CC_NAME=""
 EXEC_NAME=""
 
 check_setup
-if [ ${?} -ne 0 ]; then raise_error "check setup failed"; fi
+if [ ${?} -ne 0 ]; then raise_error "checking setup failed"; fi
 
 configure
-if [ ${?} -ne 0 ]; then raise_error "configure failed"; fi
+if [ ${?} -ne 0 ]; then raise_error "configuration failed"; fi
 
 build_exec ${@:3}
-if [ ${?} -ne 0 ]; then raise_error "build executable failed"; fi
+if [ ${?} -ne 0 ]; then raise_error "failed to build executable"; fi
 
 echo "---"
-echo -e "[\033[1;32m${EXEC_NAME}\033[0m] build was successful, \
-see usage with command $(em "./${WACC_NAME} --help")"
+echo -e "[${LIGHT_GREEN}${EXEC_NAME}${NC}] \
+build was successful, see usage with command $(em "./${WACC_NAME} --help")"
 echo "---"
 exit 0

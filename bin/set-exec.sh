@@ -10,7 +10,7 @@ function help () {
     exit 0
 }
 
-function em() {
+function em () {
     echo "\033[1m‘${1}’\033[0m"
 }
 
@@ -40,7 +40,7 @@ done
 echo "${PROJECT_DIR}/exec.name = ${EXEC_NAME}"
 echo -n "${EXEC_NAME}" > ${PROJECT_DIR}/exec.name
 if [ ${?} -ne 0 ]; then
-    raise_error "set executable failed"
+    raise_error "failed to set executable"
 fi
 
 echo "OK"

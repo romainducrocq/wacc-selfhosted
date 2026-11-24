@@ -3,6 +3,16 @@
 PROJECT_DIR="$(dirname $(readlink -f ${0}))"
 WHEELCC_DIR="$(dirname ${PROJECT_DIR})/wheelcc"
 
+function em () {
+    echo "\033[1m‘${1}’\033[0m"
+}
+
+function raise_error () {
+    ERROR_MESSAGE="${1}"
+    echo -e "build-wheelcc: \033[0;31merror:\033[0m ${ERROR_MESSAGE}" 1>&2
+    exit 1
+}
+
 function build_wheelcc () {
     echo "-- Build wheelcc for bootstrapping ..."
     cd ${WHEELCC_DIR}/build
@@ -15,8 +25,7 @@ function build_wheelcc () {
 
 build_wheelcc
 if [ ${?} -ne 0 ]; then
-    echo -e "build: \033[0;31merror:\033[0m build \033[1m‘wheelcc’\033[0m failed, \
-see https://github.com/romainducrocq/wheelcc#install" 1>&2
-    exit 1
+    raise_error "failed to build $(em "wheelcc"), see https://github.com/romainducrocq/wheelcc#install"
 fi
+
 exit 0
